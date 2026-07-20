@@ -1,0 +1,25 @@
+Final presentations are scheduled for the time allocated for the final:
+
+July 31st, Friday 5pm !  (until 7:30pm)
+
+Only one student from a group needs to submit.
+
+The archive file should contain:
+
+1. Prompts
+
+2. Description of execution of acceptance testcases illustrated with screenshots of all the windows and pop-up windows of the system along an acceptance testcase
+
+3. UML class diagram
+
+4. System statechart diagrams
+
+5. Textual description of the structure of your system and implemented algorithms critical for the system's behavior (if you implemented some complex algorithm from scratch)
+
+6. Source code (archive of the project directory structure)
+
+7. API docs produced by javadoc, if using Java
+
+8. Unit testcases in the code (for the Model and Controller classes and their methods or for most critical classes that contribute most to the behavior of your system), use JUnit if using Java
+
+10. Your presentation ppt file that includes the purpose of your system, classdiagram/structure, statecharts, acceptance testcases, screenshot of your git repo "Network" (diagram with branches and commits)
