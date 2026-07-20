@@ -1,1 +1,9 @@
-// Player — see docs/01_class_list.md §2
+import { PlayerId } from './ids';
+
+export class Player {
+  constructor(
+    public readonly id: PlayerId,
+    public readonly username: string,
+    public readonly createdAt: Date,
+  ) {}
+}

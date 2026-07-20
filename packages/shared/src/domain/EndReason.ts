@@ -1,1 +1,6 @@
-// EndReason — see docs/01_class_list.md §2
+export enum EndReason {
+  ELIMINATION = 'ELIMINATION',
+  TIME_LIMIT = 'TIME_LIMIT',
+  DISCONNECT_FORFEIT = 'DISCONNECT_FORFEIT',
+  SELECTION_TIMEOUT = 'SELECTION_TIMEOUT',
+}

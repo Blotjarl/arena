@@ -1,1 +1,5 @@
-// MatchResult — see docs/01_class_list.md §2
+export enum MatchResult {
+  WIN = 'WIN',
+  LOSS = 'LOSS',
+  DRAW = 'DRAW',
+}

@@ -1,1 +1,5 @@
-// MatchPhase — see docs/01_class_list.md §2
+export enum MatchPhase {
+  CHAMPION_SELECT = 'CHAMPION_SELECT',
+  ACTIVE = 'ACTIVE',
+  ENDED = 'ENDED',
+}

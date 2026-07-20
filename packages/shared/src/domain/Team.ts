@@ -1,1 +1,4 @@
-// Team — see docs/01_class_list.md §2
+export enum Team {
+  A = 'A',
+  B = 'B',
+}

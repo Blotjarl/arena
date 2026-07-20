@@ -1,1 +1,6 @@
-// EffectType — see docs/01_class_list.md §2
+export enum EffectType {
+  DAMAGE = 'DAMAGE',
+  HEAL = 'HEAL',
+  CROWD_CONTROL = 'CROWD_CONTROL',
+  POSITIONING = 'POSITIONING',
+}
