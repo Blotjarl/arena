@@ -1,1 +1,5 @@
-// Model — see docs/01_class_list.md §1
+import { ModelEvent } from './ModelEvent';
+
+export interface Model {
+  notifyChanged(event: ModelEvent): void;
+}

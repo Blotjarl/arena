@@ -1,1 +1,5 @@
-// ModelListener — see docs/01_class_list.md §1
+import { ModelEvent } from './ModelEvent';
+
+export interface ModelListener {
+  modelChanged(event: ModelEvent): void;
+}

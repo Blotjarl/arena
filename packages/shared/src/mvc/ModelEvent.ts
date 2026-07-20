@@ -1,1 +1,10 @@
-// ModelEvent — see docs/01_class_list.md §1
+import { Model } from './Model';
+
+export class ModelEvent<T = unknown> {
+  constructor(
+    public readonly source: Model,
+    public readonly type: string,
+    public readonly payload: T,
+    public readonly timestamp: number = Date.now(),
+  ) {}
+}
