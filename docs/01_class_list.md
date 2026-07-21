@@ -223,6 +223,10 @@ not a domain exception, and it should not appear in the final diagram after Step
 | `MatchHUDView` | `View, ModelListener` | Health/resource bars, cooldown indicators, arena rendering via `InterpolationBuffer` |
 | `ResultsView` | `View, ModelListener` | Outcome, reason, duration, return-to-queue control |
 
+**Note (Step 2 gap-fill):** `ResultsView` pairs with `LobbyController` rather than a dedicated results
+controller — "return to queue" is a lobby action, and no separate controller was specified for this view.
+Documented here rather than left as a silent inconsistency with 6b.
+
 Each `*View` class implements `modelChanged(event: ModelEvent): void` by invoking a bound React
 `setState`/hook-dispatch callback supplied at construction — the class is the MVC-facing object; the
 functional component it's paired with is the render target. This keeps the same push-MVC contract on the
