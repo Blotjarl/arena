@@ -19,19 +19,19 @@ packages (5–7) come before controllers (8–10), which come before views + ent
 
 | # | File | Component(s) | Status |
 |---|---|---|---|
-| 1 | `02_shared_1_workspace-and-skeleton.md` | Monorepo structure, configs, `NotImplementedError` | [ ] |
-| 2 | `02_shared_2_mvc-framework.md` | Model, View, Controller, ModelEvent, ModelListener, AbstractModel, AbstractController | [ ] |
-| 3 | `02_shared_3_domain-and-contract.md` | Domain vocabulary (14 files) + wire contract (3 files) | [ ] |
-| 4 | `02_shared_4_exceptions.md` | ArenaError + 15 subclasses, `packages/shared/src/index.ts` barrel | [ ] |
-| 5 | `02_server_1_model.md` | QueueEntry, MatchmakingQueue, ParticipantState, MatchModel, TickLoop | [ ] |
-| 6 | `02_client_1_model.md` | ClientIdentityModel, ClientQueueModel, ClientMatchModel, InterpolationBuffer | [ ] |
-| 7 | `02_api_1_model.md` | PgPool, PlayerRepository, MatchRepository, LeaderboardEntry, LeaderboardRepository, PendingMatchCorrelator | [ ] |
-| 8 | `02_server_2_controller.md` | 5 controllers + ConnectionHandler + MatchReportingClient | [ ] |
-| 9 | `02_client_2_controller.md` | SocketConnectionController + 3 controllers | [ ] |
-| 10 | `02_api_2_controller.md` | InternalMatchController, MatchHistoryController, LeaderboardController | [ ] |
-| 11 | `02_server_3_view-and-main.md` | MatchmakingBroadcastView, MatchBroadcastView, ServerMain | [ ] |
-| 12 | `02_client_3_view-and-main.md` | 4 screen views, ClientMain | [ ] |
-| 13 | `02_api_3_view-and-main.md` | 3 response views, ApiMain | [ ] |
+| 1 | `02_shared_1_workspace-and-skeleton.md` | Monorepo structure, configs, `NotImplementedError` | [x] |
+| 2 | `02_shared_2_mvc-framework.md` | Model, View, Controller, ModelEvent, ModelListener, AbstractModel, AbstractController | [x] |
+| 3 | `02_shared_3_domain-and-contract.md` | Domain vocabulary (14 files) + wire contract (3 files) | [x] |
+| 4 | `02_shared_4_exceptions.md` | ArenaError + 15 subclasses, `packages/shared/src/index.ts` barrel | [x] |
+| 5 | `02_server_1_model.md` | QueueEntry, MatchmakingQueue, ParticipantState, MatchModel, TickLoop | [x] |
+| 6 | `02_client_1_model.md` | ClientIdentityModel, ClientQueueModel, ClientMatchModel, InterpolationBuffer | [x] |
+| 7 | `02_api_1_model.md` | PgPool, PlayerRepository, MatchRepository, LeaderboardEntry, LeaderboardRepository, PendingMatchCorrelator | [x] |
+| 8 | `02_server_2_controller.md` | 5 controllers + ConnectionHandler + MatchReportingClient | [x] |
+| 9 | `02_client_2_controller.md` | SocketConnectionController + 3 controllers | [x] |
+| 10 | `02_api_2_controller.md` | InternalMatchController, MatchHistoryController, LeaderboardController | [x] |
+| 11 | `02_server_3_view-and-main.md` | MatchmakingBroadcastView, MatchBroadcastView, ServerMain | [x] |
+| 12 | `02_client_3_view-and-main.md` | 4 screen views, ClientMain | [x] |
+| 13 | `02_api_3_view-and-main.md` | 3 response views, ApiMain | [x] |
 
 Check a box (in a commit) as each prompt's work is merged to `main`, not merely committed to its track
 branch — see master context §9.4.
