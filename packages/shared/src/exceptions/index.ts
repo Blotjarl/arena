@@ -1,1 +1,16 @@
-// exceptions barrel export — see docs/01_class_list.md §4
+export * from './ArenaError';
+export * from './InvalidUsernameError';
+export * from './UnidentifiedConnectionError';
+export * from './AlreadyQueuedError';
+export * from './NotQueuedError';
+export * from './InvalidChampionSelectionError';
+export * from './SelectionWindowExpiredError';
+export * from './InvalidMatchPhaseError';
+export * from './AbilityOnCooldownError';
+export * from './InsufficientResourceError';
+export * from './ActorIncapacitatedError';
+export * from './TargetOutOfRangeError';
+export * from './GracePeriodExpiredError';
+export * from './PlayerNotFoundError';
+export * from './PersistenceError';
+export * from './ValidationError';

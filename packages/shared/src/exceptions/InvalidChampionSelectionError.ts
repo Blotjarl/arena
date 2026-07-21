@@ -1,1 +1,8 @@
-// InvalidChampionSelectionError — see docs/01_class_list.md §4
+import { ArenaError } from './ArenaError';
+
+export class InvalidChampionSelectionError extends ArenaError {
+  readonly code = 'INVALID_CHAMPION_SELECTION';
+  constructor(championId: string) {
+    super(`"${championId}" is not a champion in the roster.`);
+  }
+}
