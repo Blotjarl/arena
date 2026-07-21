@@ -1,1 +1,6 @@
-// api entry index — see docs/01_class_list.md §7d
+import { ApiMain } from './ApiMain';
+
+ApiMain.main().catch((err) => {
+  console.error('Arena API failed to start:', err);
+  process.exit(1);
+});
