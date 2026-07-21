@@ -202,7 +202,7 @@ not a domain exception, and it should not appear in the final diagram after Step
 |---|---|---|---|
 | `ClientIdentityModel` | `extends AbstractModel` | `playerId: PlayerId \| null`; `username: string \| null` | `constructor()`; `identify(username: string): void` (persists to `sessionStorage` per R1.2); `getPlayerId(): PlayerId` |
 | `ClientQueueModel` | `extends AbstractModel` | `status: 'idle' \| 'queued' \| 'matched'`; `position: number \| null` | `constructor()`; `setQueued(position: number): void`; `setCancelled(): void`; `setMatched(payload: MatchFoundPayload): void` |
-| `ClientMatchModel` | `extends AbstractModel` | `matchId: MatchId \| null`; `phase: MatchPhase`; `latestState: MatchStatePayload \| null`; `result: MatchEndPayload \| null` | `constructor()`; `applyChampionSelected(payload: ChampionSelectedPayload): void`; `applyMatchStart(payload: MatchStartPayload): void`; `applyMatchState(payload: MatchStatePayload): void` (R4.7 — read-only mirror, never mutates authoritative values itself); `applyMatchEnd(payload: MatchEndPayload): void` |
+| `ClientMatchModel` | `extends AbstractModel` | `matchId: MatchId \| null`; `phase: MatchPhase \| null` (null until a match is found — unlike server's `MatchModel`, which always has a phase from construction); `latestState: MatchStatePayload \| null`; `result: MatchEndPayload \| null` | `constructor()`; `applyChampionSelected(payload: ChampionSelectedPayload): void`; `applyMatchStart(payload: MatchStartPayload): void`; `applyMatchState(payload: MatchStatePayload): void` (R4.7 — read-only mirror, never mutates authoritative values itself); `applyMatchEnd(payload: MatchEndPayload): void` |
 | `InterpolationBuffer` | — | `private samples: MatchStatePayload[]` (ring buffer) | `constructor(capacity: number)`; `push(snapshot: MatchStatePayload): void`; `getInterpolatedPosition(playerId: PlayerId, now: number): Position` (R4.7, R-P4 — smooths rendering between the server's 20Hz ticks without altering any authoritative value) |
 
 ### 6b. `client/controller`
@@ -222,6 +222,10 @@ not a domain exception, and it should not appear in the final diagram after Step
 | `ChampionSelectView` | `View, ModelListener` | Both players, selection countdown, roster with stats/abilities |
 | `MatchHUDView` | `View, ModelListener` | Health/resource bars, cooldown indicators, arena rendering via `InterpolationBuffer` |
 | `ResultsView` | `View, ModelListener` | Outcome, reason, duration, return-to-queue control |
+
+**Note (Step 2 gap-fill):** `ResultsView` pairs with `LobbyController` rather than a dedicated results
+controller — "return to queue" is a lobby action, and no separate controller was specified for this view.
+Documented here rather than left as a silent inconsistency with 6b.
 
 Each `*View` class implements `modelChanged(event: ModelEvent): void` by invoking a bound React
 `setState`/hook-dispatch callback supplied at construction — the class is the MVC-facing object; the
