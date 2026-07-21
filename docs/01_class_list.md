@@ -65,7 +65,7 @@ used by matchmaking and persistence alike.)*
 
 | Type | Kind | Attributes | Operations |
 |---|---|---|---|
-| `PlayerId`, `MatchId`, `ChampionId` | branded `string` types (`ids.ts`) | — | — |
+| `PlayerId`, `MatchId`, `ChampionId` | plain `string` type aliases (`ids.ts`) — not branded; simplicity was chosen over nominal typing for Step 2 | — | — |
 | `Team` | enum | `A`, `B` | — |
 | `MatchPhase` | enum | `CHAMPION_SELECT`, `ACTIVE`, `ENDED` | — |
 | `ConnectionStatus` | enum | `CONNECTED`, `DISCONNECTED` | — |
@@ -186,6 +186,10 @@ not a domain exception, and it should not appear in the final diagram after Step
 | `MatchmakingBroadcastView` | `View, ModelListener` | `constructor(model: MatchmakingQueue, sockets: Map<PlayerId, Socket>)` (registers itself as a listener in the constructor, mirroring `JFrameView`'s registration pattern); `modelChanged(event: ModelEvent): void` (emits `queue:joined` / `queue:cancelled` / `match:found`) |
 | `MatchBroadcastView` | `View, ModelListener` | `constructor(model: MatchModel, sockets: Map<PlayerId, Socket>)`; `modelChanged(event: ModelEvent): void` (switches on `event.type` to emit `champion:selected`, `match:start`, `match:state`, `match:end`, `match:player_disconnected`, `match:player_reconnected`) |
 
+**Note:** `getController()`/`setController()` are not applicable on `MatchmakingBroadcastView` and
+`MatchBroadcastView` — both are pure observers (broadcasters) with no paired controller, so these two
+`View` methods are stubbed to throw rather than implemented.
+
 ### 5d. Entry point
 
 | Class | Operations |
@@ -209,7 +213,7 @@ not a domain exception, and it should not appear in the final diagram after Step
 
 | Class | Extends | Operations |
 |---|---|---|
-| `SocketConnectionController` | `extends AbstractController` | `constructor(models: {...})`; `operation(action: string, payload?: unknown): void` (sends `identify`/`queue:join`/`queue:cancel`/`champion:select`/`match:action`/`match:reconnect` over the socket); `private bindInboundEvents(): void` (routes every inbound event to the matching model's `apply*` method) |
+| `SocketConnectionController` | *(not an `AbstractController` — a thin transport adapter coordinating three models, kept separate for the same reason `ConnectionHandler` is on the server side — see §5b)* | `constructor(models: {...})`; `operation(action: string, payload?: unknown): void` (sends `identify`/`queue:join`/`queue:cancel`/`champion:select`/`match:action`/`match:reconnect` over the socket); `private bindInboundEvents(): void` (routes every inbound event to the matching model's `apply*` method) |
 | `LobbyController` | `extends AbstractController<ClientIdentityModel, LobbyView>` | `operation('submitUsername', payload: {username: string}): void` (client-side length/non-empty check mirroring R1.1, before delegating to `SocketConnectionController`) |
 | `ChampionSelectController` | `extends AbstractController<ClientMatchModel, ChampionSelectView>` | `operation('selectChampion', payload: {championId: ChampionId}): void` |
 | `MatchController` | `extends AbstractController<ClientMatchModel, MatchHUDView>` | `operation('move' \| 'useAbility', payload): void` (throttles/sends `match:action`) |
@@ -265,9 +269,13 @@ subsystems.
 
 | Class | Implements | Responsibility |
 |---|---|---|
-| `LeaderboardResponseView` | `View` | Formats `LeaderboardEntry[]` → `LeaderboardEntryDTO[]` JSON |
-| `MatchHistoryResponseView` | `View` | Formats `MatchParticipant[]` → paginated `MatchHistoryEntryDTO[]` JSON |
-| `ErrorResponseView` | `View` | Formats a caught `ArenaError` into an HTTP status + JSON error body |
+| `LeaderboardResponseView` | — | Formats `LeaderboardEntry[]` → `LeaderboardEntryDTO[]` JSON |
+| `MatchHistoryResponseView` | — | Formats `MatchParticipant[]` → paginated `MatchHistoryEntryDTO[]` JSON |
+| `ErrorResponseView` | — | Formats a caught `ArenaError` into an HTTP status + JSON error body |
+
+Unlike the server's broadcast views, these are plain formatter classes (a `render()` method only) — a
+synchronous HTTP response has no push/observe relationship to establish, so implementing the full `View`
+interface would be unused ceremony.
 
 ### 7d. `api/util` and entry point
 
@@ -284,7 +292,7 @@ subsystems.
 - `AbstractModel` implements `Model`; `AbstractController` implements `Controller`.
 - `MatchmakingQueue`, `MatchModel`, `ClientIdentityModel`, `ClientQueueModel`, `ClientMatchModel` all extend `AbstractModel`.
 - Every `*Controller` class (both `server` and `client`, plus `api`'s three) extends `AbstractController`.
-- `MatchmakingBroadcastView`, `MatchBroadcastView`, all four `client/view` classes, and all three `api/view` classes implement `View`; the ones that react to push events also implement `ModelListener`.
+- `MatchmakingBroadcastView`, `MatchBroadcastView`, and all four `client/view` classes implement `View`; the ones that react to push events also implement `ModelListener`.
 - All exceptions in §4 extend `ArenaError extends Error`.
 
 **Composition / aggregation (strong ownership):**
