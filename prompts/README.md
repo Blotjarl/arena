@@ -38,7 +38,29 @@ Check a box (in a commit) as each prompt's work is merged to `main`, not merely 
 branch — see master context §9.4. Row 14 exists because a post-Step-2 audit found the class list hadn't
 caught up to some of the code's own correct refinements — see that prompt for detail.
 
+## Step 3–5 — Declarations complete, javadoc, compiles, initial API docs
+
+Five prompts. `docs/ProjectProcess.txt` Step 4 ("make sure your code compiles") isn't a separate prompt —
+it's satisfied by each of these prompts' own mandatory typecheck, same as Step 2. **This is the first
+batch where the three tracks genuinely run in parallel**: `03_server_1` (Marshall), `03_client_1` (Raj),
+and `03_api_1` (En) don't depend on each other or on `03_shared_1` merging — each only needs to *read*
+`03_shared_1`'s TSDoc convention (§1), not wait for it. `03_shared_2` is the exception: it must run last,
+after all four of the others are merged, since it generates documentation from what they wrote.
+
+| # | File | Owner | Component(s) | Depends on | Status |
+|---|---|---|---|---|---|
+| 1 | `03_shared_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/shared` — establishes the TSDoc convention | none | [ ] |
+| 2 | `03_server_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/server` | reads 1's §1 only | [ ] |
+| 3 | `03_client_1_tsdoc-and-contingency-review.md` | **Raj** | `packages/client` | reads 1's §1 only | [ ] |
+| 4 | `03_api_1_tsdoc-and-contingency-review.md` | **En** | `packages/api` | reads 1's §1 only | [ ] |
+| 5 | `03_shared_2_typedoc-generation.md` | **Marshall** | TypeDoc setup + initial generation, `docs/api/` | 1, 2, 3, and 4 all merged | [ ] |
+
+If any of prompts 1–4 finds a genuine gap in the exception set (rare — see each prompt's §3), it adds a
+new exception class to `packages/shared/src/exceptions/` directly as part of its own commit rather than
+blocking on a separate prompt; this is a small enough addition to be low-conflict even with two tracks
+touching `shared` the same day.
+
 ## Later steps
 
-Not yet generated. `docs/ProjectProcess.txt` steps 3–13 will get their own prompt batches once Step 2 is
-complete and reviewed.
+Not yet generated. `docs/ProjectProcess.txt` steps 6–13 will get their own prompt batches once Steps 3–5
+are complete and reviewed.
