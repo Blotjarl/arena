@@ -1,0 +1,6 @@
+export enum EffectType {
+  DAMAGE = 'DAMAGE',
+  HEAL = 'HEAL',
+  CROWD_CONTROL = 'CROWD_CONTROL',
+  POSITIONING = 'POSITIONING',
+}
