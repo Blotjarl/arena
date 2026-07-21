@@ -1,1 +1,6 @@
-// server entry index — see docs/01_class_list.md §5d
+import { ServerMain } from './ServerMain';
+
+ServerMain.main().catch((err) => {
+  console.error('Arena server failed to start:', err);
+  process.exit(1);
+});
