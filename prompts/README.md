@@ -32,7 +32,7 @@ packages (5–7) come before controllers (8–10), which come before views + ent
 | 11 | `02_server_3_view-and-main.md` | MatchmakingBroadcastView, MatchBroadcastView, ServerMain | [x] |
 | 12 | `02_client_3_view-and-main.md` | 4 screen views, ClientMain | [x] |
 | 13 | `02_api_3_view-and-main.md` | 3 response views, ApiMain | [x] |
-| 14 | `02_shared_5_class-list-reconciliation.md` | Docs-only fix: reconcile `docs/01_class_list.md` with 3 correct-but-undocumented Step 2 deviations | [ ] |
+| 14 | `02_shared_5_class-list-reconciliation.md` | Docs-only fix: reconcile `docs/01_class_list.md` with 3 correct-but-undocumented Step 2 deviations | [x] |
 
 Check a box (in a commit) as each prompt's work is merged to `main`, not merely committed to its track
 branch — see master context §9.4. Row 14 exists because a post-Step-2 audit found the class list hadn't
