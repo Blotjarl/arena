@@ -143,7 +143,7 @@ base so the WebSocket `error` event and REST error responses can carry a machine
 | `AbilityOnCooldownError` | `ArenaError` | `ParticipantState.useAbility()` | R4.2 |
 | `InsufficientResourceError` | `ArenaError` | `ParticipantState.useAbility()` | R4.2 |
 | `ActorIncapacitatedError` | `ArenaError` | `ParticipantState.useAbility()`, `.move()` (dead or crowd-controlled) | R4.2, R6.1 |
-| `TargetOutOfRangeError` | `ArenaError` | `ParticipantState.useAbility()` | R4.2 |
+| `TargetOutOfRangeError` | `ArenaError` | `MatchModel.submitAbility()` (range check — `ParticipantState.useAbility()` has no target-position parameter to check against, so range is resolved by `MatchModel` before delegating) | R4.2 |
 | `GracePeriodExpiredError` | `ArenaError` | `MatchModel.reconnect()` | R6.4 |
 | `PlayerNotFoundError` | `ArenaError` | `PlayerRepository` lookups | general |
 | `PersistenceError` | `ArenaError` | any `*Repository` method | R7.4, R-DB4 |
