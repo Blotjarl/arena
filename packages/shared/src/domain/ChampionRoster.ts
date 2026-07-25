@@ -6,11 +6,17 @@ import { NotImplementedError } from '../util/NotImplementedError';
 export class ChampionRoster {
   private static readonly champions: Champion[] = [];
 
+  /** @returns every champion in the fixed roster, in a stable order */
   static getAll(): Champion[] {
     throw new NotImplementedError('ChampionRoster.getAll not yet implemented');
   }
 
-  /** @throws InvalidChampionSelectionError if id is not a known champion. */
+  /**
+   * Looks up a champion definition by id.
+   * @param id - the champion identifier to resolve
+   * @returns the matching Champion
+   * @throws {InvalidChampionSelectionError} if id does not match any champion in the roster
+   */
   static getById(id: ChampionId): Champion {
     throw new NotImplementedError('ChampionRoster.getById not yet implemented');
   }

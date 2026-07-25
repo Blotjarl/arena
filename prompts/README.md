@@ -49,7 +49,7 @@ after all four of the others are merged, since it generates documentation from w
 
 | # | File | Owner | Component(s) | Depends on | Status |
 |---|---|---|---|---|---|
-| 1 | `03_shared_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/shared` — establishes the TSDoc convention | none | [ ] |
+| 1 | `03_shared_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/shared` — establishes the TSDoc convention | none | [x] |
 | 2 | `03_server_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/server` | reads 1's §1 only | [ ] |
 | 3 | `03_client_1_tsdoc-and-contingency-review.md` | **Raj** | `packages/client` | reads 1's §1 only | [x] |
 | 4 | `03_api_1_tsdoc-and-contingency-review.md` | **En** | `packages/api` | reads 1's §1 only | [x] |
