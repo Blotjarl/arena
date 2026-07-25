@@ -1,0 +1,16 @@
+{
+  "entryPoints": [
+    "packages/shared/src",
+    "packages/server/src",
+    "packages/client/src",
+    "packages/api/src"
+  ],
+  "entryPointStrategy": "expand",
+  "tsconfig": "tsconfig.typedoc.json",
+  "out": "docs/api",
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "excludeExternals": true,
+  "name": "Arena — API Documentation"
+}

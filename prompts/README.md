@@ -50,10 +50,10 @@ after all four of the others are merged, since it generates documentation from w
 | # | File | Owner | Component(s) | Depends on | Status |
 |---|---|---|---|---|---|
 | 1 | `03_shared_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/shared` — establishes the TSDoc convention | none | [x] |
-| 2 | `03_server_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/server` | reads 1's §1 only | [ ] |
+| 2 | `03_server_1_tsdoc-and-contingency-review.md` | **Marshall** | `packages/server` | reads 1's §1 only | [x] |
 | 3 | `03_client_1_tsdoc-and-contingency-review.md` | **Raj** | `packages/client` | reads 1's §1 only | [x] |
 | 4 | `03_api_1_tsdoc-and-contingency-review.md` | **En** | `packages/api` | reads 1's §1 only | [x] |
-| 5 | `03_shared_2_typedoc-generation.md` | **Marshall** | TypeDoc setup + initial generation, `docs/api/` | 1, 2, 3, and 4 all merged | [ ] |
+| 5 | `03_shared_2_typedoc-generation.md` | **Marshall** | TypeDoc setup + initial generation, `docs/api/` | 1, 2, 3, and 4 all merged | [x] |
 
 If any of prompts 1–4 finds a genuine gap in the exception set (rare — see each prompt's §3), it adds a
 new exception class to `packages/shared/src/exceptions/` directly as part of its own commit rather than
