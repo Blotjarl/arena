@@ -30,7 +30,7 @@ export class ClientMatchModel extends AbstractModel {
   }
 
   /**
-   * Transitions the match into the COMBAT phase using the server's start payload (R4.1).
+   * Transitions the match into the ACTIVE phase using the server's start payload (R4.1).
    * @param payload - the match:start event payload
    */
   applyMatchStart(payload: MatchStartPayload): void {

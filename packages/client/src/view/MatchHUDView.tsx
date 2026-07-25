@@ -46,7 +46,8 @@ export class MatchHUDView implements View, ModelListener {
   }
 
   /**
-   * Replaces the observed model and re-registers this view as a listener.
+   * Replaces the observed model reference. Unlike the constructor, this does not re-register the
+   * view as a listener on the new model — call `model.addModelListener(this)` separately if needed.
    * @param model - the new ClientMatchModel to observe
    */
   setModel(model: ClientMatchModel): void {
