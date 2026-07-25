@@ -60,7 +60,20 @@ new exception class to `packages/shared/src/exceptions/` directly as part of its
 blocking on a separate prompt; this is a small enough addition to be low-conflict even with two tracks
 touching `shared` the same day.
 
+## Step 6 — Reverse-engineer the code into a UML class diagram
+
+One prompt. Writes and runs `scripts/generate-class-diagram.js`, a deterministic TypeDoc-JSON-to-Mermaid
+generator validated against this repo before being written into the prompt, producing
+`docs/06_class_diagram_reverse-engineered.html` in the same visual template as Step 1's diagram. Step 1's
+diagram is left untouched, on purpose — comparing "planned" vs. "actual" is Step 7's job. The generator
+script is also what Step 12 (the final reverse-engineering pass) will reuse unmodified.
+
+| # | File | Owner | Component(s) | Status |
+|---|---|---|---|---|
+| 1 | `06_shared_1_reverse-engineer-class-diagram.md` | **Marshall** | `scripts/generate-class-diagram.js`, `docs/06_class_diagram_reverse-engineered.html` | [ ] |
+
 ## Later steps
 
-Not yet generated. `docs/ProjectProcess.txt` steps 6–13 will get their own prompt batches once Steps 3–5
-are complete and reviewed.
+Not yet generated. `docs/ProjectProcess.txt` step 7 (analyze the reverse-engineered diagram against
+Step 1's and the code, iterate) and steps 8–13 will get their own prompt batches once Step 6 is complete
+and reviewed.
