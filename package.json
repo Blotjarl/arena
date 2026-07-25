@@ -12,7 +12,8 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "diagram:reverse-engineer": "node scripts/generate-class-diagram.js"
   },
   "devDependencies": {
     "typedoc": "^0.28.20",
