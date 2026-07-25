@@ -1,3 +1,4 @@
+/** Bootstrap: starts the API subsystem via `ApiMain.main()`. */
 import { ApiMain } from './ApiMain';
 
 ApiMain.main().catch((err) => {
