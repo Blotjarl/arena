@@ -5,12 +5,15 @@ import { ConnectionStatus } from '../domain/ConnectionStatus';
 import { Champion } from '../domain/Champion';
 import { Position } from '../domain/Position';
 
+/** Sent server→client on `queue:joined`, once a player is accepted into the matchmaking queue (R2.1). */
 export interface QueueJoinedPayload {
   position: number;
 }
 
+/** Sent server→client on `queue:cancelled`, acknowledging a `queue:cancel` request (R2.3). No fields. */
 export type QueueCancelledPayload = Record<string, never>;
 
+/** Sent server→client on `match:found`, once two queued players have been paired (R2.4–R2.6). */
 export interface MatchFoundPayload {
   matchId: MatchId;
   team: Team;
@@ -18,13 +21,16 @@ export interface MatchFoundPayload {
   roster: Champion[];
 }
 
+/** Sent server→client on `champion:selected`, after a player picks a champion (R3.2, R3.3). */
 export interface ChampionSelectedPayload {
   matchId: MatchId;
   playerId: PlayerId;
   championId: ChampionId;
+  /** Whether both players have now selected, meaning the match can start. */
   bothSelected: boolean;
 }
 
+/** One participant's authoritative state at a given tick — embedded in `MatchStatePayload`. */
 export interface ParticipantSnapshot {
   playerId: PlayerId;
   team: Team;
@@ -32,23 +38,27 @@ export interface ParticipantSnapshot {
   position: Position;
   health: number;
   resource: number;
+  /** Seconds remaining before each ability (keyed by ability id) is usable again. */
   cooldownsRemaining: Record<string, number>;
   crowdControlled: boolean;
   connectionStatus: ConnectionStatus;
   alive: boolean;
 }
 
+/** Sent server→client on `match:state`, once per tick, at 20Hz (R-P1, R-P2, R4.7). */
 export interface MatchStatePayload {
   matchId: MatchId;
   tick: number;
   participants: [ParticipantSnapshot, ParticipantSnapshot];
 }
 
+/** Sent server→client on `match:start`, once both players have selected champions (R3.5). */
 export interface MatchStartPayload {
   matchId: MatchId;
   initialState: MatchStatePayload;
 }
 
+/** Sent server→client on `match:end`, once a win condition is reached (R5.1–R5.3). */
 export interface MatchEndPayload {
   matchId: MatchId;
   reason: EndReason;
@@ -56,15 +66,18 @@ export interface MatchEndPayload {
   durationMs: number;
 }
 
+/** Sent server→client on `match:player_disconnected`, when a match participant's socket drops (R6.1, R6.2). */
 export interface PlayerDisconnectedPayload {
   playerId: PlayerId;
   gracePeriodSeconds: number;
 }
 
+/** Sent server→client on `match:player_reconnected`, when a disconnected participant reconnects in time (R6.3). */
 export interface PlayerReconnectedPayload {
   playerId: PlayerId;
 }
 
+/** Sent server→client on `error`, for any rejected request that needs to surface a message to the player. */
 export interface ErrorPayload {
   code: string;
   message: string;
