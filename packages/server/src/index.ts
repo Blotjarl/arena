@@ -1,3 +1,4 @@
+/** Bootstrap: starts the server subsystem via `ServerMain.main()`. */
 import { ServerMain } from './ServerMain';
 
 ServerMain.main().catch((err) => {
