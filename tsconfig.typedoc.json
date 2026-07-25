@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": [
+    "packages/shared/src/**/*.ts",
+    "packages/server/src/**/*.ts",
+    "packages/client/src/**/*.ts",
+    "packages/client/src/**/*.tsx",
+    "packages/api/src/**/*.ts"
+  ]
+}
