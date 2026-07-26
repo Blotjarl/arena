@@ -3,18 +3,23 @@ import {
   MatchId,
   MatchPhase,
   EndReason,
+  EffectType,
   Team,
   Player,
   MatchStatePayload,
   ModelEvent,
   ChampionRoster,
+  ArenaError,
+  ConnectionStatus,
+  GracePeriodExpiredError,
   InvalidMatchPhaseError,
   SelectionWindowExpiredError,
-  NotImplementedError,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
 
 const CHAMPION_SELECT_WINDOW_MS = 30_000;
+const MATCH_TIME_LIMIT_MS = 5 * 60_000;
+const DISCONNECT_GRACE_PERIOD_MS = 30_000;
 
 /**
  * One instance of gameplay, champion selection through a win condition — the authoritative source of
@@ -37,6 +42,8 @@ export class MatchModel extends AbstractModel {
   public winningTeam: Team | null = null;
   /** Incrementing tick counter included in every broadcast snapshot; not a timestamp. */
   private tickCount = 0;
+  /** Each participant's most recently submitted movement input, applied once per tick (see submitMove). */
+  private pendingMoves: Map<string, { dx: number; dy: number }> = new Map();
 
   constructor(
     /** Stable identifier for this match. */
@@ -57,6 +64,11 @@ export class MatchModel extends AbstractModel {
     return p;
   }
 
+  /** The other participant. */
+  protected opponentOf(participant: ParticipantState): ParticipantState {
+    return this.participants[0] === participant ? this.participants[1] : this.participants[0];
+  }
+
   protected endMatch(reason: EndReason, winningTeam: Team | null, now: number): void {
     this.phase = MatchPhase.ENDED;
     this.endedAt = now;
@@ -66,6 +78,19 @@ export class MatchModel extends AbstractModel {
     this.notifyChanged(
       new ModelEvent(this, 'match:end', { matchId: this.id, reason, winningTeam, durationMs }),
     );
+  }
+
+  /** The ELIMINATION/TIME_LIMIT winner. DISCONNECT_FORFEIT/SELECTION_TIMEOUT are decided at their call sites. */
+  protected determineWinner(reason: EndReason): Team | null {
+    const [a, b] = this.participants;
+    if (reason === EndReason.ELIMINATION) {
+      return a.isAlive() ? a.team : b.team;
+    }
+    if (reason === EndReason.TIME_LIMIT) {
+      if (a.health === b.health) return null;
+      return a.health > b.health ? a.team : b.team;
+    }
+    return null;
   }
 
   /**
@@ -102,36 +127,78 @@ export class MatchModel extends AbstractModel {
   }
 
   /**
-   * Forwards movement input to the submitting player's ParticipantState for the current tick.
+   * Forwards movement input to the submitting player's ParticipantState for the current tick. Buffers the
+   * input rather than moving immediately — actual position integration happens once per tick(), using
+   * that tick's own deltaSeconds, so movement speed is independent of client send rate.
    * @param playerId - the moving player
    * @param input - raw directional input for this tick
    * @throws {InvalidMatchPhaseError} if the match is not currently ACTIVE
    */
   submitMove(playerId: string, input: { dx: number; dy: number }): void {
-    throw new NotImplementedError('MatchModel.submitMove not yet implemented');
+    if (this.phase !== MatchPhase.ACTIVE) {
+      throw new InvalidMatchPhaseError(this.id, MatchPhase.ACTIVE, this.phase);
+    }
+    this.pendingMoves.set(playerId, input);
   }
 
   /**
    * Resolves and forwards an ability-use request. Because ParticipantState.useAbility() has no
-   * target-position parameter, this method is where target range is checked (R4.2) — it has access to
-   * both participants and computes the distance from req.targetPlayerId/targetPosition against
-   * ability.range before delegating cooldown/resource/incapacitation checks to ParticipantState.
+   * target-position parameter, this method is where target range is checked (R4.2). A request naming no
+   * target is treated as self-targeted (range always satisfied) — matches self-heal/self-buff kits. Once
+   * ParticipantState.useAbility() succeeds, this method applies the ability's actual effect
+   * (damage/heal/crowd-control/positioning) using ability.effectType/magnitude. POSITIONING is simplified
+   * to "move the caster directly to the target's position" (a charge/leap) — nuanced blink semantics are
+   * out of scope for this pass.
    * @param playerId - the acting player
    * @param req - the ability id and optional target
    * @throws {InvalidMatchPhaseError} if the match is not currently ACTIVE
    *
    * All per-ability validation failures — unknown ability, cooldown, insufficient resource, incapacitation,
-   * and out-of-range target — are caught internally and silently ignored (the action has no effect) rather
-   * than propagated to the caller, per R4's "silently ignores" behavior; see CombatController.
+   * out-of-range target — are caught internally and silently ignored, per R4's "silently ignores" behavior.
    */
   submitAbility(playerId: string, req: { abilityId: string; targetPlayerId?: string }): void {
-    throw new NotImplementedError('MatchModel.submitAbility not yet implemented');
+    if (this.phase !== MatchPhase.ACTIVE) {
+      throw new InvalidMatchPhaseError(this.id, MatchPhase.ACTIVE, this.phase);
+    }
+    const caster = this.findParticipant(playerId);
+    if (!caster.champion) return;
+    const ability = caster.champion.abilities.find((a) => a.id === req.abilityId);
+    if (!ability) return;
+
+    const target = req.targetPlayerId ? this.findParticipant(req.targetPlayerId) : caster;
+    const distance = caster.position.distanceTo(target.position);
+    if (target !== caster && distance > ability.range) return;
+
+    const now = Date.now();
+    try {
+      caster.useAbility(ability, now);
+    } catch (err) {
+      if (err instanceof ArenaError) return;
+      throw err;
+    }
+
+    switch (ability.effectType) {
+      case EffectType.DAMAGE:
+        target.applyDamage(ability.magnitude);
+        break;
+      case EffectType.HEAL:
+        target.applyHeal(ability.magnitude);
+        break;
+      case EffectType.CROWD_CONTROL:
+        target.applyCrowdControl(ability.magnitude * 1000, now);
+        break;
+      case EffectType.POSITIONING:
+        caster.position = target.position;
+        break;
+    }
   }
 
   /**
    * Advances the match simulation by one tick. During CHAMPION_SELECT, only checks the 30s selection
-   * deadline (R3.4) — the ACTIVE-phase branch (movement, combat, win conditions) is added in 09_server_4;
-   * disconnect-forfeit handling is added in 09_server_5. A no-op once ENDED.
+   * deadline (R3.4). Once ACTIVE, first checks each participant's disconnect grace period, ending the
+   * match by DISCONNECT_FORFEIT if one has elapsed (R6.3, R6.4), then drives combat — applies buffered
+   * movement, regenerates resource, checks win conditions, and notifies listeners with the new state
+   * (R4.3–R4.6). A no-op once ENDED.
    * CRITICAL: called by TickLoop.onTick() up to 20x/sec, once per registered match. This method itself
    * must never throw uncaught — TickLoop wraps each call in a per-match try/catch specifically so one
    * match's internal error cannot crash the loop or affect any other in-progress match (R5.4, 3.6.2).
@@ -145,15 +212,49 @@ export class MatchModel extends AbstractModel {
       }
       return;
     }
-    // ACTIVE-phase handling lands in 09_server_4.
+    if (this.phase !== MatchPhase.ACTIVE) return;
+
+    for (const p of this.participants) {
+      if (p.connectionStatus === ConnectionStatus.DISCONNECTED && p.disconnectedAt !== null) {
+        if (now - p.disconnectedAt >= DISCONNECT_GRACE_PERIOD_MS) {
+          this.endMatch(EndReason.DISCONNECT_FORFEIT, this.opponentOf(p).team, now);
+          return;
+        }
+      }
+    }
+
+    for (const p of this.participants) {
+      const pending = this.pendingMoves.get(p.playerId);
+      if (pending) {
+        try {
+          p.move(pending, deltaSeconds, now);
+        } catch {
+          // ActorIncapacitatedError: movement silently has no effect this tick.
+        }
+      }
+      p.regenerateResource(deltaSeconds);
+    }
+    this.tickCount += 1;
+
+    const reason = this.checkWinConditions();
+    if (reason) {
+      this.endMatch(reason, this.determineWinner(reason), now);
+      return;
+    }
+
+    this.notifyChanged(new ModelEvent(this, 'state', this.snapshot()));
   }
 
   /**
    * Evaluates whether the match has reached a win condition this tick (elimination or time limit).
+   * Disconnect forfeit and selection timeout are handled separately, not here (SRS 3.2.6 vs. 3.2.5).
    * @returns the reason the match ended, or null if it should continue
    */
   checkWinConditions(): EndReason | null {
-    throw new NotImplementedError('MatchModel.checkWinConditions not yet implemented');
+    const [a, b] = this.participants;
+    if (!a.isAlive() || !b.isAlive()) return EndReason.ELIMINATION;
+    if (this.startedAt !== null && Date.now() - this.startedAt >= MATCH_TIME_LIMIT_MS) return EndReason.TIME_LIMIT;
+    return null;
   }
 
   /**
@@ -162,7 +263,13 @@ export class MatchModel extends AbstractModel {
    * @param playerId - the player whose socket disconnected
    */
   disconnect(playerId: string): void {
-    throw new NotImplementedError('MatchModel.disconnect not yet implemented');
+    const p = this.findParticipant(playerId);
+    if (p.connectionStatus === ConnectionStatus.DISCONNECTED) return;
+    p.connectionStatus = ConnectionStatus.DISCONNECTED;
+    p.disconnectedAt = Date.now();
+    this.notifyChanged(
+      new ModelEvent(this, 'player_disconnected', { playerId, gracePeriodSeconds: DISCONNECT_GRACE_PERIOD_MS / 1000 }),
+    );
   }
 
   /**
@@ -171,7 +278,15 @@ export class MatchModel extends AbstractModel {
    * @throws {GracePeriodExpiredError} if the 30-second grace period has already elapsed (R6.3, R6.4)
    */
   reconnect(playerId: string): void {
-    throw new NotImplementedError('MatchModel.reconnect not yet implemented');
+    const p = this.findParticipant(playerId);
+    if (p.connectionStatus === ConnectionStatus.CONNECTED) return;
+    const now = Date.now();
+    if (p.disconnectedAt !== null && now - p.disconnectedAt >= DISCONNECT_GRACE_PERIOD_MS) {
+      throw new GracePeriodExpiredError(playerId, this.id);
+    }
+    p.connectionStatus = ConnectionStatus.CONNECTED;
+    p.disconnectedAt = null;
+    this.notifyChanged(new ModelEvent(this, 'player_reconnected', { playerId }));
   }
 
   /** @returns a read-only snapshot of both participants and match metadata, for broadcast to clients. */
