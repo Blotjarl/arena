@@ -75,21 +75,23 @@ script is also what Step 12 (the final reverse-engineering pass) will reuse unmo
 ## Step 9 — Model package complete (Step 8 test/implement/iterate cycles, batched)
 
 Governed by `prompts/09-10_implementation_plan.md`, not by this README alone — read that spec before
-generating or executing any `09_*` prompt. 16 prompts total; two are generated so far. Per that plan's §4,
-`09_shared_1` is **Owner: En** even though it lives in `packages/shared` (game-design content, not
-framework code), and it must merge to `main` promptly — `09_server_3` depends on it and cannot run for real
-until it's merged.
+generating or executing any `09_*` prompt. Per that plan's §4, `09_shared_1` is **Owner: En** even though
+it lives in `packages/shared` (game-design content, not framework code), and it must merge to `main`
+promptly — `09_server_3` depends on it and cannot run for real until it's merged.
 
 | # | File | Track | Owner | Depends on | Status |
 |---|---|---|---|---|---|
 | 1 | `09_shared_1_domain-value-objects.md` | shared | **En** | none | [ ] |
 | 2 | `09_server_1_matchmaking-queue.md` | server | **Marshall** | none | [ ] |
+| 3 | `09_client_1_identity-and-queue.md` | client | **Raj** | none | [ ] |
+| 4 | `09_client_2_match-model.md` | client | **Raj** | none | [ ] |
+| 5 | `09_client_3_interpolation-buffer.md` | client | **Raj** | none (CRITICAL CHECKPOINT) | [ ] |
 
-Remaining 14 rows (`09_server_2` through `09_api_5`) are tracked in the implementation plan's own §4 table
+Remaining rows (`09_server_2` onward, `09_api_*`) are tracked in the implementation plan's own §4 table
 and will be added here as each is generated.
 
 ## Later steps
 
-Not yet generated. `docs/ProjectProcess.txt` step 7 (analyze the reverse-engineered diagram against
-Step 1's and the code, iterate) is still outstanding, and Step 10 (controller/view layer) starts only once
-each track's own Step 9 model work is done — see the implementation plan.
+`docs/ProjectProcess.txt` step 7 (analyze the reverse-engineered diagram against Step 1's and the code,
+iterate) is still outstanding, and Step 10 (controller/view layer) starts only once each track's own
+Step 9 model work is done — see the implementation plan.
