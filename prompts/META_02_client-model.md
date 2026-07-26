@@ -3,6 +3,10 @@
 **Your job is to WRITE PROMPT FILES, not implement application code directly.** You are generating
 `09_client_1_identity-and-queue.md`, `09_client_2_match-model.md`, and `09_client_3_interpolation-buffer.md`.
 
+**Owner of all three generated prompts: Raj** (per `prompts/09-10_implementation_plan.md` §4's Owner
+column — `packages/client` is Raj's SRS track). Each generated `.md` file must open with `**Owner: Raj.**`,
+matching the format at `09_server_2_participant-state.md:3`.
+
 ### CRITICAL: read first
 1. `prompts/00_master_context.md`
 2. `prompts/09-10_implementation_plan.md` (§2 test strategy, §5 scope notes)

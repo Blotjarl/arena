@@ -88,52 +88,64 @@ spec by a delegated session, following the scope notes in §5.
 
 ### Step 9 — model (16)
 
-| # | File | Track | Scope | Depends on | Who |
-|---|---|---|---|---|---|
-| 1 | `09_shared_1_domain-value-objects.md` | shared | `Position.distanceTo`; `Champion.getAbility`; `ChampionRoster.getAll`/`getById` + real Korr/Vex/Rin numbers | none | G |
-| 2 | `09_server_1_matchmaking-queue.md` | server | `MatchmakingQueue.join`/`cancel`/`tryPairNext` | none | G |
-| 3 | `09_server_2_participant-state.md` | server | `ParticipantState` — all 8 real methods | #1 (Champion/Ability) | **B** |
-| 4 | `09_server_3_matchmodel-champion-select.md` | server | `MatchModel.selectChampion`, `snapshot` | #1, #3 | **B** |
-| 5 | `09_server_4_matchmodel-combat.md` | server | `MatchModel.submitMove`/`submitAbility`/`tick`/`checkWinConditions` | #3, #4 | **B** |
-| 6 | `09_server_5_matchmodel-disconnect.md` | server | `MatchModel.disconnect`/`reconnect` | #4 | **B** |
-| 7 | `09_server_6_tickloop.md` | server | `TickLoop.start`/`stop`/`onTick` (per-match isolation) | #5 | **B** |
-| 8 | `09_client_1_identity-and-queue.md` | client | `ClientIdentityModel`, `ClientQueueModel` | none | G |
-| 9 | `09_client_2_match-model.md` | client | `ClientMatchModel` — 4 apply* methods | none | G |
-| 10 | `09_client_3_interpolation-buffer.md` | client | `InterpolationBuffer` | #9 | G |
-| 11 | `09_api_1_pending-match-correlator.md` | api | `PendingMatchCorrelator` (no DB) | none | G |
-| 12 | `09_api_2_schema-and-pgpool.md` | api | `packages/api/schema.sql`, `docker-compose.test.yml`, `PgPool.query` | none | **B** |
-| 13 | `09_api_3_player-repository.md` | api | `PlayerRepository.findOrCreateByUsername` | #12 | G |
-| 14 | `09_api_4_match-repository.md` | api | `MatchRepository.recordMatch`/`findHistoryForPlayer`, `LeaderboardEntry.fromRow` | #12 | G |
-| 15 | `09_api_5_leaderboard-repository.md` | api | `LeaderboardRepository.computeLeaderboard`/`computeChampionWinRates` | #12, #14 | G |
+| # | File | Track | Scope | Depends on | Who | Owner |
+|---|---|---|---|---|---|---|
+| 1 | `09_shared_1_domain-value-objects.md` | shared | `Position.distanceTo`; `Champion.getAbility`; `ChampionRoster.getAll`/`getById` + real Korr/Vex/Rin numbers | none | G | **En** |
+| 2 | `09_server_1_matchmaking-queue.md` | server | `MatchmakingQueue.join`/`cancel`/`tryPairNext` | none | G | **Marshall** |
+| 3 | `09_server_2_participant-state.md` | server | `ParticipantState` — all 8 real methods | #1 (Champion/Ability) | **B** | **Marshall** |
+| 4 | `09_server_3_matchmodel-champion-select.md` | server | `MatchModel.selectChampion`, `snapshot` | #1, #3 | **B** | **Marshall** |
+| 5 | `09_server_4_matchmodel-combat.md` | server | `MatchModel.submitMove`/`submitAbility`/`tick`/`checkWinConditions` | #3, #4 | **B** | **Marshall** |
+| 6 | `09_server_5_matchmodel-disconnect.md` | server | `MatchModel.disconnect`/`reconnect` | #4 | **B** | **Marshall** |
+| 7 | `09_server_6_tickloop.md` | server | `TickLoop.start`/`stop`/`onTick` (per-match isolation) | #5 | **B** | **Marshall** |
+| 8 | `09_client_1_identity-and-queue.md` | client | `ClientIdentityModel`, `ClientQueueModel` | none | G | **Raj** |
+| 9 | `09_client_2_match-model.md` | client | `ClientMatchModel` — 4 apply* methods | none | G | **Raj** |
+| 10 | `09_client_3_interpolation-buffer.md` | client | `InterpolationBuffer` | #9 | G | **Raj** |
+| 11 | `09_api_1_pending-match-correlator.md` | api | `PendingMatchCorrelator` (no DB) | none | G | **En** |
+| 12 | `09_api_2_schema-and-pgpool.md` | api | `packages/api/schema.sql`, `docker-compose.test.yml`, `PgPool.query` | none | **B** | **Marshall** (infra prerequisite — see note below) |
+| 13 | `09_api_3_player-repository.md` | api | `PlayerRepository.findOrCreateByUsername` | #12 | G | **En** |
+| 14 | `09_api_4_match-repository.md` | api | `MatchRepository.recordMatch`/`findHistoryForPlayer`, `LeaderboardEntry.fromRow` | #12 | G | **En** |
+| 15 | `09_api_5_leaderboard-repository.md` | api | `LeaderboardRepository.computeLeaderboard`/`computeChampionWinRates` | #12, #14 | G | **En** |
 
 (Table shows 15 rows because #12's schema prompt and #13–15 share dependency #12 — 16th item is the
 `09_shared_1` row already counted as #1. Total: 16.)
 
+**Two rows break the naive track→person mapping, on purpose — both are flagged in their own prompt file
+too, not just here:**
+- **Row 1 (`09_shared_1`) is Owner: En, not Marshall**, even though it lives in the `shared` package
+  Marshall otherwise owns as a framework. The actual work here — inventing Korr/Vex/Rin's ability numbers
+  — is game-design content, En's SRS Appendix C responsibility, not framework code. `Position.distanceTo`
+  is trivial and rides along in the same file only because it's a same-package dependency.
+- **Row 12 (`09_api_2`) is Owner: Marshall, not En**, even though it lives in the `api` package En
+  otherwise owns. This is infrastructure (`schema.sql`, Docker test harness, `PgPool`) that every one of
+  En's later repository prompts (#13–15) depends on to even run their tests — Marshall built and validated
+  it directly as one of the six **B** prompts so En isn't blocked waiting on it, not because the repository
+  *logic* itself is Marshall's to design.
+
 ### Step 10 — controller/view (21)
 
-| # | File | Track | Scope | Who |
-|---|---|---|---|---|
-| 1 | `10_server_1_player-identify-controller.md` | server | `PlayerIdentifyController.operation` | G |
-| 2 | `10_server_2_matchmaking-controller.md` | server | `MatchmakingController.operation` | G |
-| 3 | `10_server_3_champion-select-controller.md` | server | `ChampionSelectController.operation` | G |
-| 4 | `10_server_4_combat-controller.md` | server | `CombatController.operation` | G |
-| 5 | `10_server_5_disconnect-controller.md` | server | `DisconnectController.operation` | G |
-| 6 | `10_server_6_connection-and-reporting.md` | server | `ConnectionHandler.register`, `MatchReportingClient.report*` | G |
-| 7 | `10_server_7_broadcast-views.md` | server | `MatchmakingBroadcastView`, `MatchBroadcastView` — `modelChanged` | G |
-| 8 | `10_server_8_server-main.md` | server | `ServerMain.main` (wiring, smoke test) | G |
-| 9 | `10_client_1_socket-connection-controller.md` | client | `SocketConnectionController` | G |
-| 10 | `10_client_2_lobby-controller.md` | client | `LobbyController.operation` | G |
-| 11 | `10_client_3_champion-select-controller.md` | client | `ChampionSelectController.operation` | G |
-| 12 | `10_client_4_match-controller.md` | client | `MatchController.operation` | G |
-| 13 | `10_client_5_lobby-view.md` | client | `LobbyView` + `LobbyScreen` (React Testing Library) | G |
-| 14 | `10_client_6_champion-select-view.md` | client | `ChampionSelectView` + `ChampionSelectScreen` | G |
-| 15 | `10_client_7_match-hud-view.md` | client | `MatchHUDView` + `MatchHUDScreen` | G |
-| 16 | `10_client_8_results-view.md` | client | `ResultsView` + `ResultsScreen` | G |
-| 17 | `10_client_9_client-main.md` | client | `ClientMain.main` (wiring) | G |
-| 18 | `10_api_1_internal-match-controller.md` | api | `InternalMatchController.handleBegin`/`handleEnd` + `ErrorResponseView` | G |
-| 19 | `10_api_2_match-history-controller.md` | api | `MatchHistoryController.getHistory` + `MatchHistoryResponseView` | G |
-| 20 | `10_api_3_leaderboard-controller.md` | api | `LeaderboardController.get*` + `LeaderboardResponseView` | G |
-| 21 | `10_api_4_api-main.md` | api | `ApiMain.main` (wiring) | G |
+| # | File | Track | Scope | Who | Owner |
+|---|---|---|---|---|---|
+| 1 | `10_server_1_player-identify-controller.md` | server | `PlayerIdentifyController.operation` | G | **Marshall** |
+| 2 | `10_server_2_matchmaking-controller.md` | server | `MatchmakingController.operation` | G | **Marshall** |
+| 3 | `10_server_3_champion-select-controller.md` | server | `ChampionSelectController.operation` | G | **Marshall** |
+| 4 | `10_server_4_combat-controller.md` | server | `CombatController.operation` | G | **Marshall** |
+| 5 | `10_server_5_disconnect-controller.md` | server | `DisconnectController.operation` | G | **Marshall** |
+| 6 | `10_server_6_connection-and-reporting.md` | server | `ConnectionHandler.register`, `MatchReportingClient.report*` | G | **Marshall** |
+| 7 | `10_server_7_broadcast-views.md` | server | `MatchmakingBroadcastView`, `MatchBroadcastView` — `modelChanged` | G | **Marshall** |
+| 8 | `10_server_8_server-main.md` | server | `ServerMain.main` (wiring, smoke test) | G | **Marshall** |
+| 9 | `10_client_1_socket-connection-controller.md` | client | `SocketConnectionController` | G | **Raj** |
+| 10 | `10_client_2_lobby-controller.md` | client | `LobbyController.operation` | G | **Raj** |
+| 11 | `10_client_3_champion-select-controller.md` | client | `ChampionSelectController.operation` | G | **Raj** |
+| 12 | `10_client_4_match-controller.md` | client | `MatchController.operation` | G | **Raj** |
+| 13 | `10_client_5_lobby-view.md` | client | `LobbyView` + `LobbyScreen` (React Testing Library) | G | **Raj** |
+| 14 | `10_client_6_champion-select-view.md` | client | `ChampionSelectView` + `ChampionSelectScreen` | G | **Raj** |
+| 15 | `10_client_7_match-hud-view.md` | client | `MatchHUDView` + `MatchHUDScreen` | G | **Raj** |
+| 16 | `10_client_8_results-view.md` | client | `ResultsView` + `ResultsScreen` | G | **Raj** |
+| 17 | `10_client_9_client-main.md` | client | `ClientMain.main` (wiring) | G | **Raj** |
+| 18 | `10_api_1_internal-match-controller.md` | api | `InternalMatchController.handleBegin`/`handleEnd` + `ErrorResponseView` | G | **En** |
+| 19 | `10_api_2_match-history-controller.md` | api | `MatchHistoryController.getHistory` + `MatchHistoryResponseView` | G | **En** |
+| 20 | `10_api_3_leaderboard-controller.md` | api | `LeaderboardController.get*` + `LeaderboardResponseView` | G | **En** |
+| 21 | `10_api_4_api-main.md` | api | `ApiMain.main` (wiring) | G | **En** |
 
 All of Step 10 is **G** — none of it needs the same depth of algorithmic validation the six `09_server_*`
 and `09_api_2` prompts do; controllers are thin dispatchers over already-implemented model methods, and
@@ -149,6 +161,12 @@ load `00_master_context.md` + this spec, list of files, TDD instructions per §2
 (from Step 2/3) already specifies the exact signature and `@throws` list — a generating session should
 read the actual current file, not re-derive the signature from `01_class_list.md`, since Step 3's TSDoc
 pass may have refined details the original class list doesn't have.
+
+**Every generated prompt must open with an explicit `**Owner: <name>.**` line**, exactly like the six `B`
+prompts do (see `09_server_2_participant-state.md:3` for the format) — copy the name straight from the
+`Owner` column in §4's tables above, not the `Track` column. This is not cosmetic: the whole point of
+tracking ownership per-prompt is so whoever picks up a `.md` file later (Marshall doing a review, or Raj/En
+deciding what to run next) can tell at a glance whose work it is without cross-referencing this spec.
 
 **Champion balance numbers for `09_shared_1`** don't exist yet anywhere — whoever writes that prompt is
 inventing real numbers (cooldowns, resource costs, ranges, magnitudes) for Korr/Vex/Rin's abilities, not

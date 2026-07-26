@@ -4,6 +4,11 @@
 `09_api_1_pending-match-correlator.md`, `09_api_3_player-repository.md`, `09_api_4_match-repository.md`,
 and `09_api_5_leaderboard-repository.md`.
 
+**Owner of all four generated prompts: En** (per `prompts/09-10_implementation_plan.md` §4's Owner column —
+`packages/api` is En's SRS track; note that `09_api_2`, the schema/PgPool prerequisite you're building on,
+is the one exception owned by Marshall, documented as such in that file). Each generated `.md` file must
+open with `**Owner: En.**`, matching the format at `09_server_2_participant-state.md:3`.
+
 ### CRITICAL: read first, and confirm a real prerequisite before starting #2-4
 1. `prompts/00_master_context.md`
 2. `prompts/09-10_implementation_plan.md` (§2, §3 — the real-Postgres testing approach)

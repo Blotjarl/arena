@@ -2,6 +2,10 @@
 
 **Your job is to WRITE PROMPT FILES, not implement application code directly.**
 
+**Owner of all four generated prompts: En** (per `prompts/09-10_implementation_plan.md` §4's Owner column —
+`packages/api` is En's SRS track). Each generated `.md` file must open with `**Owner: En.**`, matching the
+format at `09_server_2_participant-state.md:3`.
+
 ### CRITICAL: read first, and confirm the real prerequisite
 1. `prompts/00_master_context.md`
 2. `prompts/09-10_implementation_plan.md`

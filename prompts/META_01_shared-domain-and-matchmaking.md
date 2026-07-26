@@ -4,6 +4,14 @@
 generating `09_shared_1_domain-value-objects.md` and `09_server_1_matchmaking-queue.md` — two Step 9
 prompts that a *different* session will later execute for real.
 
+**This meta-prompt spans two different owners — don't let that get lost.** Per
+`prompts/09-10_implementation_plan.md` §4's Owner column: `09_shared_1` is **Owner: En** (it's game-design
+content — inventing champion ability numbers — even though it lives in the `shared` package; see that
+document's note under the Step 9 table for why). `09_server_1` is **Owner: Marshall**. Whoever runs this
+meta-prompt session is just the one generating both files for scheduling/dependency reasons (`09_shared_1`
+blocks `09_server_3`) — each generated `.md` file must open with its own correct `**Owner: <name>.**` line,
+not a blanket owner for the whole batch.
+
 ---
 
 ### CRITICAL: read these three things in full before writing anything
