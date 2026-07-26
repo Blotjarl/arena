@@ -8,6 +8,8 @@ import {
   EffectType,
   ChampionRoster,
   ModelListener,
+  ConnectionStatus,
+  GracePeriodExpiredError,
   InvalidMatchPhaseError,
   SelectionWindowExpiredError,
   InvalidChampionSelectionError,
@@ -231,6 +233,71 @@ describe('MatchModel', () => {
       expect(match.endReason).toBe(EndReason.TIME_LIMIT);
       expect(match.winningTeam).toBeNull();
       expect(events.some((e) => e.type === 'match:end')).toBe(true);
+    });
+  });
+
+  describe('disconnect / reconnect', () => {
+    it('marks disconnected and broadcasts player_disconnected', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const events = collectEvents(match);
+      match.disconnect('p1');
+      const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+      expect(p1.connectionStatus).toBe(ConnectionStatus.DISCONNECTED);
+      expect(events.some((e) => e.type === 'player_disconnected')).toBe(true);
+    });
+
+    it('is a no-op for an already-disconnected participant', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.disconnect('p1');
+      expect(() => match.disconnect('p1')).not.toThrow();
+    });
+
+    it('restores CONNECTED within the grace period and broadcasts player_reconnected', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const events = collectEvents(match);
+      match.disconnect('p1');
+      match.reconnect('p1');
+      const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+      expect(p1.connectionStatus).toBe(ConnectionStatus.CONNECTED);
+      expect(events.some((e) => e.type === 'player_reconnected')).toBe(true);
+    });
+
+    it('throws GracePeriodExpiredError once 30s have elapsed', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.disconnect('p1');
+      const p1 = (match as unknown as { participants: { disconnectedAt: number | null }[] }).participants[0];
+      p1.disconnectedAt = Date.now() - 30_001;
+      expect(() => match.reconnect('p1')).toThrow(GracePeriodExpiredError);
+    });
+
+    it('tick() ends the match as DISCONNECT_FORFEIT once the grace period elapses without reconnect', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const events = collectEvents(match);
+      match.disconnect('p1');
+      const p1 = (match as unknown as { participants: { disconnectedAt: number | null }[] }).participants[0];
+      p1.disconnectedAt = Date.now() - 30_001;
+      match.tick(0.05);
+      expect(match.phase).toBe(MatchPhase.ENDED);
+      expect(match.endReason).toBe(EndReason.DISCONNECT_FORFEIT);
+      expect(match.winningTeam).toBe(Team.B);
+      expect(events.some((e) => e.type === 'match:end')).toBe(true);
+    });
+  });
+
+  describe('snapshot', () => {
+    it('includes both participants and an incrementing tick count', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const before = match.snapshot().tick;
+      match.tick(0.05);
+      const after = match.snapshot().tick;
+      expect(after).toBe(before + 1);
+      expect(match.snapshot().participants).toHaveLength(2);
     });
   });
 });

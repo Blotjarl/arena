@@ -10,14 +10,16 @@ import {
   ModelEvent,
   ChampionRoster,
   ArenaError,
+  ConnectionStatus,
+  GracePeriodExpiredError,
   InvalidMatchPhaseError,
   SelectionWindowExpiredError,
-  NotImplementedError,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
 
 const CHAMPION_SELECT_WINDOW_MS = 30_000;
 const MATCH_TIME_LIMIT_MS = 5 * 60_000;
+const DISCONNECT_GRACE_PERIOD_MS = 30_000;
 
 /**
  * One instance of gameplay, champion selection through a win condition — the authoritative source of
@@ -193,9 +195,10 @@ export class MatchModel extends AbstractModel {
 
   /**
    * Advances the match simulation by one tick. During CHAMPION_SELECT, only checks the 30s selection
-   * deadline (R3.4). Once ACTIVE, also drives combat — applies buffered movement, regenerates resource,
-   * checks win conditions, and notifies listeners with the new state (R4.3–R4.6). Disconnect-forfeit
-   * handling is added in 09_server_5. A no-op once ENDED.
+   * deadline (R3.4). Once ACTIVE, first checks each participant's disconnect grace period, ending the
+   * match by DISCONNECT_FORFEIT if one has elapsed (R6.3, R6.4), then drives combat — applies buffered
+   * movement, regenerates resource, checks win conditions, and notifies listeners with the new state
+   * (R4.3–R4.6). A no-op once ENDED.
    * CRITICAL: called by TickLoop.onTick() up to 20x/sec, once per registered match. This method itself
    * must never throw uncaught — TickLoop wraps each call in a per-match try/catch specifically so one
    * match's internal error cannot crash the loop or affect any other in-progress match (R5.4, 3.6.2).
@@ -210,6 +213,15 @@ export class MatchModel extends AbstractModel {
       return;
     }
     if (this.phase !== MatchPhase.ACTIVE) return;
+
+    for (const p of this.participants) {
+      if (p.connectionStatus === ConnectionStatus.DISCONNECTED && p.disconnectedAt !== null) {
+        if (now - p.disconnectedAt >= DISCONNECT_GRACE_PERIOD_MS) {
+          this.endMatch(EndReason.DISCONNECT_FORFEIT, this.opponentOf(p).team, now);
+          return;
+        }
+      }
+    }
 
     for (const p of this.participants) {
       const pending = this.pendingMoves.get(p.playerId);
@@ -251,7 +263,13 @@ export class MatchModel extends AbstractModel {
    * @param playerId - the player whose socket disconnected
    */
   disconnect(playerId: string): void {
-    throw new NotImplementedError('MatchModel.disconnect not yet implemented');
+    const p = this.findParticipant(playerId);
+    if (p.connectionStatus === ConnectionStatus.DISCONNECTED) return;
+    p.connectionStatus = ConnectionStatus.DISCONNECTED;
+    p.disconnectedAt = Date.now();
+    this.notifyChanged(
+      new ModelEvent(this, 'player_disconnected', { playerId, gracePeriodSeconds: DISCONNECT_GRACE_PERIOD_MS / 1000 }),
+    );
   }
 
   /**
@@ -260,7 +278,15 @@ export class MatchModel extends AbstractModel {
    * @throws {GracePeriodExpiredError} if the 30-second grace period has already elapsed (R6.3, R6.4)
    */
   reconnect(playerId: string): void {
-    throw new NotImplementedError('MatchModel.reconnect not yet implemented');
+    const p = this.findParticipant(playerId);
+    if (p.connectionStatus === ConnectionStatus.CONNECTED) return;
+    const now = Date.now();
+    if (p.disconnectedAt !== null && now - p.disconnectedAt >= DISCONNECT_GRACE_PERIOD_MS) {
+      throw new GracePeriodExpiredError(playerId, this.id);
+    }
+    p.connectionStatus = ConnectionStatus.CONNECTED;
+    p.disconnectedAt = null;
+    this.notifyChanged(new ModelEvent(this, 'player_reconnected', { playerId }));
   }
 
   /** @returns a read-only snapshot of both participants and match metadata, for broadcast to clients. */
