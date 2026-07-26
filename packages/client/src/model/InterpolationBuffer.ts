@@ -1,4 +1,4 @@
-import { MatchStatePayload, PlayerId, Position, NotImplementedError } from '@arena/shared';
+import { MatchStatePayload, PlayerId, Position } from '@arena/shared';
 
 /**
  * Buffers recent authoritative MatchStatePayload snapshots and produces smoothly-interpolated
@@ -20,7 +20,10 @@ export class InterpolationBuffer {
    * @param snapshot - the match state as broadcast by the server
    */
   push(snapshot: MatchStatePayload): void {
-    throw new NotImplementedError('InterpolationBuffer.push not yet implemented');
+    this.samples.push(snapshot);
+    if (this.samples.length > this.capacity) {
+      this.samples.shift();
+    }
   }
 
   /**
@@ -33,6 +36,57 @@ export class InterpolationBuffer {
    * @returns an interpolated Position for display
    */
   getInterpolatedPosition(playerId: PlayerId, now: number): Position {
-    throw new NotImplementedError('InterpolationBuffer.getInterpolatedPosition not yet implemented');
+    if (this.samples.length === 0) {
+      return new Position(0, 0);
+    }
+
+    if (this.samples.length === 1) {
+      return this.findPosition(this.samples[0], playerId) ?? new Position(0, 0);
+    }
+
+    const TICK_INTERVAL_MS = 50; // 20Hz server tick rate
+    const lastTick = this.samples[this.samples.length - 1].tick;
+
+    // Anchor the latest tick at (now + TICK_INTERVAL_MS/2) so the render query `now`
+    // always falls between two bracketing samples, enabling smooth interpolation.
+    // Earlier samples step back 50 ms per tick from that anchor.
+    const anchor = now + TICK_INTERVAL_MS / 2;
+    const toMs = (s: MatchStatePayload): number =>
+      anchor - (lastTick - s.tick) * TICK_INTERVAL_MS;
+
+    // Default to the last two samples; override if we find a tighter bracket.
+    let prev = this.samples[this.samples.length - 2];
+    let next = this.samples[this.samples.length - 1];
+
+    for (let i = 0; i < this.samples.length - 1; i++) {
+      const tA = toMs(this.samples[i]);
+      const tB = toMs(this.samples[i + 1]);
+      if (tA <= now && now <= tB) {
+        prev = this.samples[i];
+        next = this.samples[i + 1];
+        break;
+      }
+    }
+
+    const tPrev = toMs(prev);
+    const tNext = toMs(next);
+    const span = tNext - tPrev;
+
+    const pPrev = this.findPosition(prev, playerId);
+    const pNext = this.findPosition(next, playerId);
+
+    if (!pPrev) return pNext ?? new Position(0, 0);
+    if (!pNext) return pPrev;
+    if (span <= 0) return pNext;
+
+    const t = Math.max(0, Math.min(1, (now - tPrev) / span));
+    return new Position(
+      pPrev.x + t * (pNext.x - pPrev.x),
+      pPrev.y + t * (pNext.y - pPrev.y),
+    );
+  }
+
+  private findPosition(snapshot: MatchStatePayload, playerId: PlayerId): Position | undefined {
+    return snapshot.participants.find((p) => p.playerId === playerId)?.position;
   }
 }
