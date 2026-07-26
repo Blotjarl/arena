@@ -6,9 +6,15 @@ import {
   Team,
   Player,
   MatchStatePayload,
+  ModelEvent,
+  ChampionRoster,
+  InvalidMatchPhaseError,
+  SelectionWindowExpiredError,
   NotImplementedError,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
+
+const CHAMPION_SELECT_WINDOW_MS = 30_000;
 
 /**
  * One instance of gameplay, champion selection through a win condition — the authoritative source of
@@ -20,7 +26,7 @@ export class MatchModel extends AbstractModel {
   public phase: MatchPhase = MatchPhase.CHAMPION_SELECT;
   private participants: [ParticipantState, ParticipantState];
   /** Simulation timestamp (ms) by which both players must select a champion, or the match ends (R3.4). */
-  public championSelectDeadline = 0;
+  public championSelectDeadline: number;
   /** Simulation timestamp (ms) the ACTIVE phase began, or null before combat starts. */
   public startedAt: number | null = null;
   /** Simulation timestamp (ms) the match ended, or null while still in progress. */
@@ -29,6 +35,8 @@ export class MatchModel extends AbstractModel {
   public endReason: EndReason | null = null;
   /** The winning team, or null for a draw or a match still in progress. */
   public winningTeam: Team | null = null;
+  /** Incrementing tick counter included in every broadcast snapshot; not a timestamp. */
+  private tickCount = 0;
 
   constructor(
     /** Stable identifier for this match. */
@@ -40,6 +48,24 @@ export class MatchModel extends AbstractModel {
       new ParticipantState(players[0].id, Team.A),
       new ParticipantState(players[1].id, Team.B),
     ];
+    this.championSelectDeadline = Date.now() + CHAMPION_SELECT_WINDOW_MS;
+  }
+
+  protected findParticipant(playerId: string): ParticipantState {
+    const p = this.participants.find((x) => x.playerId === playerId);
+    if (!p) throw new Error(`playerId ${playerId} is not a participant in match ${this.id}`);
+    return p;
+  }
+
+  protected endMatch(reason: EndReason, winningTeam: Team | null, now: number): void {
+    this.phase = MatchPhase.ENDED;
+    this.endedAt = now;
+    this.endReason = reason;
+    this.winningTeam = winningTeam;
+    const durationMs = this.startedAt !== null ? now - this.startedAt : 0;
+    this.notifyChanged(
+      new ModelEvent(this, 'match:end', { matchId: this.id, reason, winningTeam, durationMs }),
+    );
   }
 
   /**
@@ -51,7 +77,28 @@ export class MatchModel extends AbstractModel {
    * @throws {InvalidMatchPhaseError} if the match is not currently in CHAMPION_SELECT
    */
   selectChampion(playerId: string, championId: string): void {
-    throw new NotImplementedError('MatchModel.selectChampion not yet implemented');
+    if (this.phase !== MatchPhase.CHAMPION_SELECT) {
+      throw new InvalidMatchPhaseError(this.id, MatchPhase.CHAMPION_SELECT, this.phase);
+    }
+    if (Date.now() > this.championSelectDeadline) {
+      throw new SelectionWindowExpiredError(this.id);
+    }
+    const champion = ChampionRoster.getById(championId); // throws InvalidChampionSelectionError
+    const participant = this.findParticipant(playerId);
+    participant.champion = champion;
+    participant.health = champion.maxHealth;
+    participant.resource = champion.maxResource;
+
+    const bothSelected = this.participants.every((p) => p.champion !== null);
+    this.notifyChanged(
+      new ModelEvent(this, 'champion:selected', { matchId: this.id, playerId, championId, bothSelected }),
+    );
+
+    if (bothSelected) {
+      this.phase = MatchPhase.ACTIVE;
+      this.startedAt = Date.now();
+      this.notifyChanged(new ModelEvent(this, 'match:start', { matchId: this.id, initialState: this.snapshot() }));
+    }
   }
 
   /**
@@ -82,16 +129,23 @@ export class MatchModel extends AbstractModel {
   }
 
   /**
-   * Advances the match simulation by one tick: regenerates resource, expires cooldowns/crowd control,
-   * checks win conditions, and notifies listeners with the new state (R4.3–R4.6).
+   * Advances the match simulation by one tick. During CHAMPION_SELECT, only checks the 30s selection
+   * deadline (R3.4) — the ACTIVE-phase branch (movement, combat, win conditions) is added in 09_server_4;
+   * disconnect-forfeit handling is added in 09_server_5. A no-op once ENDED.
    * CRITICAL: called by TickLoop.onTick() up to 20x/sec, once per registered match. This method itself
    * must never throw uncaught — TickLoop wraps each call in a per-match try/catch specifically so one
-   * match's internal error cannot crash the loop or affect any other in-progress match (R5.4, 3.6.2). This
-   * isolation guarantee lives in TickLoop, not here; tick() should still avoid throwing where avoidable.
+   * match's internal error cannot crash the loop or affect any other in-progress match (R5.4, 3.6.2).
    * @param deltaSeconds - elapsed simulation time since the previous tick
    */
   tick(deltaSeconds: number): void {
-    throw new NotImplementedError('MatchModel.tick not yet implemented');
+    const now = Date.now();
+    if (this.phase === MatchPhase.CHAMPION_SELECT) {
+      if (now > this.championSelectDeadline) {
+        this.endMatch(EndReason.SELECTION_TIMEOUT, null, now);
+      }
+      return;
+    }
+    // ACTIVE-phase handling lands in 09_server_4.
   }
 
   /**
@@ -122,6 +176,11 @@ export class MatchModel extends AbstractModel {
 
   /** @returns a read-only snapshot of both participants and match metadata, for broadcast to clients. */
   snapshot(): MatchStatePayload {
-    throw new NotImplementedError('MatchModel.snapshot not yet implemented');
+    const now = Date.now();
+    return {
+      matchId: this.id,
+      tick: this.tickCount,
+      participants: [this.participants[0].toSnapshot(now), this.participants[1].toSnapshot(now)],
+    };
   }
 }
