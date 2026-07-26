@@ -286,7 +286,7 @@ interface would be unused ceremony.
 
 | Class | Operations |
 |---|---|
-| `PgPool` | `constructor(connectionString: string)`; `query<T>(sql: string, params: unknown[]): Promise<T[]>` — **throws** `PersistenceError` |
+| `PgPool` | `constructor(connectionString: string)`; `query<T>(sql: string, params: unknown[]): Promise<T[]>` — **throws** `PersistenceError`; `close(): Promise<void>` — releases all pooled connections (process shutdown, test teardown) |
 | `ApiMain` | `static async main(): Promise<void>` — builds the Express app, wires middleware and the three controllers above to routes, connects `PgPool`, and listens on the configured port. |
 
 ---
