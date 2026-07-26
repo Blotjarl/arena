@@ -1,5 +1,5 @@
 import {
-  AbstractModel, MatchId, MatchPhase, NotImplementedError,
+  AbstractModel, MatchId, MatchPhase,
   ChampionSelectedPayload, MatchStartPayload, MatchStatePayload, MatchEndPayload,
 } from '@arena/shared';
 
@@ -21,12 +21,15 @@ export class ClientMatchModel extends AbstractModel {
   /** Final match result payload; null until match:end is received. */
   public result: MatchEndPayload | null = null;
 
+  /** Most recent champion selection payload; null until champion:selected is received. */
+  public championSelection: ChampionSelectedPayload | null = null;
+
   /**
    * Records a champion selection event from the server (R3.3).
    * @param payload - the champion:selected event payload
    */
   applyChampionSelected(payload: ChampionSelectedPayload): void {
-    throw new NotImplementedError('ClientMatchModel.applyChampionSelected not yet implemented');
+    this.championSelection = payload;
   }
 
   /**
@@ -34,7 +37,9 @@ export class ClientMatchModel extends AbstractModel {
    * @param payload - the match:start event payload
    */
   applyMatchStart(payload: MatchStartPayload): void {
-    throw new NotImplementedError('ClientMatchModel.applyMatchStart not yet implemented');
+    this.matchId = payload.matchId;
+    this.phase = MatchPhase.ACTIVE;
+    this.latestState = payload.initialState;
   }
 
   /**
@@ -43,7 +48,7 @@ export class ClientMatchModel extends AbstractModel {
    * @param payload - the match:state broadcast from the server's tick loop
    */
   applyMatchState(payload: MatchStatePayload): void {
-    throw new NotImplementedError('ClientMatchModel.applyMatchState not yet implemented');
+    this.latestState = payload;
   }
 
   /**
@@ -51,6 +56,6 @@ export class ClientMatchModel extends AbstractModel {
    * @param payload - the match:end event payload
    */
   applyMatchEnd(payload: MatchEndPayload): void {
-    throw new NotImplementedError('ClientMatchModel.applyMatchEnd not yet implemented');
+    this.result = payload;
   }
 }
