@@ -1,6 +1,6 @@
 import { ChampionId } from './ids';
 import { Ability } from './Ability';
-import { NotImplementedError } from '../util/NotImplementedError';
+import { InvalidChampionSelectionError } from '../exceptions/InvalidChampionSelectionError';
 
 /** A selectable character with fixed stats and abilities (SRS Appendix B — Korr, Vex, Rin). */
 export class Champion {
@@ -30,6 +30,8 @@ export class Champion {
    * @throws {InvalidChampionSelectionError} if abilityId is not one of this champion's abilities
    */
   getAbility(abilityId: string): Ability {
-    throw new NotImplementedError('Champion.getAbility not yet implemented');
+    const ability = this.abilities.find((a) => a.id === abilityId);
+    if (!ability) throw new InvalidChampionSelectionError(abilityId);
+    return ability;
   }
 }
