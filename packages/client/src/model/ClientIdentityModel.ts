@@ -1,4 +1,4 @@
-import { AbstractModel, PlayerId, NotImplementedError } from '@arena/shared';
+import { AbstractModel, PlayerId, PlayerNotFoundError } from '@arena/shared';
 
 /**
  * Holds the local player's chosen username and server-assigned PlayerId for the duration of the
@@ -17,7 +17,17 @@ export class ClientIdentityModel extends AbstractModel {
    * @param username - non-empty string, at most 24 characters (R1.1); the server re-validates
    */
   identify(username: string): void {
-    throw new NotImplementedError('ClientIdentityModel.identify not yet implemented');
+    this.username = username;
+    // Guard for non-browser environments; jsdom provides sessionStorage in tests.
+    const storage: Storage | null =
+      typeof sessionStorage !== 'undefined' ? sessionStorage : null;
+    if (storage) {
+      storage.setItem('arena:username', username);
+      const storedId = storage.getItem('arena:playerId');
+      if (storedId !== null) {
+        this.playerId = storedId;
+      }
+    }
   }
 
   /**
@@ -26,6 +36,9 @@ export class ClientIdentityModel extends AbstractModel {
    * @throws {PlayerNotFoundError} if called before a successful identify() (playerId is still null)
    */
   getPlayerId(): PlayerId {
-    throw new NotImplementedError('ClientIdentityModel.getPlayerId not yet implemented');
+    if (this.playerId === null) {
+      throw new PlayerNotFoundError('(not yet identified)');
+    }
+    return this.playerId;
   }
 }
