@@ -1,4 +1,4 @@
-import { MatchId, NotImplementedError } from '@arena/shared';
+import { MatchId } from '@arena/shared';
 import { MatchModel } from './MatchModel';
 
 /**
@@ -34,23 +34,34 @@ export class TickLoop {
 
   /** Starts the fixed-rate timer that invokes onTick(); a no-op if already running. */
   start(): void {
-    throw new NotImplementedError('TickLoop.start not yet implemented');
+    if (this.handle !== null) return;
+    this.handle = setInterval(() => this.onTick(), 1000 / this.tickRateHz);
   }
 
   /** Stops the fixed-rate timer; a no-op if not running. */
   stop(): void {
-    throw new NotImplementedError('TickLoop.stop not yet implemented');
+    if (this.handle === null) return;
+    clearInterval(this.handle);
+    this.handle = null;
   }
 
   /**
    * CRITICAL CHECKPOINT (prompts/00_master_context.md §8): iterates every registered match and calls its
    * tick() inside a try/catch scoped to that match alone, so one match's internal error is logged and
    * skipped rather than propagating — it must never crash the loop or affect any other in-progress match
-   * (R5.4, 3.6.2). This per-match isolation requirement is what the isolated Jest test (driving tick()
-   * directly, with no timers/sockets — 00_master_context.md §8) exists to verify. The stub below
-   * intentionally does not yet demonstrate this — Step 8 implementation must add it.
+   * (R5.4, 3.6.2). deltaSeconds is the fixed nominal tick interval (1 / tickRateHz), not a measured
+   * wall-clock delta — Node's setInterval isn't perfectly precise, and a fixed simulation step is more
+   * deterministic (and more testable) than trusting measured jitter.
    */
   private onTick(): void {
-    throw new NotImplementedError('TickLoop.onTick not yet implemented');
+    const deltaSeconds = 1 / this.tickRateHz;
+    for (const [matchId, match] of this.matches) {
+      try {
+        match.tick(deltaSeconds);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(`TickLoop: match ${matchId} threw during tick(), isolated from other matches:`, err);
+      }
+    }
   }
 }
