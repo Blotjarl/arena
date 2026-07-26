@@ -31,11 +31,14 @@ So far:
    in `packages/`, fully declared, and it all compiles. **Nothing is actually implemented yet** — every
    method body just throws a placeholder "not implemented" error. This is deliberate (it's how the
    course's process works): structure first, real logic later, in a future step.
-3. **Step 3–5 (in progress)** — adding proper documentation comments to every class (like docstrings —
-   what each class/method does, what it takes, what it can throw) and double-checking that error handling
-   is complete, plus generating an initial auto-built API documentation site. **This is what your prompt
-   is part of.** Marshall's own piece of this batch (`packages/shared`) hasn't been run yet either — your
-   prompt doesn't need it to be, so you're not blocked on anyone.
+3. **Step 3–5 (done)** — documentation comments added to every class across all four packages, plus an
+   auto-built API documentation site. Your `03_api_1` prompt (below) was your piece of this.
+4. **Step 6–7 (done)** — a script that reverse-engineers the actual code back into a UML diagram, so the
+   diagram and the real code can be checked against each other.
+5. **Step 8–10 (in progress)** — this is where real game logic gets implemented and tested for the first
+   time, class by class, test-first. Marshall has already built and validated his own pieces (the server's
+   match logic, plus the database schema and connection pool your work depends on). **Your pieces haven't
+   been generated yet — see "What's next for you" below.**
 
 ## What your prompt actually does
 
@@ -154,6 +157,33 @@ Message Marshall that the PR is up. Marshall reviews and merges it into `main`. 
 round for you — wait for the next prompt assignment rather than starting anything else on your own.
 
 ---
+
+## What's next for you (Step 9–10)
+
+Once your `03_api_1` PR is merged, your next work isn't a single prompt file yet — it's two **meta-prompts**
+that generate your actual prompts:
+
+- `prompts/META_01_shared-domain-and-matchmaking.md` — this one is split between you and Marshall: it
+  generates `09_shared_1_domain-value-objects.md`, which is **your** piece even though it lives in the
+  `shared` package — it's where the real Korr/Vex/Rin champion ability numbers (cooldowns, damage, ranges)
+  get invented, and that's game-design content, not framework code. The prompt file it produces will open
+  with `**Owner: En.**` so it's clear it's yours even though someone else's session may be the one that
+  physically runs the meta-prompt.
+- `prompts/META_03_api-model.md` — generates four prompts (`09_api_1`, `09_api_3`, `09_api_4`, `09_api_5`)
+  covering the rest of `packages/api`'s model: match/player/leaderboard repositories talking to a real
+  PostgreSQL database. These need `09_api_2` (Marshall's schema + database connection pool work) merged to
+  `main` first — Marshall built and validated that piece directly since every one of your repository
+  prompts needs it to even run its tests against a real database.
+- `prompts/META_06_api-controller-view.md` — generates four more prompts for the HTTP route handlers. This
+  one is **blocked** until all the model-layer prompts above are written, executed, and merged first.
+
+Marshall runs the meta-prompts himself (or hands them to you once ready) — you don't need to do anything
+with the `META_*` files directly. What changes for you: once Marshall tells you the `09_shared_1`,
+`09_api_*`, and `10_api_*` prompt files exist in `prompts/`, you'll run them the same way you ran `03_api_1`
+above (Step 5 → load `00_master_context.md`, Step 6 → give it the specific prompt file, Step 7-10 → let it
+work, check the branch, open a PR). Each will open with `**Owner: En.**` so you can always tell which ones
+are yours. Wait for Marshall to point you at them rather than guessing which are ready — several have real
+dependencies on work that isn't merged yet.
 
 ## If something goes wrong
 

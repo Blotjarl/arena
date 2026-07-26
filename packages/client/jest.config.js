@@ -2,11 +2,8 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  moduleNameMapper: {
-    '^@arena/shared$': '<rootDir>/../shared/src/index.ts',
-  },
-  roots: ['<rootDir>/src'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', { isolatedModules: true }],
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
 };

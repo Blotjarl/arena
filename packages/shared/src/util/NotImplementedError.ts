@@ -5,6 +5,7 @@
  * real implementation lands (Steps 8–10).
  */
 export class NotImplementedError extends Error {
+  /** @param message - identifies which stub method threw, for a clearer test-failure message */
   constructor(message: string) {
     super(message);
     this.name = 'NotImplementedError';
