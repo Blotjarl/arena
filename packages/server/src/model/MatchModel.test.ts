@@ -131,4 +131,106 @@ describe('MatchModel', () => {
       expect(match.snapshot().matchId).toBe('m1');
     });
   });
+
+  describe('submitMove / tick — movement', () => {
+    it('buffers movement and applies it scaled by deltaSeconds on the next tick', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.submitMove('p1', { dx: 1, dy: 0 });
+      match.tick(0.5); // vex moveSpeed 200 * 0.5 = 100
+      const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+      expect(p1.position.x).toBe(100);
+    });
+
+    it('throws InvalidMatchPhaseError if submitted before the match is ACTIVE', () => {
+      const match = new MatchModel('m1', makePlayers());
+      expect(() => match.submitMove('p1', { dx: 1, dy: 0 })).toThrow(InvalidMatchPhaseError);
+    });
+
+    it('broadcasts a state event each active tick', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const events = collectEvents(match);
+      match.tick(0.05);
+      expect(events.some((e) => e.type === 'state')).toBe(true);
+    });
+  });
+
+  describe('submitAbility', () => {
+    it('applies damage to an in-range target and consumes cooldown/resource on the caster', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.submitAbility('p1', { abilityId: 'bolt', targetPlayerId: 'p2' });
+      const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+      expect(p2.health).toBe(55); // 85 - 30
+    });
+
+    it('silently ignores an out-of-range target (no effect, no throw)', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.submitMove('p2', { dx: 1, dy: 0 });
+      match.tick(10); // push p2 far out of bolt's 500-range
+      expect(() => match.submitAbility('p1', { abilityId: 'bolt', targetPlayerId: 'p2' })).not.toThrow();
+      const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+      expect(p2.health).toBe(85);
+    });
+
+    it('silently ignores an unknown ability id', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      expect(() => match.submitAbility('p1', { abilityId: 'nope', targetPlayerId: 'p2' })).not.toThrow();
+    });
+
+    it('self-heals when no target is given', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.submitAbility('p2', { abilityId: 'bolt', targetPlayerId: 'p1' }); // p1 takes 30 -> 55
+      match.submitAbility('p1', { abilityId: 'heal' }); // no target -> self
+      const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+      expect(p1.health).toBe(70); // 55 + 15
+    });
+
+    it('applies crowd control converting magnitude (seconds) to a duration window', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.submitAbility('p1', { abilityId: 'root', targetPlayerId: 'p2' });
+      const before = match.snapshot().participants.find((p) => p.playerId === 'p2')!.position;
+      match.submitMove('p2', { dx: 1, dy: 0 });
+      match.tick(0.5);
+      const after = match.snapshot().participants.find((p) => p.playerId === 'p2')!.position;
+      expect(after).toEqual(before); // did not move -- crowd-controlled
+    });
+
+    it('throws InvalidMatchPhaseError before the match is ACTIVE', () => {
+      const match = new MatchModel('m1', makePlayers());
+      expect(() => match.submitAbility('p1', { abilityId: 'bolt' })).toThrow(InvalidMatchPhaseError);
+    });
+  });
+
+  describe('checkWinConditions / tick — elimination and time limit', () => {
+    it('ends the match by ELIMINATION crediting the surviving team, broadcasting match:end', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const events = collectEvents(match);
+      const p2 = (match as unknown as { participants: { health: number }[] }).participants[1];
+      p2.health = 0;
+      match.tick(0.05);
+      expect(match.phase).toBe(MatchPhase.ENDED);
+      expect(match.endReason).toBe(EndReason.ELIMINATION);
+      expect(match.winningTeam).toBe(Team.A);
+      expect(events.some((e) => e.type === 'match:end')).toBe(true);
+    });
+
+    it('ends by TIME_LIMIT crediting higher health, or a draw if equal', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const events = collectEvents(match);
+      (match as unknown as { startedAt: number }).startedAt = Date.now() - 5 * 60_000 - 1;
+      match.tick(0.05);
+      expect(match.phase).toBe(MatchPhase.ENDED);
+      expect(match.endReason).toBe(EndReason.TIME_LIMIT);
+      expect(match.winningTeam).toBeNull();
+      expect(events.some((e) => e.type === 'match:end')).toBe(true);
+    });
+  });
 });

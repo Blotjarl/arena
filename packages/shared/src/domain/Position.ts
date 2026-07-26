@@ -1,5 +1,3 @@
-import { NotImplementedError } from '../util/NotImplementedError';
-
 /** A 2D point in arena-space. Used for champion positions and ability targeting. */
 export class Position {
   constructor(
@@ -15,6 +13,6 @@ export class Position {
    * @returns the straight-line distance, in the same units as x and y
    */
   distanceTo(other: Position): number {
-    throw new NotImplementedError('Position.distanceTo not yet implemented');
+    return Math.hypot(this.x - other.x, this.y - other.y);
   }
 }
