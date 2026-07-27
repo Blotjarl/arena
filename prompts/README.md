@@ -116,7 +116,7 @@ track prompts below are now generated — none remain outstanding.
 | 3 | `10_server_3_champion-select-controller.md` | `10_server_2` | [x] |
 | 4 | `10_server_4_combat-controller.md` | `10_server_2` | [x] |
 | 5 | `10_server_5_disconnect-controller.md` | `10_server_2` | [x] |
-| 6 | `10_server_6_connection-and-reporting.md` | `10_server_1`–`5` | [ ] |
+| 6 | `10_server_6_connection-and-reporting.md` | `10_server_1`–`5` | [x] |
 | 7 | `10_server_7_broadcast-views.md` | `10_server_2`, `10_server_3` | [ ] |
 | 8 | `10_server_8_server-main.md` | `10_server_1`–`7` (wires everything) | [ ] |
 
