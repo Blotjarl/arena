@@ -6,13 +6,26 @@ real `postgres:16` container, then reverted to the stub so the actual commit hap
 branch/PR flow) — you are transcribing proven work, not designing from scratch. Still run everything
 yourself; don't skip verification.
 
+### MANDATORY: fetch before you branch
+`server`, `client`, and `shared` tracks push to `main` concurrently and independently, and three other
+`api` prompts (`09_api_1`, `09_api_3`, `09_api_4`) exist in this batch — do not assume your local `main`
+matches `origin/main`. Before doing anything else:
+```
+git fetch origin
+git checkout main && git pull origin main
+```
+Then confirm the prerequisites below are actually present on your now-current `main`, not just remembered
+from an earlier session.
+
 ### CRITICAL prerequisites
-**`09_api_2_schema-and-pgpool.md` must already be merged to `main`.** This prompt also depends on
+**`09_api_2_schema-and-pgpool.md` must already be merged to `main`** — check with
+`ls packages/api/schema.sql` after the pull above. This prompt also depends on
 **`09_api_4_match-repository.md`** — not for any code it imports, but because this prompt's own tests use
 `MatchRepository.recordMatch` to seed realistic match history fixtures, and because it depends on
 `LeaderboardEntry.fromRow`'s column-name contract (`player_id`, `username`, `wins`, `losses`, `draws`,
 `games_played`, `win_rate`) that `09_api_4` established. Confirm `LeaderboardEntry.fromRow` is implemented
-(not throwing `NotImplementedError`) before starting.
+(not throwing `NotImplementedError`) — open `packages/api/src/model/LeaderboardEntry.ts` on your
+just-updated `main` and check — before starting.
 
 ### R8.1 — win rate is computed by the query, not maintained separately
 `docs/01_class_list.md` and the current stub's doc comment both call this out: win rate must be derived
@@ -222,10 +235,18 @@ npm run test:db:down
 ```
 Validated result across all six model/util files (`PendingMatchCorrelator`, `PlayerRepository`,
 `MatchRepository`, `LeaderboardEntry`, `LeaderboardRepository`, `PgPool`): 27/27 tests passing, 100%
-statement/branch/function/line coverage on every file. Per master context §9.4: branch `api` from `main`
-(`git branch -D api 2>/dev/null; git checkout -b api main`) if you don't already have work in progress on
-it, commit `Step 9: LeaderboardRepository implementation and tests — api model package complete`, push,
-open a PR into `main`.
+statement/branch/function/line coverage on every file. Per master context §9.4:
+```
+git fetch origin
+git checkout main && git pull origin main
+git checkout api 2>/dev/null && git merge main || git checkout -b api main
+```
+(the first branch of the `||` picks up an `api` branch already in flight from another prompt in this
+batch and fast-forwards it onto the latest `main`; the second creates it fresh if none exists yet). Since
+this is the last prompt in the batch, resolve any conflicts here rather than deferring them. Commit
+`Step 9: LeaderboardRepository implementation and tests — api model package complete`, push. If
+`git push origin api` is rejected because the remote moved while you worked, `git fetch origin && git
+rebase origin/api` (resolve conflicts, don't force-push) before retrying. Open a PR into `main`.
 
 ---
 

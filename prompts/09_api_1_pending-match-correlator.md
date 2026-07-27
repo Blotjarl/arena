@@ -5,6 +5,18 @@ prompt's code below is already validated (implemented and test-run against this 
 to the stub so the actual commit happens through your own branch/PR flow) — you are transcribing proven
 work, not designing from scratch. Still run everything yourself; don't skip verification.
 
+### MANDATORY: fetch before you branch
+Four `api` prompts (`09_api_1`, `09_api_3`, `09_api_4`, `09_api_5`) exist in this batch, and `server`,
+`client`, and `shared` tracks are pushing to `main` concurrently and independently — do not assume your
+local `main` matches `origin/main`. Before doing anything else:
+```
+git fetch origin
+git checkout main && git pull origin main
+```
+If an `api` branch already exists on the remote (from an earlier prompt in this batch, or from another
+session), fetch and continue from it rather than recreating it from scratch — see the branch step in
+Verification and Git below for the exact commands either way.
+
 ### CRITICAL CHECKPOINT (prompts/00_master_context.md §8, prompts/09-10_implementation_plan.md §2 item 4)
 `recordBegin`/`recordEnd` must be idempotent per `matchId` — calling either twice must not create a
 duplicate pending entry or return a second combined record. This is one of the six pre-identified
@@ -203,10 +215,17 @@ npx jest PendingMatchCorrelator --coverage --collectCoverageFrom="src/model/Pend
 ```
 Validated result: 7/7 tests passing, 100% statement/branch/function/line coverage on
 `PendingMatchCorrelator.ts`, including both named critical-checkpoint tests. Per master context §9.4:
-branch `api` from `main` (`git branch -D api 2>/dev/null; git checkout -b api main`) if you don't already
-have work in progress on it, commit `Step 9: PendingMatchCorrelator implementation and tests`, push, open a
-PR into `main` (or fold into an existing in-flight `api`-branch PR alongside the other three prompts in
-this batch).
+```
+git fetch origin
+git checkout main && git pull origin main
+git checkout api 2>/dev/null && git merge main || git checkout -b api main
+```
+(the first branch of the `||` picks up an `api` branch already in flight from another prompt in this
+batch and fast-forwards it onto the latest `main`; the second creates it fresh if none exists yet). Commit
+`Step 9: PendingMatchCorrelator implementation and tests`, push. If `git push origin api` is rejected
+because the remote moved while you worked, `git fetch origin && git rebase origin/api` (resolve conflicts,
+don't force-push) before retrying. Open a PR into `main` (or fold into an existing in-flight `api`-branch PR
+alongside the other three prompts in this batch).
 
 ---
 

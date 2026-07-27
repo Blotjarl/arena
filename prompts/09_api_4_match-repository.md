@@ -6,11 +6,23 @@ real `postgres:16` container, then reverted to the stub so the actual commit hap
 branch/PR flow) — you are transcribing proven work, not designing from scratch. Still run everything
 yourself; don't skip verification.
 
+### MANDATORY: fetch before you branch
+`server`, `client`, and `shared` tracks push to `main` concurrently and independently, and three other
+`api` prompts (`09_api_1`, `09_api_3`, `09_api_5`) exist in this batch — do not assume your local `main`
+matches `origin/main`. Before doing anything else:
+```
+git fetch origin
+git checkout main && git pull origin main
+```
+Then confirm the prerequisite below is actually present on your now-current `main`, not just remembered
+from an earlier session.
+
 ### CRITICAL prerequisite
-**`09_api_2_schema-and-pgpool.md` must already be merged to `main`.** This prompt also builds on
-`09_api_3`'s `PlayerRepository` only indirectly (its tests insert `players` rows directly via `PgPool`, not
-through `PlayerRepository`, so `09_api_3` does not block starting this one — but it does share the same
-schema and test database).
+**`09_api_2_schema-and-pgpool.md` must already be merged to `main`.** Check with
+`ls packages/api/schema.sql` after the pull above — if it's missing, stop and wait for that PR to merge.
+This prompt also builds on `09_api_3`'s `PlayerRepository` only indirectly (its tests insert `players` rows
+directly via `PgPool`, not through `PlayerRepository`, so `09_api_3` does not block starting this one — but
+it does share the same schema and test database).
 
 ### CRITICAL real gap found during implementation: `PgPool` had no transaction support
 `MatchRepository.recordMatch` must write one `matches` row and exactly two `match_participants` rows as a
@@ -406,11 +418,19 @@ npm run test:db:down
 Validated result: `PgPool.ts` 7/7 tests passing (4 pre-existing + 3 new transaction tests), 100%
 statement/branch/function/line coverage. `MatchRepository.ts` and `LeaderboardEntry.ts` combined: 7/7 tests
 passing, 100% coverage on both files, including the named atomic-write rollback test. Per master context
-§9.4: branch `api` from `main` (`git branch -D api 2>/dev/null; git checkout -b api main`) if you don't
-already have work in progress on it, commit `Step 9: PgPool transaction support, MatchRepository, and
-LeaderboardEntry.fromRow`, push, open a PR into `main` (or fold into an existing in-flight `api`-branch PR
-alongside the other three prompts in this batch). Note in the PR/commit body that `docs/01_class_list.md`'s
-`PgPool` row was updated for the `transaction<T>()` addition.
+§9.4:
+```
+git fetch origin
+git checkout main && git pull origin main
+git checkout api 2>/dev/null && git merge main || git checkout -b api main
+```
+(the first branch of the `||` picks up an `api` branch already in flight from another prompt in this
+batch and fast-forwards it onto the latest `main`; the second creates it fresh if none exists yet). Commit
+`Step 9: PgPool transaction support, MatchRepository, and LeaderboardEntry.fromRow`, push. If
+`git push origin api` is rejected because the remote moved while you worked, `git fetch origin && git
+rebase origin/api` (resolve conflicts, don't force-push) before retrying. Open a PR into `main` (or fold
+into an existing in-flight `api`-branch PR alongside the other three prompts in this batch). Note in the
+PR/commit body that `docs/01_class_list.md`'s `PgPool` row was updated for the `transaction<T>()` addition.
 
 ---
 
