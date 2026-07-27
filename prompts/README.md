@@ -103,15 +103,15 @@ repo (implemented, tested, then reverted to a stub) before being committed as pr
 whoever owns each one actually executes and merges the work. All 15 Step 9 prompts are now generated —
 none remain outstanding.
 
-## Step 10 — Controller/view package (server track — 8 of 21 prompts)
+## Step 10 — Controller/view package (server + client tracks — 17 of 21 prompts)
 
 Governed by `prompts/09-10_implementation_plan.md` §4's Step 10 table, same as Step 9. All eight of
-Marshall's `server` track prompts below are now generated (`[ ]` until executed/merged); `client` (9) and
-`api` (4) remain outstanding.
+Marshall's `server` track prompts and all nine of Raj's `client` track prompts below are now generated;
+`api` (4) remains outstanding.
 
 | # | File | Depends on | Status |
 |---|---|---|---|
-| 1 | `10_server_1_player-identify-controller.md` | server model package (`09_server_1`–`6`) | [ ] |
+| 1 | `10_server_1_player-identify-controller.md` | server model package (`09_server_1`–`6`) | [x] |
 | 2 | `10_server_2_matchmaking-controller.md` | server model package; CRITICAL — the only place a `MatchModel` is constructed and registered with `TickLoop` | [ ] |
 | 3 | `10_server_3_champion-select-controller.md` | `10_server_2` | [ ] |
 | 4 | `10_server_4_combat-controller.md` | `10_server_2` | [ ] |
@@ -126,8 +126,34 @@ Two small corrections ride along in this batch, each documented in the prompt th
 (`10_server_6`) — see that prompt for why `MatchReportingClient`'s original `MatchParticipant[]`-based
 signature couldn't work as sketched.
 
+### Client track (9)
+
+Owner: **Raj**, per `prompts/09-10_implementation_plan.md` §4. Prompts 5–8 (the four screens) use React
+Testing Library, not just Jest, per that plan's §5 scope note. All nine reiterate master context §1.1 (the
+client renders what the server sends and never computes an outcome) in their own text, per this batch's
+closing requirement.
+
+| # | File | Depends on | Status |
+|---|---|---|---|
+| 1 | `10_client_1_socket-connection-controller.md` | client model package (`09_client_1`–`3`); gains a constructor-injected `Socket` (correction) | [ ] |
+| 2 | `10_client_2_lobby-controller.md` | `10_client_1` | [ ] |
+| 3 | `10_client_3_champion-select-controller.md` | `10_client_1` | [ ] |
+| 4 | `10_client_4_match-controller.md` | `10_client_1`; CRITICAL CHECKPOINT — move-throttle sentinel bug caught by its own test suite | [ ] |
+| 5 | `10_client_5_lobby-view.md` | `10_client_2`; corrects `ClientIdentityModel`/`ClientQueueModel`'s missing `notifyChanged` calls | [ ] |
+| 6 | `10_client_6_champion-select-view.md` | `10_client_3`, `10_client_5`; corrects all four `ClientMatchModel.apply*` methods' missing `notifyChanged` calls | [ ] |
+| 7 | `10_client_7_match-hud-view.md` | `10_client_4`, `10_client_6`; CRITICAL CHECKPOINT — `InterpolationBuffer` output never written back to `ClientMatchModel` | [ ] |
+| 8 | `10_client_8_results-view.md` | `10_client_2`, `10_client_6`; pairs with `LobbyController`, not a dedicated controller (docs/01_class_list.md §6c gap-fill) | [ ] |
+| 9 | `10_client_9_client-main.md` | `10_client_1`–`8` (wires everything); smoke test only, per plan §5 | [ ] |
+
+The client model package (`09_client_1`–`3`, merged) turned out to have a real gap: none of
+`ClientIdentityModel`/`ClientQueueModel`/`ClientMatchModel`'s mutator methods called `notifyChanged()`, so
+the entire push-MVC view layer would have been silently inert. `10_client_5` and `10_client_6` fix this
+once each, additively — no other prompt in the batch repeats it. Several views also need more than the one
+model their `docs/01_class_list.md` §6c constructor sketch names (e.g. `LobbyView` needs `ClientQueueModel`
+alongside `ClientIdentityModel` to show queue status); each such prompt documents the correction and adds
+the extra model as an accessor outside the formal `View<M,C>` contract, not by widening that contract.
+
 ## Later steps
 
 `docs/ProjectProcess.txt` step 7 (analyze the reverse-engineered diagram against Step 1's and the code,
-iterate) is still outstanding. Step 10's `client`/`api` tracks remain outstanding — see the implementation
-plan.
+iterate) is still outstanding. Step 10's `api` track remains outstanding — see the implementation plan.
