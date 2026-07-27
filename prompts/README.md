@@ -167,7 +167,7 @@ observe).
 
 | # | File | Depends on | Status |
 |---|---|---|---|
-| 1 | `10_api_1_internal-match-controller.md` | api model package (`09_api_1`–`5`); CRITICAL correction — `BeginParticipant` gains `username`, `InternalMatchController` resolves canonical player ids via `PlayerRepository` before persisting | [ ] |
+| 1 | `10_api_1_internal-match-controller.md` | api model package (`09_api_1`–`5`); CRITICAL correction — `BeginParticipant` gains `username`, `InternalMatchController` resolves canonical player ids via `PlayerRepository` before persisting | [x] |
 | 2 | `10_api_2_match-history-controller.md` | `10_api_1` (shared `nullMvc.ts`); corrects `MatchRepository.findHistoryForPlayer`'s return shape to include the match opponent's username | [ ] |
 | 3 | `10_api_3_leaderboard-controller.md` | `10_api_1` (shared `nullMvc.ts`) | [ ] |
 | 4 | `10_api_4_api-main.md` | `10_api_1`–`3` (wires everything); smoke test only, per plan §5 | [ ] |
