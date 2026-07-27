@@ -1,5 +1,5 @@
 import {
-  AbstractModel, MatchId, MatchPhase,
+  AbstractModel, ModelEvent, MatchId, MatchPhase,
   ChampionSelectedPayload, MatchStartPayload, MatchStatePayload, MatchEndPayload,
 } from '@arena/shared';
 
@@ -30,6 +30,10 @@ export class ClientMatchModel extends AbstractModel {
    */
   applyChampionSelected(payload: ChampionSelectedPayload): void {
     this.championSelection = payload;
+    // CORRECTION (Step 10, 10_client_6): none of this class's apply*() methods previously called
+    // notifyChanged — see the identical correction and rationale on ClientIdentityModel.identify()
+    // (10_client_5). ChampionSelectView is the first consumer that registers as a listener here.
+    this.notifyChanged(new ModelEvent(this, 'championSelection:changed', payload));
   }
 
   /**
@@ -40,6 +44,7 @@ export class ClientMatchModel extends AbstractModel {
     this.matchId = payload.matchId;
     this.phase = MatchPhase.ACTIVE;
     this.latestState = payload.initialState;
+    this.notifyChanged(new ModelEvent(this, 'matchStart', payload));
   }
 
   /**
@@ -49,6 +54,7 @@ export class ClientMatchModel extends AbstractModel {
    */
   applyMatchState(payload: MatchStatePayload): void {
     this.latestState = payload;
+    this.notifyChanged(new ModelEvent(this, 'matchState', payload));
   }
 
   /**
@@ -57,5 +63,6 @@ export class ClientMatchModel extends AbstractModel {
    */
   applyMatchEnd(payload: MatchEndPayload): void {
     this.result = payload;
+    this.notifyChanged(new ModelEvent(this, 'matchEnd', payload));
   }
 }
