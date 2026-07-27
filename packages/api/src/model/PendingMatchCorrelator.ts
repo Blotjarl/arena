@@ -1,8 +1,21 @@
 import { MatchId, PlayerId, ChampionId, Team, EndReason } from '@arena/shared';
 
-/** One participant's begin-time selections, as reported by `MatchReportingClient.reportMatchBegin`. */
+/**
+ * One participant's begin-time selections, as reported by `MatchReportingClient.reportMatchBegin`.
+ *
+ * CORRECTION (Step 10, `10_api_1`): added `username`. `InternalMatchController.handleEnd` (`10_api_1`)
+ * must resolve each participant's *canonical* `players.id` via `PlayerRepository.findOrCreateByUsername`
+ * before persisting — `match_participants.player_id` has a foreign key to `players(id)` (`schema.sql`), and
+ * `playerId` here is the transient, client-generated session id (R1.2), never a row `PlayerRepository` has
+ * created. Without a username, `InternalMatchController` would have no way to resolve or create that row,
+ * and every `recordMatch` call would fail its foreign-key constraint. **This requires a matching
+ * correction to `packages/shared/src/contract/dto.ts`'s `MatchBeginReportDTO` and to
+ * `prompts/10_server_6_connection-and-reporting.md`'s `MatchReportingClient`/`ConnectionHandler`** (not yet
+ * executed at the time this correction was made) — see `10_api_1`'s design note 5 for the full flag.
+ */
 export interface BeginParticipant {
   playerId: PlayerId;
+  username: string;
   team: Team;
   championId: ChampionId;
 }

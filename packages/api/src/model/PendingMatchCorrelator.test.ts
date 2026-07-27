@@ -3,8 +3,8 @@ import { PendingMatchCorrelator, BeginParticipant, MatchOutcome } from './Pendin
 
 function makeParticipants(): BeginParticipant[] {
   return [
-    { playerId: 'player-1', team: Team.A, championId: 'korr' },
-    { playerId: 'player-2', team: Team.B, championId: 'vex' },
+    { playerId: 'player-1', username: 'Alice', team: Team.A, championId: 'korr' },
+    { playerId: 'player-2', username: 'Bob', team: Team.B, championId: 'vex' },
   ];
 }
 
@@ -30,7 +30,7 @@ describe('PendingMatchCorrelator', () => {
   it('CRITICAL CHECKPOINT: recordBegin is idempotent — a retried begin does not create a duplicate pending entry', () => {
     const correlator = new PendingMatchCorrelator();
     const first = makeParticipants();
-    const retried: BeginParticipant[] = [{ playerId: 'someone-else', team: Team.A, championId: 'rin' }];
+    const retried: BeginParticipant[] = [{ playerId: 'someone-else', username: 'Someone', team: Team.A, championId: 'rin' }];
     correlator.recordBegin('match-1', first);
     correlator.recordBegin('match-1', retried); // must be ignored — first recording wins
     const combined = correlator.recordEnd('match-1', makeOutcome());
