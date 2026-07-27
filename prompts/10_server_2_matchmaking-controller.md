@@ -40,6 +40,19 @@ supplies it, closing over its own `Map<PlayerId, ConnectionHandler>`, and uses i
 keeps `MatchmakingController` itself fully unit-testable (the callback is just a `jest.fn()` in tests) while
 keeping the cross-connection wiring out of this controller's own responsibility.
 
+**4. `MatchFoundBroadcast` (the per-player `match:found` routing type) is defined here, in
+`MatchmakingController.ts` — not in `MatchmakingBroadcastView.ts`.** This controller is the one place a
+`match:found` event actually gets constructed and emitted, so it owns the type. This matters for execution
+order: `10_server_7` (broadcast views) already declares `10_server_2` as a prerequisite, so it's safe for
+`MatchmakingBroadcastView.ts` to `import type { MatchFoundBroadcast } from '../controller/MatchmakingController'`
+once it exists. The reverse — this file importing a type from `MatchmakingBroadcastView.ts` — would only
+work by accident (it happened to compile when everything was implemented together in one session) and
+breaks the moment this prompt is run in the batch's actual intended order, before `10_server_7` exists:
+`MatchmakingBroadcastView.ts` is still the original stub, which exports no such type. If you're executing
+this prompt against a repo where `MatchmakingBroadcastView.ts`/`MatchBroadcastView.ts` are still
+`NotImplementedError` stubs (the normal case — `10_server_2` does not require `10_server_7` first), that is
+expected and fine; this prompt's own code and tests never call into those two views' `modelChanged`.
+
 ---
 
 ### 0. Correction to `packages/server/src/model/MatchmakingQueue.ts` — add `playerId` to two broadcasts
@@ -73,19 +86,22 @@ expect(events).toEqual([{ type: 'queue:cancelled', payload: { playerId: 'p1' } }
 ### 1. Replace `packages/server/src/controller/MatchmakingController.ts` with:
 
 ```ts
-import { AbstractController, ModelEvent, Player, PlayerId, Team, ChampionRoster, SOCKET_EVENTS } from '@arena/shared';
+import { AbstractController, ModelEvent, Player, PlayerId, Team, ChampionRoster, SOCKET_EVENTS, MatchFoundPayload } from '@arena/shared';
 import type { Socket } from 'socket.io';
 import { randomUUID } from 'node:crypto';
 import { MatchmakingQueue } from '../model/MatchmakingQueue';
 import { MatchModel } from '../model/MatchModel';
 import { TickLoop } from '../model/TickLoop';
-import { MatchmakingBroadcastView, MatchFoundBroadcast } from '../view/MatchmakingBroadcastView';
+import { MatchmakingBroadcastView } from '../view/MatchmakingBroadcastView';
 import { MatchBroadcastView } from '../view/MatchBroadcastView';
 
 /** Payload ConnectionHandler forwards for `queue:join`/`queue:cancel` — the connection's identified player. */
 export interface MatchmakingRequest {
   player: Player;
 }
+
+/** A `match:found` broadcast, addressed to one specific player. Owned here (not in MatchmakingBroadcastView) so this controller has no compile-time dependency on 10_server_7's view implementation — MatchmakingBroadcastView imports this type back, not the other way around (see design note 4 above). */
+export type MatchFoundBroadcast = MatchFoundPayload & { playerId: PlayerId };
 
 /** Invoked once per newly-paired match, so the caller (ConnectionHandler/ServerMain) can bind the two players' championSelect/combat/disconnect controllers to it — see 10_server_6. */
 export type OnMatchCreated = (playerIds: [PlayerId, PlayerId], match: MatchModel, view: MatchBroadcastView) => void;
@@ -287,34 +303,33 @@ describe('MatchmakingController', () => {
         expect(forA.roster.length).toBeGreaterThan(0);
       });
 
-      it('CRITICAL CHECKPOINT: unregisters the match from TickLoop once it ends', () => {
+      it('CRITICAL CHECKPOINT: unregisters the match from TickLoop once it ends, without ever invoking MatchBroadcastView.modelChanged (may still be an unimplemented stub, 10_server_7)', () => {
         const addListenerSpy = jest.spyOn(MatchModel.prototype, 'addModelListener');
         const pair: [QueueEntry, QueueEntry] = [new QueueEntry('p1', 'Alice', 1000), new QueueEntry('p2', 'Bob', 1001)];
         const queue = makeQueue({ tryPairNext: jest.fn(() => pair) });
         const view = makeView();
         const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
-        const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), jest.fn());
+        const onMatchCreated = jest.fn();
+        const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), onMatchCreated);
 
         controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) });
         const match = (tickLoop.register as jest.Mock).mock.calls[0][0] as MatchModel;
+        const matchBroadcastView = onMatchCreated.mock.calls[0][2];
 
-        // MatchBroadcastView's own constructor also calls addModelListener — find MatchmakingController's
-        // cleanup listener specifically: the one that calls tickLoop.unregister on 'match:end'.
-        const cleanupListenerCall = addListenerSpy.mock.calls.find(([listener]) => {
-          const before = (tickLoop.unregister as jest.Mock).mock.calls.length;
-          listener.modelChanged(new ModelEvent(match, 'match:end', {}));
-          const firedUnregister = (tickLoop.unregister as jest.Mock).mock.calls.length > before;
-          (tickLoop.unregister as jest.Mock).mockClear();
-          return firedUnregister;
-        });
-        expect(cleanupListenerCall).toBeDefined();
+        // MatchmakingController registers exactly two listeners on the new match: MatchBroadcastView's own
+        // (in its constructor) and this cleanup listener. Identify the cleanup listener by elimination
+        // rather than by invoking every captured listener's modelChanged — MatchBroadcastView.modelChanged
+        // may still be an unimplemented NotImplementedError stub when this prompt is run in the batch's
+        // intended dependency order (10_server_2 does not require 10_server_7 first).
+        const cleanupListener = addListenerSpy.mock.calls.map(([l]) => l).find((l) => l !== matchBroadcastView);
+        expect(cleanupListener).toBeDefined();
 
-        cleanupListenerCall![0].modelChanged(new ModelEvent(match, 'match:end', {}));
+        cleanupListener!.modelChanged(new ModelEvent(match, 'match:end', {}));
         expect(tickLoop.unregister).toHaveBeenCalledWith(match.id);
 
         // A non-'match:end' event must not trigger unregistration.
         (tickLoop.unregister as jest.Mock).mockClear();
-        cleanupListenerCall![0].modelChanged(new ModelEvent(match, 'state', {}));
+        cleanupListener!.modelChanged(new ModelEvent(match, 'state', {}));
         expect(tickLoop.unregister).not.toHaveBeenCalled();
 
         addListenerSpy.mockRestore();
@@ -365,9 +380,13 @@ Per master context §9.5/§9.4: `npm run typecheck -w @arena/server` passes; `np
 passing, 100% statement/branch/function/line coverage**, including both CRITICAL CHECKPOINT tests (TickLoop
 registration wiring and TickLoop cleanup-on-`match:end` wiring). Also re-run `npx jest MatchmakingQueue
 --coverage --collectCoverageFrom="src/model/MatchmakingQueue.ts"` after step 0's correction — still **100%
-coverage**, all pre-existing tests green with their updated assertions. Branch `server` from `main` (or
-reuse an already-checked-out `server` branch), commit `Step 10: MatchmakingController implementation and
-tests, MatchmakingQueue playerId-routing correction`, push, open a PR into `main`.
+coverage**, all pre-existing tests green with their updated assertions. This was validated (both typecheck
+and the full test run) **specifically against a repo where `MatchmakingBroadcastView.ts`/
+`MatchBroadcastView.ts` are still their original `NotImplementedError` stubs** — the intended execution
+order, since `10_server_7` isn't a prerequisite of this prompt. If you happen to be running this after
+`10_server_7` is already done, it still passes identically. Branch `server` from `main` (or reuse an
+already-checked-out `server` branch), commit `Step 10: MatchmakingController implementation and tests,
+MatchmakingQueue playerId-routing correction`, push, open a PR into `main`.
 
 ---
 

@@ -27,6 +27,12 @@ the internal routing field.
 to see them) — `MatchBroadcastView` just iterates every socket in the `sockets` map passed to its
 constructor, which is scoped to exactly this match's two participants (per the existing doc comment).
 
+**`MatchFoundBroadcast` is imported, not defined, here.** The type lives in `MatchmakingController.ts`
+(`10_server_2`) — that's the one place a `match:found` event actually gets constructed — and this file just
+imports it (`import type`, so there's no runtime circular dependency even though `MatchmakingController.ts`
+also imports the `MatchmakingBroadcastView` class). This is why `10_server_2` is listed as this prompt's
+prerequisite above; the reverse dependency doesn't hold, so don't "fix" this by moving the type back here.
+
 **Internal event-type-string translation.** `MatchModel` emits three event types whose internal name
 differs from the wire event name: `'state'` → `match:state`, `'player_disconnected'` → `match:player_
 disconnected`, `'player_reconnected'` → `match:player_reconnected`. Translating between the two is exactly
@@ -50,9 +56,7 @@ import {
 } from '@arena/shared';
 import type { Socket } from 'socket.io';
 import { MatchmakingQueue } from '../model/MatchmakingQueue';
-
-/** A `match:found` broadcast, addressed to one specific player — see `MatchmakingController` (10_server_2). */
-export type MatchFoundBroadcast = MatchFoundPayload & { playerId: PlayerId };
+import type { MatchFoundBroadcast } from '../controller/MatchmakingController';
 
 /**
  * Socket.IO broadcaster for MatchmakingQueue changes — the server's concrete View realization for
