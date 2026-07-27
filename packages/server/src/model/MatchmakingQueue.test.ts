@@ -25,7 +25,7 @@ describe('MatchmakingQueue', () => {
       const queue = new MatchmakingQueue(50);
       const events = collectEvents(queue);
       queue.join(makePlayer('p1', 'Alice'));
-      expect(events).toEqual([{ type: 'queue:joined', payload: { position: 1 } }]);
+      expect(events).toEqual([{ type: 'queue:joined', payload: { playerId: 'p1', position: 1 } }]);
     });
 
     it('throws AlreadyQueuedError if the player is already queued', () => {
@@ -50,7 +50,7 @@ describe('MatchmakingQueue', () => {
       queue.join(makePlayer('p1', 'Alice'));
       const events = collectEvents(queue);
       queue.cancel('p1');
-      expect(events).toEqual([{ type: 'queue:cancelled', payload: {} }]);
+      expect(events).toEqual([{ type: 'queue:cancelled', payload: { playerId: 'p1' } }]);
     });
 
     it('throws NotQueuedError if the player is not queued', () => {
