@@ -112,7 +112,7 @@ track prompts below are now generated — none remain outstanding.
 | # | File | Depends on | Status |
 |---|---|---|---|
 | 1 | `10_server_1_player-identify-controller.md` | server model package (`09_server_1`–`6`) | [x] |
-| 2 | `10_server_2_matchmaking-controller.md` | server model package; CRITICAL — the only place a `MatchModel` is constructed and registered with `TickLoop` | [ ] |
+| 2 | `10_server_2_matchmaking-controller.md` | server model package; CRITICAL — the only place a `MatchModel` is constructed and registered with `TickLoop` | [x] |
 | 3 | `10_server_3_champion-select-controller.md` | `10_server_2` | [ ] |
 | 4 | `10_server_4_combat-controller.md` | `10_server_2` | [ ] |
 | 5 | `10_server_5_disconnect-controller.md` | `10_server_2` | [ ] |
