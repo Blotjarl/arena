@@ -97,6 +97,14 @@ describe('MatchRepository (integration — real PostgreSQL)', () => {
 
       const page1 = await repo.findHistoryForPlayer(PLAYER_A, 1, 2);
       expect(page1.map((p) => p.matchId)).toEqual(['match-repo-test-h3', 'match-repo-test-h2']);
+      expect(page1[0]).toMatchObject({
+        opponentUsername: 'MatchRepoTestPlayerB',
+        championId: 'korr',
+        result: MatchResult.WIN,
+        endReason: EndReason.ELIMINATION,
+        durationMs: 90_000,
+      });
+      expect(page1[0].endedAt).toBeInstanceOf(Date);
 
       const page2 = await repo.findHistoryForPlayer(PLAYER_A, 2, 2);
       expect(page2.map((p) => p.matchId)).toEqual(['match-repo-test-h1']);

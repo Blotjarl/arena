@@ -1,4 +1,4 @@
-import { LeaderboardEntryDTO, NotImplementedError } from '@arena/shared';
+import { LeaderboardEntryDTO } from '@arena/shared';
 import { LeaderboardEntry } from '../model/LeaderboardEntry';
 
 /**
@@ -12,6 +12,13 @@ export class LeaderboardResponseView {
    * @returns the DTO array to send as the JSON response body
    */
   render(entries: LeaderboardEntry[]): LeaderboardEntryDTO[] {
-    throw new NotImplementedError('LeaderboardResponseView.render not yet implemented');
+    return entries.map((entry) => ({
+      username: entry.username,
+      wins: entry.wins,
+      losses: entry.losses,
+      draws: entry.draws,
+      gamesPlayed: entry.gamesPlayed,
+      winRate: entry.winRate,
+    }));
   }
 }
