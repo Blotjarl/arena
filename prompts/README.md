@@ -81,16 +81,16 @@ promptly — `09_server_3` depends on it and cannot run for real until it's merg
 
 | # | File | Track | Owner | Depends on | Status |
 |---|---|---|---|---|---|
-| 1 | `09_shared_1_domain-value-objects.md` | shared | **En** | none | [ ] |
-| 2 | `09_server_1_matchmaking-queue.md` | server | **Marshall** | none | [ ] |
+| 1 | `09_shared_1_domain-value-objects.md` | shared | **En** | none | [x] |
+| 2 | `09_server_1_matchmaking-queue.md` | server | **Marshall** | none | [x] |
 | 3 | `09_server_2_participant-state.md` | server | **Marshall** | #1 (Champion/Ability) | [x] |
 | 4 | `09_server_3_matchmodel-champion-select.md` | server | **Marshall** | #1, #3 | [x] |
 | 5 | `09_server_4_matchmodel-combat.md` | server | **Marshall** | #3, #4 | [x] |
 | 6 | `09_server_5_matchmodel-disconnect.md` | server | **Marshall** | #4 | [x] |
 | 7 | `09_server_6_tickloop.md` | server | **Marshall** | #5 | [x] |
-| 8 | `09_client_1_identity-and-queue.md` | client | **Raj** | none | [ ] |
-| 9 | `09_client_2_match-model.md` | client | **Raj** | none | [ ] |
-| 10 | `09_client_3_interpolation-buffer.md` | client | **Raj** | #9 (CRITICAL CHECKPOINT) | [ ] |
+| 8 | `09_client_1_identity-and-queue.md` | client | **Raj** | none | [x] |
+| 9 | `09_client_2_match-model.md` | client | **Raj** | none | [x] |
+| 10 | `09_client_3_interpolation-buffer.md` | client | **Raj** | #9 (CRITICAL CHECKPOINT) | [x] |
 | 11 | `09_api_1_pending-match-correlator.md` | api | **En** | none | [ ] |
 | 12 | `09_api_2_schema-and-pgpool.md` | api | **Marshall** (infra prerequisite) | none | [x] |
 | 13 | `09_api_3_player-repository.md` | api | **En** | #12 | [ ] |
