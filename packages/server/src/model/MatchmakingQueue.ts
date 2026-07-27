@@ -35,7 +35,7 @@ export class MatchmakingQueue extends AbstractModel {
     }
     this.entries.push(new QueueEntry(player.id, player.username, Date.now()));
     const position = this.entries.length;
-    this.notifyChanged(new ModelEvent(this, 'queue:joined', { position }));
+    this.notifyChanged(new ModelEvent(this, 'queue:joined', { playerId: player.id, position }));
     return position;
   }
 
@@ -50,7 +50,7 @@ export class MatchmakingQueue extends AbstractModel {
       throw new NotQueuedError(playerId);
     }
     this.entries.splice(index, 1);
-    this.notifyChanged(new ModelEvent(this, 'queue:cancelled', {}));
+    this.notifyChanged(new ModelEvent(this, 'queue:cancelled', { playerId }));
   }
 
   /**
