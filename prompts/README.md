@@ -103,8 +103,31 @@ repo (implemented, tested, then reverted to a stub) before being committed as pr
 whoever owns each one actually executes and merges the work. All 15 Step 9 prompts are now generated —
 none remain outstanding.
 
+## Step 10 — Controller/view package (server track — 8 of 21 prompts)
+
+Governed by `prompts/09-10_implementation_plan.md` §4's Step 10 table, same as Step 9. All eight of
+Marshall's `server` track prompts below are now generated (`[ ]` until executed/merged); `client` (9) and
+`api` (4) remain outstanding.
+
+| # | File | Depends on | Status |
+|---|---|---|---|
+| 1 | `10_server_1_player-identify-controller.md` | server model package (`09_server_1`–`6`) | [ ] |
+| 2 | `10_server_2_matchmaking-controller.md` | server model package; CRITICAL — the only place a `MatchModel` is constructed and registered with `TickLoop` | [ ] |
+| 3 | `10_server_3_champion-select-controller.md` | `10_server_2` | [ ] |
+| 4 | `10_server_4_combat-controller.md` | `10_server_2` | [ ] |
+| 5 | `10_server_5_disconnect-controller.md` | `10_server_2` | [ ] |
+| 6 | `10_server_6_connection-and-reporting.md` | `10_server_1`–`5` | [ ] |
+| 7 | `10_server_7_broadcast-views.md` | `10_server_2`, `10_server_3` | [ ] |
+| 8 | `10_server_8_server-main.md` | `10_server_1`–`7` (wires everything) | [ ] |
+
+Two small corrections ride along in this batch, each documented in the prompt that surfaces it: `09_server_1`'s
+`MatchmakingQueue.join`/`cancel` gain a `playerId` field in their internal (non-wire) broadcast payload
+(`10_server_2`), and `packages/shared/src/contract/dto.ts` gains `MatchBeginReportDTO`/`MatchEndReportDTO`
+(`10_server_6`) — see that prompt for why `MatchReportingClient`'s original `MatchParticipant[]`-based
+signature couldn't work as sketched.
+
 ## Later steps
 
 `docs/ProjectProcess.txt` step 7 (analyze the reverse-engineered diagram against Step 1's and the code,
-iterate) is still outstanding, and Step 10 (controller/view layer) starts only once each track's own
-Step 9 model work is done — see the implementation plan.
+iterate) is still outstanding. Step 10's `client`/`api` tracks remain outstanding — see the implementation
+plan.
