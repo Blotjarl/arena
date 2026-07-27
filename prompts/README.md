@@ -118,7 +118,11 @@ track prompts below are now generated — none remain outstanding.
 | 5 | `10_server_5_disconnect-controller.md` | `10_server_2` | [x] |
 | 6 | `10_server_6_connection-and-reporting.md` | `10_server_1`–`5` | [x] |
 | 7 | `10_server_7_broadcast-views.md` | `10_server_2`, `10_server_3` | [x] |
-| 8 | `10_server_8_server-main.md` | `10_server_1`–`7` (wires everything) | [ ] |
+| 8 | `10_server_8_server-main.md` | `10_server_1`–`7` (wires everything) | [x] |
+
+All eight of Marshall's `server`-track Step 10 prompts are now merged to `main` — `packages/server`'s
+controller/view package is complete (136 tests passing, 100% coverage on every controller/view file except
+`ServerMain.ts`, which is intentionally a smoke test per its own prompt's scope note).
 
 Two small corrections ride along in this batch, each documented in the prompt that surfaces it: `09_server_1`'s
 `MatchmakingQueue.join`/`cancel` gain a `playerId` field in their internal (non-wire) broadcast payload
