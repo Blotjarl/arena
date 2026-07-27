@@ -103,11 +103,11 @@ repo (implemented, tested, then reverted to a stub) before being committed as pr
 whoever owns each one actually executes and merges the work. All 15 Step 9 prompts are now generated —
 none remain outstanding.
 
-## Step 10 — Controller/view package (server + client tracks — 17 of 21 prompts)
+## Step 10 — Controller/view package (server + client + api tracks — 21 of 21 prompts)
 
 Governed by `prompts/09-10_implementation_plan.md` §4's Step 10 table, same as Step 9. All eight of
-Marshall's `server` track prompts and all nine of Raj's `client` track prompts below are now generated;
-`api` (4) remains outstanding.
+Marshall's `server` track prompts, all nine of Raj's `client` track prompts, and all four of En's `api`
+track prompts below are now generated — none remain outstanding.
 
 | # | File | Depends on | Status |
 |---|---|---|---|
@@ -153,7 +153,35 @@ model their `docs/01_class_list.md` §6c constructor sketch names (e.g. `LobbyVi
 alongside `ClientIdentityModel` to show queue status); each such prompt documents the correction and adds
 the extra model as an accessor outside the formal `View<M,C>` contract, not by widening that contract.
 
+### Api track (4)
+
+Owner: **En**, per `prompts/09-10_implementation_plan.md` §4. All three REST controllers
+(`InternalMatchController`, `MatchHistoryController`, `LeaderboardController`) use the default (untyped)
+`AbstractController` generics via a shared `nullMvc.ts` helper introduced in `10_api_1` — see that prompt's
+design note 4 for why (no domain `Model`/push-based `View` exists for a synchronous HTTP response to
+observe).
+
+| # | File | Depends on | Status |
+|---|---|---|---|
+| 1 | `10_api_1_internal-match-controller.md` | api model package (`09_api_1`–`5`); CRITICAL correction — `BeginParticipant` gains `username`, `InternalMatchController` resolves canonical player ids via `PlayerRepository` before persisting | [ ] |
+| 2 | `10_api_2_match-history-controller.md` | `10_api_1` (shared `nullMvc.ts`); corrects `MatchRepository.findHistoryForPlayer`'s return shape to include the match opponent's username | [ ] |
+| 3 | `10_api_3_leaderboard-controller.md` | `10_api_1` (shared `nullMvc.ts`) | [ ] |
+| 4 | `10_api_4_api-main.md` | `10_api_1`–`3` (wires everything); smoke test only, per plan §5 | [ ] |
+
+`10_api_1` surfaces a genuine, load-bearing correctness gap found by implementing it for real:
+`match_participants.player_id` has a foreign key to `players(id)`, but the live match's `playerId` is a
+transient, client-generated session id (R1.2) that `PlayerRepository` never created a row for — persisting
+it directly would fail every single `recordMatch` call's foreign-key constraint. The fix adds `username` to
+`PendingMatchCorrelator.BeginParticipant` (`09_api_1`, already-merged) and has `InternalMatchController`
+resolve each participant's canonical id via `PlayerRepository.findOrCreateByUsername` before persisting.
+**This has an unresolved cross-track follow-up**: `packages/shared/src/contract/dto.ts`'s
+`MatchBeginReportDTO` (added by `10_server_6`, not yet executed) still matches the *old* shape with no
+`username` field — `10_api_1`'s design note 5 flags this explicitly; it must be corrected before
+`10_server_6` is executed, or the two tracks' real end-to-end match-reporting flow will not work.
+
 ## Later steps
 
 `docs/ProjectProcess.txt` step 7 (analyze the reverse-engineered diagram against Step 1's and the code,
-iterate) is still outstanding. Step 10's `api` track remains outstanding — see the implementation plan.
+iterate) is still outstanding. All 36 prompts across Steps 9–10 now exist (per the corrected count in
+`prompts/09-10_implementation_plan.md`); executing/merging the remaining `[ ]` rows above is the next work,
+not prompt generation.

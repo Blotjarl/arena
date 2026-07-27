@@ -1,7 +1,7 @@
 # Steps 9–10 Implementation Plan (spec, not itself a prompt)
 
 **CRITICAL: This document is not in the `NN_<track>_<seq>_<component>.md` naming/execution pattern — it is
-the plan that governs how the 37 prompts under Step 9 and Step 10 get written.** Any session generating
+the plan that governs how the 36 prompts under Step 9 and Step 10 get written.** Any session generating
 one of those prompts (whether Marshall directly or a delegated "meta-prompt" session) must read this
 document in full first, in addition to `prompts/00_master_context.md`. This freezes design decisions made
 in chat on 2026-07-25 so they survive independent of any one conversation's context window.
@@ -24,7 +24,7 @@ each other — only against `shared`, which goes first for everyone.
 
 ---
 
-## 2. Test strategy — applies to every one of the 37 prompts
+## 2. Test strategy — applies to every one of the 36 prompts
 
 - **TDD, in this order, per prompt**: write the test(s) first, from the class's existing TSDoc contract
   (Step 3 already documented every method's params/returns/`@throws` — the tests are close to
@@ -106,8 +106,10 @@ spec by a delegated session, following the scope notes in §5.
 | 14 | `09_api_4_match-repository.md` | api | `MatchRepository.recordMatch`/`findHistoryForPlayer`, `LeaderboardEntry.fromRow` | #12 | G | **En** |
 | 15 | `09_api_5_leaderboard-repository.md` | api | `LeaderboardRepository.computeLeaderboard`/`computeChampionWinRates` | #12, #14 | G | **En** |
 
-(Table shows 15 rows because #12's schema prompt and #13–15 share dependency #12 — 16th item is the
-`09_shared_1` row already counted as #1. Total: 16.)
+(15 rows total, including `09_shared_1` as row #1 — #12's schema prompt and #13–15 share dependency #12.
+**Correction**: an earlier draft of this note miscounted this as 16, which propagated into a "37 prompts"
+total elsewhere in this document; the correct total across Steps 9 and 10 is 15 + 21 = **36**, matching
+`prompts/README.md`'s count.)
 
 **Two rows break the naive track→person mapping, on purpose — both are flagged in their own prompt file
 too, not just here:**
@@ -182,6 +184,8 @@ already a devDependency per Step 2. Tests should assert on rendered output and s
 
 ## 6. Status
 
+**All 36 prompts across Steps 9 and 10 are now generated — none remain outstanding.**
+
 All six `B` prompts are written and validated (implemented for real against this repo, tested — including
 a real Postgres container for the schema/PgPool one — then reverted to stubs so the actual commit happens
 through the normal branch/PR flow, not as a direct edit bypassing it):
@@ -193,8 +197,23 @@ through the normal branch/PR flow, not as a direct edit bypassing it):
 
 Also fixed as a direct infrastructure commit (not a prompt — mechanical, no design judgment involved):
 `jest.config.js` added to all four packages. There was no Jest configuration anywhere in the repo before
-this; without it, every test in every one of the 37 prompts would fail with a syntax error, since Jest was
+this; without it, every test in every one of the 36 prompts would fail with a syntax error, since Jest was
 silently falling back to a plain Babel transform that cannot parse TypeScript.
 
-Remaining: 31 `G` prompts, to be generated from this spec by delegated sessions, per §5 above and the
-chat response accompanying this document for the batch/handoff plan.
+The remaining 30 `G` prompts have all been generated from this spec by delegated sessions, per §5 above:
+
+- **Step 9** (9 of the 15 non-`B` rows): `09_shared_1`, `09_server_1`, `09_client_1`–`3`, `09_api_1`,
+  `09_api_3`–`5`.
+- **Step 10 — server** (8): `10_server_1`–`8`.
+- **Step 10 — client** (9): `10_client_1`–`9`.
+- **Step 10 — api** (4): `10_api_1`–`4`, generated last, per this document's §5 scope notes. `10_api_1`
+  surfaced a CRITICAL cross-track correctness gap — `InternalMatchController` must resolve each match
+  participant's canonical `players.id` via `PlayerRepository.findOrCreateByUsername` before persisting
+  (the live match's `playerId` is a transient session id, never a row `PlayerRepository` created, and
+  `match_participants.player_id` has a foreign key to `players(id)`) — which requires a **not-yet-applied**
+  follow-up correction to `packages/shared/src/contract/dto.ts`'s `MatchBeginReportDTO` (adding a
+  `username` field) before `10_server_6` is executed. See `10_api_1_internal-match-controller.md`'s design
+  note 5 and `prompts/README.md`'s api-track section for the full detail.
+
+Executing and merging the generated `[ ]` rows (per `prompts/README.md`'s status tables) is the remaining
+work — not prompt generation.
