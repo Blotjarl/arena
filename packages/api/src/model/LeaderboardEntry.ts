@@ -1,5 +1,4 @@
 import { PlayerId } from '@arena/shared';
-import { NotImplementedError } from '@arena/shared';
 
 /** One player's aggregate leaderboard standing, derived from match history (R8.1, R8.2). */
 export class LeaderboardEntry {
@@ -21,11 +20,22 @@ export class LeaderboardEntry {
   ) {}
 
   /**
-   * Builds a `LeaderboardEntry` from one aggregated query result row.
+   * Builds a `LeaderboardEntry` from one aggregated query result row. Expects the row to carry the
+   * columns `player_id`, `username`, `wins`, `losses`, `draws`, `games_played`, `win_rate` — the aliases
+   * `LeaderboardRepository.computeLeaderboard`'s query produces (`pg` returns `COUNT`/`SUM` aggregates as
+   * strings, hence the `Number(...)` conversions below).
    * @param row - a raw row returned by `LeaderboardRepository.computeLeaderboard`'s query
    * @returns the corresponding `LeaderboardEntry`
    */
   static fromRow(row: Record<string, unknown>): LeaderboardEntry {
-    throw new NotImplementedError('LeaderboardEntry.fromRow not yet implemented');
+    return new LeaderboardEntry(
+      row.player_id as PlayerId,
+      row.username as string,
+      Number(row.wins),
+      Number(row.losses),
+      Number(row.draws),
+      Number(row.games_played),
+      Number(row.win_rate),
+    );
   }
 }

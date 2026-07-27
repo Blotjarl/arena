@@ -286,8 +286,12 @@ interface would be unused ceremony.
 
 | Class | Operations |
 |---|---|
-| `PgPool` | `constructor(connectionString: string)`; `query<T>(sql: string, params: unknown[]): Promise<T[]>` — **throws** `PersistenceError`; `close(): Promise<void>` — releases all pooled connections (process shutdown, test teardown) |
+| `PgPool` | `constructor(connectionString: string)`; `query<T>(sql: string, params: unknown[]): Promise<T[]>` — **throws** `PersistenceError`; `transaction<T>(fn: (query) => Promise<T>): Promise<T>` — runs `fn` atomically over one pooled connection (`BEGIN`/`COMMIT`/`ROLLBACK`) — **throws** `PersistenceError`; `close(): Promise<void>` — releases all pooled connections (process shutdown, test teardown) |
 | `ApiMain` | `static async main(): Promise<void>` — builds the Express app, wires middleware and the three controllers above to routes, connects `PgPool`, and listens on the configured port. |
+
+**Step 9 addition**: `transaction<T>()` was added during `MatchRepository` implementation — `recordMatch`
+needs one `matches` row and two `match_participants` rows to commit or fail together (R-DB4), which plain
+`query()` calls against a connection pool cannot guarantee.
 
 ---
 
