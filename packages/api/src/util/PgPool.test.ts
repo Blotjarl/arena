@@ -49,4 +49,45 @@ describe('PgPool (integration — real PostgreSQL)', () => {
       ),
     ).rejects.toThrow(PersistenceError);
   });
+
+  describe('transaction', () => {
+    afterEach(async () => {
+      await pool.query('DELETE FROM players WHERE id = $1', ['test-txn-player']);
+    });
+
+    it('commits all queries together when fn succeeds', async () => {
+      const result = await pool.transaction(async (query) => {
+        await query('INSERT INTO players (id, username) VALUES ($1, $2)', ['test-txn-player', 'TxnCommitTest']);
+        return query<{ username: string }>('SELECT username FROM players WHERE id = $1', ['test-txn-player']);
+      });
+      expect(result).toEqual([{ username: 'TxnCommitTest' }]);
+
+      const rows = await pool.query('SELECT id FROM players WHERE id = $1', ['test-txn-player']);
+      expect(rows).toHaveLength(1);
+    });
+
+    it('rolls back every query in the transaction when fn throws partway through', async () => {
+      await expect(
+        pool.transaction(async (query) => {
+          await query('INSERT INTO players (id, username) VALUES ($1, $2)', ['test-txn-player', 'TxnRollbackTest']);
+          throw new Error('simulated failure after the insert');
+        }),
+      ).rejects.toThrow(PersistenceError);
+
+      const rows = await pool.query('SELECT id FROM players WHERE id = $1', ['test-txn-player']);
+      expect(rows).toHaveLength(0); // the insert above must not have survived the rollback
+    });
+
+    it('rolls back when a query inside the transaction violates a constraint', async () => {
+      await expect(
+        pool.transaction(async (query) => {
+          await query('INSERT INTO players (id, username) VALUES ($1, $2)', ['test-txn-player', 'TxnConstraintTest']);
+          await query('INSERT INTO players (id, username) VALUES ($1, $2)', ['test-txn-player-dup', 'TxnConstraintTest']); // duplicate username
+        }),
+      ).rejects.toThrow(PersistenceError);
+
+      const rows = await pool.query('SELECT id FROM players WHERE id = $1', ['test-txn-player']);
+      expect(rows).toHaveLength(0);
+    });
+  });
 });
