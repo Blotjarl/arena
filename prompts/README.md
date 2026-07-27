@@ -91,11 +91,11 @@ promptly — `09_server_3` depends on it and cannot run for real until it's merg
 | 8 | `09_client_1_identity-and-queue.md` | client | **Raj** | none | [x] |
 | 9 | `09_client_2_match-model.md` | client | **Raj** | none | [x] |
 | 10 | `09_client_3_interpolation-buffer.md` | client | **Raj** | #9 (CRITICAL CHECKPOINT) | [x] |
-| 11 | `09_api_1_pending-match-correlator.md` | api | **En** | none | [ ] |
+| 11 | `09_api_1_pending-match-correlator.md` | api | **En** | none | [x] |
 | 12 | `09_api_2_schema-and-pgpool.md` | api | **Marshall** (infra prerequisite) | none | [x] |
-| 13 | `09_api_3_player-repository.md` | api | **En** | #12 | [ ] |
-| 14 | `09_api_4_match-repository.md` | api | **En** | #12 | [ ] |
-| 15 | `09_api_5_leaderboard-repository.md` | api | **En** | #12, #14 | [ ] |
+| 13 | `09_api_3_player-repository.md` | api | **En** | #12 | [x] |
+| 14 | `09_api_4_match-repository.md` | api | **En** | #12 | [x] |
+| 15 | `09_api_5_leaderboard-repository.md` | api | **En** | #12, #14 | [x] |
 
 Rows 3–7 and 12 (marked `[x]`) are the six **B** prompts — written and validated directly against this
 repo (implemented, tested, then reverted to a stub) before being committed as prompt files; rows 8–11 and
