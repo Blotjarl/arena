@@ -1,4 +1,4 @@
-import { AbstractModel, PlayerId, PlayerNotFoundError } from '@arena/shared';
+import { AbstractModel, ModelEvent, PlayerId, PlayerNotFoundError } from '@arena/shared';
 
 /**
  * Holds the local player's chosen username and server-assigned PlayerId for the duration of the
@@ -28,6 +28,11 @@ export class ClientIdentityModel extends AbstractModel {
         this.playerId = storedId;
       }
     }
+    // CORRECTION (Step 10, 10_client_5): this method previously never called notifyChanged, so no
+    // ModelListener (i.e. no View) was ever told a change happened — the entire push-MVC contract this
+    // class is supposed to participate in (docs/01_class_list.md §6c) was silently inert. LobbyView is
+    // the first consumer that actually registers as a listener, which is what surfaced the gap.
+    this.notifyChanged(new ModelEvent(this, 'identity:changed', { username: this.username, playerId: this.playerId }));
   }
 
   /**

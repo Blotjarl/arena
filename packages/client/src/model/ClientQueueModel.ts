@@ -1,4 +1,4 @@
-import { AbstractModel, MatchFoundPayload } from '@arena/shared';
+import { AbstractModel, ModelEvent, MatchFoundPayload } from '@arena/shared';
 
 /** Lifecycle state of the local player's position in the matchmaking queue (R2.1–R2.6). */
 export type QueueStatus = 'idle' | 'queued' | 'matched';
@@ -24,6 +24,9 @@ export class ClientQueueModel extends AbstractModel {
   setQueued(position: number): void {
     this.status = 'queued';
     this.position = position;
+    // CORRECTION (Step 10, 10_client_5): setQueued/setCancelled/setMatched previously never called
+    // notifyChanged — see the identical correction and rationale on ClientIdentityModel.identify().
+    this.notifyChanged(new ModelEvent(this, 'queue:changed', { status: this.status, position: this.position }));
   }
 
   /**
@@ -32,6 +35,7 @@ export class ClientQueueModel extends AbstractModel {
   setCancelled(): void {
     this.status = 'idle';
     this.position = null;
+    this.notifyChanged(new ModelEvent(this, 'queue:changed', { status: this.status, position: this.position }));
   }
 
   /**
@@ -42,5 +46,6 @@ export class ClientQueueModel extends AbstractModel {
     this.status = 'matched';
     this.position = null;
     this.matchPayload = payload;
+    this.notifyChanged(new ModelEvent(this, 'queue:changed', { status: this.status, matchPayload: payload }));
   }
 }
