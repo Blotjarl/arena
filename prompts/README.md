@@ -120,7 +120,7 @@ track prompts below are now generated — none remain outstanding.
 | 7 | `10_server_7_broadcast-views.md` | `10_server_2`, `10_server_3` | [x] |
 | 8 | `10_server_8_server-main.md` | `10_server_1`–`7` (wires everything) | [x] |
 | 9 | `10_server_9_match-reporting-wiring.md` | `10_server_6`, `10_server_8` — closes a real gap found in a full-project SRS audit: `MatchReportingClient` was implemented and tested but never wired to a real call site, so R7.1–R7.4/R8.1–R8.3/R-DB1–R-DB6 were non-functional end-to-end | [x] |
-| 10 | `10_server_10_matchmaking-lifecycle-and-reconnection.md` | Two more real gaps found by `07_shared_1`'s audit: R2.2's "already in an active match" guard was silently unenforced, R2.5's concurrent-match count never released; and R6.1–R6.4 (reconnection) has no server-side rebinding path. Blocks `10_client_10` | [ ] |
+| 10 | `10_server_10_matchmaking-lifecycle-and-reconnection.md` | Two more real gaps found by `07_shared_1`'s audit: R2.2's "already in an active match" guard was silently unenforced, R2.5's concurrent-match count never released; and R6.1–R6.4 (reconnection) has no server-side rebinding path. Blocks `10_client_10` | [x] |
 
 All eight of Marshall's original `server`-track Step 10 prompts are merged to `main` — `packages/server`'s
 controller/view package is otherwise complete (136 tests passing, 100% coverage on every controller/view
@@ -153,7 +153,7 @@ closing requirement.
 | 7 | `10_client_7_match-hud-view.md` | `10_client_4`, `10_client_6`; CRITICAL CHECKPOINT — `InterpolationBuffer` output never written back to `ClientMatchModel` | [x] |
 | 8 | `10_client_8_results-view.md` | `10_client_2`, `10_client_6`; pairs with `LobbyController`, not a dedicated controller (docs/01_class_list.md §6c gap-fill) | [x] |
 | 9 | `10_client_9_client-main.md` | `10_client_1`–`8` (wires everything); smoke test only, per plan §5 | [x] |
-| 10 | `10_client_10_reconnect-on-socket-reconnect.md` | `10_server_10` (server-side rebinding must merge first) — closes R6.1–R6.4's client-side gap: the client never emitted `match:reconnect` anywhere | [ ] |
+| 10 | `10_client_10_reconnect-on-socket-reconnect.md` | `10_server_10` (server-side rebinding must merge first) — closes R6.1–R6.4's client-side gap: the client never emitted `match:reconnect` anywhere | [x] |
 
 All nine of Raj's original `client`-track Step 10 prompts are now merged to `main` (PR #30) — `packages/client`'s
 controller/view package is complete (128 tests passing across 17 suites, 98%+ statement coverage; every
@@ -214,11 +214,13 @@ only, no `packages/` changes.
 
 This pass found two more real (non-doc) gaps, per its own closing requirement to surface rather than
 silently absorb anything beyond documentation drift: `10_server_10_matchmaking-lifecycle-and-reconnection.md`
-and `10_client_10_reconnect-on-socket-reconnect.md` above exist to fix them.
+and `10_client_10_reconnect-on-socket-reconnect.md` above fixed them — both are now merged, so R2.2, R2.5,
+and R6.1–R6.4 are functional end-to-end (server-side rebinding verified via code + test inspection;
+client-side emission verified via its own mocked-socket test suite — genuine two-client end-to-end
+reconnection has not been manually exercised against a live server).
 
 ## Later steps
 
 Steps 11 (acceptance tests, incl. the required Playwright e2e test), 12 (final reverse-engineered
-diagram), and 13 (final javadoc) have not had prompts written yet. Step 11 is blocked on `10_server_10`
-and `10_client_10` above — an end-to-end test covering a complete match with a disconnect/reconnect would
-otherwise immediately expose the gaps those two prompts fix.
+diagram), and 13 (final javadoc) have not had prompts written yet. Nothing in the Step 9–10 batch remains
+outstanding — Step 11 is unblocked.
