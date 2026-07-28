@@ -218,7 +218,9 @@ pattern.
 
 | Class | Extends | Operations |
 |---|---|---|
-| `SocketConnectionController` | *(not an `AbstractController` — a thin transport adapter coordinating three models, kept separate for the same reason `ConnectionHandler` is on the server side — see §5b)* | `constructor(models: {...})`; `operation(action: string, payload?: unknown): void` (sends `identify`/`queue:join`/`queue:cancel`/`champion:select`/`match:action`/`match:reconnect` over the socket); `private bindInboundEvents(): void` (routes every inbound event to the matching model's `apply*` method) |
+| `SocketConnectionController` | *(not an `AbstractController` — a thin transport adapter coordinating three models, kept separate for the same reason `ConnectionHandler` is on the server side — see §5b)* | `constructor(socket: Socket, models: ClientModels)`; `operation(action: string, payload?: unknown): void` (sends `identify`/`queue:join`/`queue:cancel`/`champion:select`/`match:action`/`match:reconnect` over the socket); `private bindInboundEvents(): void` (routes every inbound event to the matching model's `apply*` method) |
+
+> **Step 10 correction**: `SocketConnectionController` gained a constructor-injected `socket: Socket` parameter during implementation — without a socket reference, `operation()` had nothing to emit on. Mirrors `ConnectionHandler`'s `Socket` parameter on the server side (§5b).
 | `LobbyController` | `extends AbstractController<ClientIdentityModel, LobbyView>` | `operation('submitUsername', payload: {username: string}): void` (client-side length/non-empty check mirroring R1.1, before delegating to `SocketConnectionController`) |
 | `ChampionSelectController` | `extends AbstractController<ClientMatchModel, ChampionSelectView>` | `operation('selectChampion', payload: {championId: ChampionId}): void` |
 | `MatchController` | `extends AbstractController<ClientMatchModel, MatchHUDView>` | `operation('move' \| 'useAbility', payload): void` (throttles/sends `match:action`) |
