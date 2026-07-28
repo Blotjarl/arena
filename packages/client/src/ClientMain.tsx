@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from 'react';
 import { createRoot } from 'react-dom/client';
 import { io, Socket } from 'socket.io-client';
-import { MatchPhase } from '@arena/shared';
+import { MatchPhase, SOCKET_EVENTS, IdentifyPayload } from '@arena/shared';
 import { ClientIdentityModel } from './model/ClientIdentityModel';
 import { ClientQueueModel } from './model/ClientQueueModel';
 import { ClientMatchModel } from './model/ClientMatchModel';
@@ -94,6 +94,25 @@ export class ClientMain {
       identity: identityModel,
       queue: queueModel,
       match: matchModel,
+    });
+
+    // R6.1-R6.4: Socket.IO's client fires its own 'connect' event both on the first successful
+    // connection and on every subsequent transport-level reconnect. A fresh server-side connection
+    // starts unidentified, so a reconnect must re-identify before anything else — including before
+    // match:reconnect, which requires an already-identified connection server-side. Guarded on
+    // identityModel.username/playerId so the very first, pre-login connect emits nothing.
+    socket.on('connect', () => {
+      if (identityModel.username === null || identityModel.playerId === null) {
+        return;
+      }
+      const identifyPayload: IdentifyPayload = {
+        playerId: identityModel.playerId,
+        username: identityModel.username,
+      };
+      socketController.operation(SOCKET_EVENTS.IDENTIFY, identifyPayload);
+      if (matchModel.matchId !== null && matchModel.phase !== MatchPhase.ENDED) {
+        socketController.operation(SOCKET_EVENTS.MATCH_RECONNECT);
+      }
     });
 
     const { view: lobbyView, controller: lobbyController } = wirePair<

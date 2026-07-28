@@ -80,3 +80,104 @@ describe('ClientMain.main', () => {
     expect(root.querySelector('ul[aria-label="champion-roster"]')).not.toBeNull();
   });
 });
+
+describe('ClientMain.main — socket reconnection (R6.1–R6.4 client-side gap)', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="root"></div>';
+  });
+
+  it('does not emit identify or match:reconnect on the very first, pre-login connect', () => {
+    const { socket, handlers } = makeFakeSocket();
+    act(() => {
+      ClientMain.main(() => socket);
+    });
+
+    act(() => {
+      handlers.get('connect')!();
+    });
+
+    expect(socket.emit).not.toHaveBeenCalledWith('identify', expect.anything());
+    expect(socket.emit).not.toHaveBeenCalledWith('match:reconnect', expect.anything());
+  });
+
+  it('re-emits identify (but not match:reconnect) on reconnect after identifying, with no active match', () => {
+    const { socket, handlers } = makeFakeSocket();
+    act(() => {
+      ClientMain.main(() => socket);
+    });
+    const root = document.getElementById('root')!;
+
+    act(() => {
+      fireEvent.change(root.querySelector('#username')!, { target: { value: 'Raj' } });
+      fireEvent.click(root.querySelector('button[type="submit"]')!);
+    });
+    (socket.emit as jest.Mock).mockClear();
+
+    act(() => {
+      handlers.get('connect')!();
+    });
+
+    expect(socket.emit).toHaveBeenCalledWith('identify', expect.objectContaining({ username: 'Raj' }));
+    expect(socket.emit).not.toHaveBeenCalledWith('match:reconnect', expect.anything());
+  });
+
+  it('CRITICAL CHECKPOINT: reconnect after identifying with an active, non-ended match emits identify then match:reconnect, in that order', () => {
+    const { socket, handlers } = makeFakeSocket();
+    act(() => {
+      ClientMain.main(() => socket);
+    });
+    const root = document.getElementById('root')!;
+
+    act(() => {
+      fireEvent.change(root.querySelector('#username')!, { target: { value: 'Raj' } });
+      fireEvent.click(root.querySelector('button[type="submit"]')!);
+    });
+    act(() => {
+      handlers.get('match:start')!({
+        matchId: 'm1',
+        initialState: {
+          matchId: 'm1',
+          tick: 0,
+          participants: [
+            {
+              playerId: 'p1',
+              team: 'A',
+              championId: 'korr',
+              position: { x: 0, y: 0 },
+              health: 100,
+              resource: 0,
+              cooldownsRemaining: {},
+              crowdControlled: false,
+              connectionStatus: 'connected',
+              alive: true,
+            },
+            {
+              playerId: 'p2',
+              team: 'B',
+              championId: 'vex',
+              position: { x: 1, y: 1 },
+              health: 100,
+              resource: 0,
+              cooldownsRemaining: {},
+              crowdControlled: false,
+              connectionStatus: 'connected',
+              alive: true,
+            },
+          ],
+        },
+      });
+    });
+    (socket.emit as jest.Mock).mockClear();
+
+    act(() => {
+      handlers.get('connect')!();
+    });
+
+    const emittedEvents = (socket.emit as jest.Mock).mock.calls.map(([event]) => event);
+    const identifyIndex = emittedEvents.indexOf('identify');
+    const reconnectIndex = emittedEvents.indexOf('match:reconnect');
+    expect(identifyIndex).not.toBe(-1);
+    expect(reconnectIndex).not.toBe(-1);
+    expect(identifyIndex).toBeLessThan(reconnectIndex);
+  });
+});

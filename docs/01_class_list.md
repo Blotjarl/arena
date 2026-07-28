@@ -425,6 +425,20 @@ call, where this table originally sketched a zero-arg method — this lets `Clie
 by a test without opening a live socket connection (master context §4.2's testability principle); a test
 supplies a mock satisfying the same `emit`/`on` shape instead.
 
+**Step 10 correction (`10_client_10`, R6.1–R6.4 client-side gap)**: `main()` now also registers a
+`socket.on('connect', ...)` handler, right after `socketController` is constructed. Socket.IO's client
+fires its own `'connect'` event both on the first successful connection and on every subsequent
+transport-level reconnect (its own automatic reconnection, no application code required to trigger it).
+On each firing, if `identityModel.username` and `identityModel.playerId` are both already set (i.e. this
+connection has identified before — false on the very first, pre-login connect, so nothing is emitted
+then), the handler re-emits `identify` with the existing `{playerId, username}` via
+`socketController.operation(SOCKET_EVENTS.IDENTIFY, ...)`. If, in addition, `matchModel.matchId !== null &&
+matchModel.phase !== MatchPhase.ENDED`, it also emits `socketController.operation(SOCKET_EVENTS.MATCH_RECONNECT)`,
+after the `identify` re-emission — ordering matters, since the server rejects `match:reconnect` on a
+connection that hasn't (re-)identified yet. This was previously a real, confirmed gap: the client never
+emitted `match:reconnect` anywhere in `packages/client/src` (07_shared_1's audit), even though the wire
+event and the server-side `DisconnectController`/`MatchModel.reconnect()` handling already existed.
+
 ---
 
 ## 7. `packages/api` (En) — REST API + persistence
