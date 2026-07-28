@@ -119,10 +119,13 @@ track prompts below are now generated — none remain outstanding.
 | 6 | `10_server_6_connection-and-reporting.md` | `10_server_1`–`5` | [x] |
 | 7 | `10_server_7_broadcast-views.md` | `10_server_2`, `10_server_3` | [x] |
 | 8 | `10_server_8_server-main.md` | `10_server_1`–`7` (wires everything) | [x] |
+| 9 | `10_server_9_match-reporting-wiring.md` | `10_server_6`, `10_server_8` — closes a real gap found in a full-project SRS audit: `MatchReportingClient` was implemented and tested but never wired to a real call site, so R7.1–R7.4/R8.1–R8.3/R-DB1–R-DB6 were non-functional end-to-end | [ ] |
 
-All eight of Marshall's `server`-track Step 10 prompts are now merged to `main` — `packages/server`'s
-controller/view package is complete (136 tests passing, 100% coverage on every controller/view file except
-`ServerMain.ts`, which is intentionally a smoke test per its own prompt's scope note).
+All eight of Marshall's original `server`-track Step 10 prompts are merged to `main` — `packages/server`'s
+controller/view package is otherwise complete (136 tests passing, 100% coverage on every controller/view
+file except `ServerMain.ts`, which is intentionally a smoke test per its own prompt's scope note). Prompt 9
+above is a same-track addendum, not part of the original 21 — it must run before Step 11 (acceptance
+testing), since an end-to-end test covering a complete match would otherwise immediately expose the gap.
 
 Two small corrections ride along in this batch, each documented in the prompt that surfaces it: `09_server_1`'s
 `MatchmakingQueue.join`/`cancel` gain a `playerId` field in their internal (non-wire) broadcast payload
@@ -195,9 +198,20 @@ resolve each participant's canonical id via `PlayerRepository.findOrCreateByUser
 `username` field — `10_api_1`'s design note 5 flags this explicitly; it must be corrected before
 `10_server_6` is executed, or the two tracks' real end-to-end match-reporting flow will not work.
 
+## Step 7 — Reconcile class diagram and docs against the real code
+
+Steps 9–10 (all 37 prompts, including the `10_server_9` addendum above) are now fully implemented. This
+prompt is `docs/ProjectProcess.txt` step 7 itself: bring `docs/01_class_list.md` and
+`docs/06_class_diagram_reverse-engineered.html` back in line with the real, tested, merged code — docs
+only, no `packages/` changes.
+
+| # | File | Owner | Status |
+|---|---|---|---|
+| 1 | `07_shared_1_diagram-reconciliation.md` | **Marshall** | [ ] |
+
 ## Later steps
 
-`docs/ProjectProcess.txt` step 7 (analyze the reverse-engineered diagram against Step 1's and the code,
-iterate) is still outstanding. All 36 prompts across Steps 9–10 now exist (per the corrected count in
-`prompts/09-10_implementation_plan.md`); executing/merging the remaining `[ ]` rows above is the next work,
-not prompt generation.
+Steps 11 (acceptance tests, incl. the required Playwright e2e test), 12 (final reverse-engineered
+diagram), and 13 (final javadoc) have not had prompts written yet. Step 11 is blocked on `10_server_9`
+above — an end-to-end test covering a complete match would otherwise immediately expose the
+match-reporting gap that prompt fixes.
