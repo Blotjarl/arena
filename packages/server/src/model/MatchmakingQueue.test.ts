@@ -136,6 +136,71 @@ describe('MatchmakingQueue', () => {
       queue.tryPairNext();
       expect(events).toEqual([]);
     });
+
+    it('CRITICAL CHECKPOINT (R2.2): a player already in an active match cannot re-queue', () => {
+      const queue = new MatchmakingQueue(50);
+      queue.join(makePlayer('p1', 'Alice'));
+      queue.join(makePlayer('p2', 'Bob'));
+      queue.tryPairNext(); // pairs and removes p1/p2 from the queue; both are now "in an active match"
+
+      expect(() => queue.join(makePlayer('p1', 'Alice'))).toThrow(AlreadyQueuedError);
+      expect(() => queue.join(makePlayer('p2', 'Bob'))).toThrow(AlreadyQueuedError);
+      expect(queue.size()).toBe(0);
+    });
+  });
+
+  describe('releaseMatch', () => {
+    it("CRITICAL CHECKPOINT (R2.5): frees the concurrent-match slot so a pairing blocked by maxConcurrentMatches can proceed once the match ends", () => {
+      const queue = new MatchmakingQueue(1);
+      queue.join(makePlayer('p1', 'Alice'));
+      queue.join(makePlayer('p2', 'Bob'));
+      const first = queue.tryPairNext();
+      expect(first).not.toBeNull();
+
+      queue.join(makePlayer('p3', 'Carol'));
+      queue.join(makePlayer('p4', 'Dan'));
+
+      // Bound (1) is reached -- pairing is blocked even though both matches would otherwise be pairable.
+      expect(queue.tryPairNext()).toBeNull();
+
+      queue.releaseMatch([first![0].playerId, first![1].playerId]);
+
+      const second = queue.tryPairNext();
+      expect(second).not.toBeNull();
+      expect(second!.map((e) => e.playerId)).toEqual(['p3', 'p4']);
+    });
+
+    it('removes both players from "in an active match" status, letting them re-queue', () => {
+      const queue = new MatchmakingQueue(50);
+      queue.join(makePlayer('p1', 'Alice'));
+      queue.join(makePlayer('p2', 'Bob'));
+      const pair = queue.tryPairNext()!;
+
+      expect(() => queue.join(makePlayer('p1', 'Alice'))).toThrow(AlreadyQueuedError);
+
+      queue.releaseMatch([pair[0].playerId, pair[1].playerId]);
+
+      expect(queue.join(makePlayer('p1', 'Alice'))).toBe(1);
+      expect(queue.join(makePlayer('p2', 'Bob'))).toBe(2);
+    });
+
+    it('never lets activeMatchCount go negative even if called more than once for the same match', () => {
+      const queue = new MatchmakingQueue(1);
+      queue.join(makePlayer('p1', 'Alice'));
+      queue.join(makePlayer('p2', 'Bob'));
+      const pair = queue.tryPairNext()!;
+      const ids: [string, string] = [pair[0].playerId, pair[1].playerId];
+
+      queue.releaseMatch(ids);
+      queue.releaseMatch(ids); // must not push activeMatchCount below 0 and mask a real future overflow
+
+      queue.join(makePlayer('p3', 'Carol'));
+      queue.join(makePlayer('p4', 'Dan'));
+      expect(queue.tryPairNext()).not.toBeNull(); // one free slot, not two
+      queue.join(makePlayer('p5', 'Eve'));
+      queue.join(makePlayer('p6', 'Frank'));
+      expect(queue.tryPairNext()).toBeNull();
+    });
   });
 
   describe('size', () => {

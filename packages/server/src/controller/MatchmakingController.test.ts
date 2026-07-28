@@ -1,5 +1,5 @@
-import { AlreadyQueuedError, NotQueuedError, Team, ModelEvent, Player, ModelListener } from '@arena/shared';
-import { MatchmakingController } from './MatchmakingController';
+import { AlreadyQueuedError, NotQueuedError, Team, ModelEvent, Player, ModelListener, PlayerId } from '@arena/shared';
+import { MatchmakingController, MatchRegistryEntry } from './MatchmakingController';
 import { MatchModel } from '../model/MatchModel';
 import { TickLoop } from '../model/TickLoop';
 import type { MatchmakingQueue } from '../model/MatchmakingQueue';
@@ -22,8 +22,13 @@ function makeQueue(overrides: Partial<MatchmakingQueue> = {}): MatchmakingQueue 
     join: jest.fn(),
     cancel: jest.fn(),
     tryPairNext: jest.fn(() => null),
+    releaseMatch: jest.fn(),
     ...overrides,
   } as unknown as MatchmakingQueue;
+}
+
+function makeMatchRegistry(): Map<PlayerId, MatchRegistryEntry> {
+  return new Map();
 }
 
 function makeView(): MatchmakingBroadcastView & { modelChanged: jest.Mock } {
@@ -44,7 +49,15 @@ describe('MatchmakingController', () => {
       const view = makeView();
       const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
       const onMatchCreated = jest.fn();
-      const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), onMatchCreated, makeReportingClient());
+      const controller = new MatchmakingController(
+        queue,
+        view,
+        tickLoop,
+        makeSockets(),
+        onMatchCreated,
+        makeReportingClient(),
+        makeMatchRegistry(),
+      );
 
       const player = new Player('p1', 'Alice', new Date());
       controller.operation('queue:join', { player });
@@ -68,6 +81,7 @@ describe('MatchmakingController', () => {
         makeSockets(),
         jest.fn(),
         makeReportingClient(),
+        makeMatchRegistry(),
       );
       expect(() => controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) })).toThrow(
         AlreadyQueuedError,
@@ -82,7 +96,15 @@ describe('MatchmakingController', () => {
         const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
         const onMatchCreated = jest.fn();
         const sockets = makeSockets();
-        const controller = new MatchmakingController(queue, view, tickLoop, sockets, onMatchCreated, makeReportingClient());
+        const controller = new MatchmakingController(
+          queue,
+          view,
+          tickLoop,
+          sockets,
+          onMatchCreated,
+          makeReportingClient(),
+          makeMatchRegistry(),
+        );
 
         controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) });
 
@@ -102,7 +124,15 @@ describe('MatchmakingController', () => {
         const queue = makeQueue({ tryPairNext: jest.fn(() => pair) });
         const view = makeView();
         const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
-        const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), jest.fn(), makeReportingClient());
+        const controller = new MatchmakingController(
+          queue,
+          view,
+          tickLoop,
+          makeSockets(),
+          jest.fn(),
+          makeReportingClient(),
+          makeMatchRegistry(),
+        );
 
         controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) });
 
@@ -120,13 +150,14 @@ describe('MatchmakingController', () => {
         expect(forA.roster.length).toBeGreaterThan(0);
       });
 
-      it('CRITICAL CHECKPOINT: unregisters the match from TickLoop once it ends', () => {
+      it('CRITICAL CHECKPOINT: unregisters the match from TickLoop, releases the queue slot, and clears the match registry once it ends', () => {
         const addListenerSpy = jest.spyOn(MatchModel.prototype, 'addModelListener');
         const pair: [QueueEntry, QueueEntry] = [new QueueEntry('p1', 'Alice', 1000), new QueueEntry('p2', 'Bob', 1001)];
         const queue = makeQueue({ tryPairNext: jest.fn(() => pair) });
         const view = makeView();
         const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
         const onMatchCreated = jest.fn();
+        const matchRegistry = makeMatchRegistry();
         const controller = new MatchmakingController(
           queue,
           view,
@@ -134,10 +165,17 @@ describe('MatchmakingController', () => {
           makeSockets(),
           onMatchCreated,
           makeReportingClient(),
+          matchRegistry,
         );
 
         controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) });
         const match = (tickLoop.register as jest.Mock).mock.calls[0][0] as MatchModel;
+
+        // Both paired players must already be registered by the time createMatch() returns -- this is what
+        // lets ServerMain rebind a reconnecting player's fresh ConnectionHandler before match:reconnect ever
+        // arrives.
+        expect(matchRegistry.get('p1')).toEqual({ match, view: onMatchCreated.mock.calls[0][2] });
+        expect(matchRegistry.get('p2')).toEqual({ match, view: onMatchCreated.mock.calls[0][2] });
 
         // createMatch() registers three listeners on the new MatchModel: the real MatchBroadcastView (its
         // own modelChanged is still an unimplemented stub, 10_server_7, so it must never be invoked here),
@@ -154,13 +192,22 @@ describe('MatchmakingController', () => {
         ) as ModelListener | undefined;
         expect(cleanupListener).toBeDefined();
 
-        cleanupListener!.modelChanged(new ModelEvent(match, 'match:end', {}));
-        expect(tickLoop.unregister).toHaveBeenCalledWith(match.id);
-
-        // A non-'match:end' event must not trigger unregistration.
-        (tickLoop.unregister as jest.Mock).mockClear();
+        // A non-'match:end' event must not trigger any cleanup.
         cleanupListener!.modelChanged(new ModelEvent(match, 'state', {}));
         expect(tickLoop.unregister).not.toHaveBeenCalled();
+        expect(queue.releaseMatch).not.toHaveBeenCalled();
+        expect(matchRegistry.has('p1')).toBe(true);
+
+        cleanupListener!.modelChanged(new ModelEvent(match, 'match:end', {}));
+        expect(tickLoop.unregister).toHaveBeenCalledWith(match.id);
+        expect(queue.releaseMatch).toHaveBeenCalledWith(['p1', 'p2']);
+
+        // CRITICAL (ordering trace, see this prompt's closing requirement): the registry entries for both
+        // players must be gone the instant 'match:end' has fired -- synchronously, before any later event
+        // (like a stray match:reconnect from a disconnected loser) could possibly reach the server and find
+        // a stale entry pointing at this now-dead match.
+        expect(matchRegistry.has('p1')).toBe(false);
+        expect(matchRegistry.has('p2')).toBe(false);
 
         addListenerSpy.mockRestore();
       });
@@ -177,6 +224,7 @@ describe('MatchmakingController', () => {
         makeSockets(),
         jest.fn(),
         makeReportingClient(),
+        makeMatchRegistry(),
       );
       controller.operation('queue:cancel', { player: new Player('p1', 'Alice', new Date()) });
       expect(queue.cancel).toHaveBeenCalledWith('p1');
@@ -195,6 +243,7 @@ describe('MatchmakingController', () => {
         makeSockets(),
         jest.fn(),
         makeReportingClient(),
+        makeMatchRegistry(),
       );
       expect(() => controller.operation('queue:cancel', { player: new Player('p1', 'Alice', new Date()) })).toThrow(
         NotQueuedError,
