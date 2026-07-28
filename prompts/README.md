@@ -139,15 +139,20 @@ closing requirement.
 
 | # | File | Depends on | Status |
 |---|---|---|---|
-| 1 | `10_client_1_socket-connection-controller.md` | client model package (`09_client_1`–`3`); gains a constructor-injected `Socket` (correction) | [ ] |
-| 2 | `10_client_2_lobby-controller.md` | `10_client_1` | [ ] |
-| 3 | `10_client_3_champion-select-controller.md` | `10_client_1` | [ ] |
-| 4 | `10_client_4_match-controller.md` | `10_client_1`; CRITICAL CHECKPOINT — move-throttle sentinel bug caught by its own test suite | [ ] |
-| 5 | `10_client_5_lobby-view.md` | `10_client_2`; corrects `ClientIdentityModel`/`ClientQueueModel`'s missing `notifyChanged` calls | [ ] |
-| 6 | `10_client_6_champion-select-view.md` | `10_client_3`, `10_client_5`; corrects all four `ClientMatchModel.apply*` methods' missing `notifyChanged` calls | [ ] |
-| 7 | `10_client_7_match-hud-view.md` | `10_client_4`, `10_client_6`; CRITICAL CHECKPOINT — `InterpolationBuffer` output never written back to `ClientMatchModel` | [ ] |
-| 8 | `10_client_8_results-view.md` | `10_client_2`, `10_client_6`; pairs with `LobbyController`, not a dedicated controller (docs/01_class_list.md §6c gap-fill) | [ ] |
-| 9 | `10_client_9_client-main.md` | `10_client_1`–`8` (wires everything); smoke test only, per plan §5 | [ ] |
+| 1 | `10_client_1_socket-connection-controller.md` | client model package (`09_client_1`–`3`); gains a constructor-injected `Socket` (correction) | [x] |
+| 2 | `10_client_2_lobby-controller.md` | `10_client_1` | [x] |
+| 3 | `10_client_3_champion-select-controller.md` | `10_client_1` | [x] |
+| 4 | `10_client_4_match-controller.md` | `10_client_1`; CRITICAL CHECKPOINT — move-throttle sentinel bug caught by its own test suite | [x] |
+| 5 | `10_client_5_lobby-view.md` | `10_client_2`; corrects `ClientIdentityModel`/`ClientQueueModel`'s missing `notifyChanged` calls | [x] |
+| 6 | `10_client_6_champion-select-view.md` | `10_client_3`, `10_client_5`; corrects all four `ClientMatchModel.apply*` methods' missing `notifyChanged` calls | [x] |
+| 7 | `10_client_7_match-hud-view.md` | `10_client_4`, `10_client_6`; CRITICAL CHECKPOINT — `InterpolationBuffer` output never written back to `ClientMatchModel` | [x] |
+| 8 | `10_client_8_results-view.md` | `10_client_2`, `10_client_6`; pairs with `LobbyController`, not a dedicated controller (docs/01_class_list.md §6c gap-fill) | [x] |
+| 9 | `10_client_9_client-main.md` | `10_client_1`–`8` (wires everything); smoke test only, per plan §5 | [x] |
+
+All nine of Raj's `client`-track Step 10 prompts are now merged to `main` (PR #30) — `packages/client`'s
+controller/view package is complete (128 tests passing across 17 suites, 98%+ statement coverage; every
+controller/view file at 100% except `ClientMain.tsx`, intentionally a smoke test per its own prompt's scope
+note, and two views with one defensive, unreachable fallback branch each).
 
 The client model package (`09_client_1`–`3`, merged) turned out to have a real gap: none of
 `ClientIdentityModel`/`ClientQueueModel`/`ClientMatchModel`'s mutator methods called `notifyChanged()`, so
@@ -156,6 +161,13 @@ once each, additively — no other prompt in the batch repeats it. Several views
 model their `docs/01_class_list.md` §6c constructor sketch names (e.g. `LobbyView` needs `ClientQueueModel`
 alongside `ClientIdentityModel` to show queue status); each such prompt documents the correction and adds
 the extra model as an accessor outside the formal `View<M,C>` contract, not by widening that contract.
+
+**Review note:** the branch as originally submitted for merge contained a bad merge commit (a mid-batch
+`git merge main` whose conflict resolution accidentally reverted `packages/shared`, `packages/server`, and
+`packages/api` to stale/stub content — 108 files, +2,911/−11,947 lines relative to `main`). Caught in review
+before merging; fixed by rebasing the branch's real commits onto current `main` (dropping the bad merge)
+and recovering the one commit's legitimate new work that had been bundled into that same merge, then fully
+re-verified (`npm run typecheck --workspaces` clean, full client suite green) before merging.
 
 ### Api track (4)
 
