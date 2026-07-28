@@ -119,7 +119,7 @@ track prompts below are now generated — none remain outstanding.
 | 6 | `10_server_6_connection-and-reporting.md` | `10_server_1`–`5` | [x] |
 | 7 | `10_server_7_broadcast-views.md` | `10_server_2`, `10_server_3` | [x] |
 | 8 | `10_server_8_server-main.md` | `10_server_1`–`7` (wires everything) | [x] |
-| 9 | `10_server_9_match-reporting-wiring.md` | `10_server_6`, `10_server_8` — closes a real gap found in a full-project SRS audit: `MatchReportingClient` was implemented and tested but never wired to a real call site, so R7.1–R7.4/R8.1–R8.3/R-DB1–R-DB6 were non-functional end-to-end | [ ] |
+| 9 | `10_server_9_match-reporting-wiring.md` | `10_server_6`, `10_server_8` — closes a real gap found in a full-project SRS audit: `MatchReportingClient` was implemented and tested but never wired to a real call site, so R7.1–R7.4/R8.1–R8.3/R-DB1–R-DB6 were non-functional end-to-end | [x] |
 
 All eight of Marshall's original `server`-track Step 10 prompts are merged to `main` — `packages/server`'s
 controller/view package is otherwise complete (136 tests passing, 100% coverage on every controller/view
@@ -212,6 +212,6 @@ only, no `packages/` changes.
 ## Later steps
 
 Steps 11 (acceptance tests, incl. the required Playwright e2e test), 12 (final reverse-engineered
-diagram), and 13 (final javadoc) have not had prompts written yet. Step 11 is blocked on `10_server_9`
-above — an end-to-end test covering a complete match would otherwise immediately expose the
-match-reporting gap that prompt fixes.
+diagram), and 13 (final javadoc) have not had prompts written yet. `10_server_9` above is implemented and
+tested (pending PR merge) — once merged, Step 11 is no longer blocked, since the match-reporting gap an
+end-to-end test would otherwise have exposed is closed.

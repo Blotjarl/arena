@@ -183,6 +183,20 @@ pattern.
 | `DisconnectController` | `extends AbstractController<MatchModel, MatchBroadcastView>` | `operation(action: 'disconnect' \| 'match:reconnect', payload): void` — **throws** `GracePeriodExpiredError` (R6.1–R6.4); forwards to `MatchModel.disconnect`/`reconnect` — the grace-period check itself lives in `MatchModel.tick()`, not here |
 | `ConnectionHandler` | *(not an `AbstractController` — a thin Socket.IO transport adapter, kept separate per 3.6.4 Maintainability so game logic is testable without a live socket)* | `constructor(socket: Socket, controllers: {...})`; `register(): void` (binds `socket.on(eventName, ...)` for every inbound event in the contract table, forwarding each to the right controller's `operation(...)`) |
 | `MatchReportingClient` | *(plain HTTP client, not MVC)* | `reportMatchBegin(matchId: MatchId, participants: MatchParticipant[]): Promise<void>`; `reportMatchEnd(matchId: MatchId, outcome: {...}): Promise<void>` — both log-and-swallow failures rather than throw, per R7.4 ("shall not interrupt or crash the live game server process") |
+| `MatchReportingListener` | `implements ModelListener` *(no paired controller/view — see note below)* | `constructor(match: MatchModel, players: [Player, Player], reportingClient: MatchReportingClient)` (registers itself via `match.addModelListener(this)`); `modelChanged(event: ModelEvent): void` — on `'match:start'`, zips `players` against `event.payload.initialState.participants` by `playerId` and calls `reportingClient.reportMatchBegin`; on `'match:end'`, calls `reportingClient.reportMatchEnd` with the event's `reason`/`winningTeam`/`durationMs` |
+
+> **Step 10 correction (`10_server_9`)**: `MatchReportingClient` (`10_server_6`) was implemented and unit
+> tested but had no real call site — `ServerMain.ts` explicitly documented this as deferred, leaving
+> R7.1–R7.4/R8.1–R8.3/R-DB1–R-DB6 non-functional end-to-end despite every individual class being correct in
+> isolation. `MatchReportingListener` is a new class (not in the original class diagram) that closes this
+> gap as a second, independent `ModelListener` on `MatchModel` alongside `MatchBroadcastView` — it has no
+> paired controller and broadcasts nothing to a socket, so it does not implement `View`. `MatchModel` never
+> retains `Player.username` (only `ParticipantState.playerId`), so this listener is constructed with the
+> full `Player` objects from `MatchmakingController.createMatch()`, the one place both are in scope
+> together, rather than being added to `MatchModel` itself (which must stay free of network/HTTP
+> dependencies, 3.6.4). `MatchmakingController`'s constructor gained a trailing `reportingClient:
+> MatchReportingClient` parameter (constructed once in `ServerMain.main()` and shared across every
+> connection's controller instance) so `createMatch()` can wire a `MatchReportingListener` per match.
 
 ### 5c. `server/view`
 
@@ -200,6 +214,12 @@ pattern.
 | Class | Operations |
 |---|---|
 | `ServerMain` | `static async main(): Promise<void>` — creates the HTTP + Socket.IO server, the singleton `MatchmakingQueue` and `TickLoop`, wires a new `ConnectionHandler` per incoming socket connection, starts `TickLoop`, and listens on the configured port. `src/index.ts` is a two-line file calling `ServerMain.main()`. |
+
+> **Step 10 correction (`10_server_9`)**: `ServerMain.main()` now constructs one `MatchReportingClient`
+> (using an `API_BASE_URL` env var, defaulting to `http://localhost:4000`) before the `io.on('connection',
+> ...)` handler, and passes it to every connection's `MatchmakingController`. Previously this construction
+> was deliberately omitted with a comment noting "no call site exists yet" — see `MatchReportingListener`'s
+> correction note in §5b for the full gap this closes.
 
 ---
 

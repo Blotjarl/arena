@@ -9,9 +9,11 @@ import { MatchBroadcastView } from './view/MatchBroadcastView';
 import { PlayerIdentifyController } from './controller/PlayerIdentifyController';
 import { MatchmakingController } from './controller/MatchmakingController';
 import { ConnectionHandler } from './controller/ConnectionHandler';
+import { MatchReportingClient } from './controller/MatchReportingClient';
 
 const DEFAULT_MAX_CONCURRENT_MATCHES = 50;
 const DEFAULT_TICK_RATE_HZ = 20;
+const DEFAULT_API_BASE_URL = 'http://localhost:4000';
 
 /** The server subsystem's entry point (SRS 2.1) — wires every server component together and starts listening. */
 export class ServerMain {
@@ -37,9 +39,10 @@ export class ServerMain {
     const queue = new MatchmakingQueue(maxConcurrentMatches);
     const tickLoop = new TickLoop(DEFAULT_TICK_RATE_HZ);
     const matchmakingView = new MatchmakingBroadcastView(queue, sockets);
-    // MatchReportingClient is deliberately not constructed/wired here — its two report methods are
-    // implemented and unit-tested (10_server_6), but no call site exists yet in this batch; see that
-    // prompt's closing note.
+    // CORRECTION (Step 10, 10_server_9): constructed once for the whole process and shared by every
+    // connection's MatchmakingController — closes the R7.1-R7.4 gap where MatchReportingClient's
+    // report methods (10_server_6) were implemented and unit-tested but never had a real call site.
+    const reportingClient = new MatchReportingClient(process.env.API_BASE_URL || DEFAULT_API_BASE_URL);
 
     io.on('connection', (socket: Socket) => {
       const identify = new PlayerIdentifyController(queue, matchmakingView);
@@ -53,6 +56,7 @@ export class ServerMain {
             connectionHandlers.get(playerId)?.bindMatch(match, view);
           }
         },
+        reportingClient,
       );
       const handler = new ConnectionHandler(socket, { identify, matchmaking }, (player: Player) => {
         sockets.set(player.id, socket);
