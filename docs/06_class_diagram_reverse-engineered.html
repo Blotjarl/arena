@@ -672,14 +672,20 @@
         +EndReason|null endReason
         +string id
         -[ParticipantState,ParticipantState] participants
+        -Map~string,object~ pendingMoves
         +MatchPhase phase
         +number|null startedAt
+        -number tickCount
         +Team|null winningTeam
         +MatchModel(id, players)
         +addModelListener(listener) void
         +checkWinConditions() EndReason|null
+        #determineWinner(reason) Team|null
         +disconnect(playerId) void
+        #endMatch(reason, winningTeam, now) void
+        #findParticipant(playerId) ParticipantState
         +notifyChanged(event) void
+        #opponentOf(participant) ParticipantState
         +reconnect(playerId) void
         +removeModelListener(listener) void
         +selectChampion(playerId, championId) void
@@ -700,14 +706,15 @@
         +number resource
         +Team team
         +ParticipantState(playerId, team)
-        +applyCrowdControl(durationMs) void
+        +applyCrowdControl(durationMs, now) void
         +applyDamage(amount) void
         +applyHeal(amount) void
         +canUseAbility(abilityId, now) boolean
         +isAlive() boolean
-        +move(direction, deltaSeconds) void
+        -isIncapacitated(now) boolean
+        +move(direction, deltaSeconds, now) void
         +regenerateResource(deltaSeconds) void
-        +toSnapshot() ParticipantSnapshot
+        +toSnapshot(now) ParticipantSnapshot
         +useAbility(ability, now) void
     }
     class QueueEntry {
@@ -737,6 +744,11 @@
         +setModel(model) void
         +setView(view) void
     }
+    class ChampionSelectRequest {
+        &lt;&lt;interface&gt;&gt;
+        +string championId
+        +string playerId
+    }
     class CombatController {
         #Model model
         #View view
@@ -747,17 +759,28 @@
         +setModel(model) void
         +setView(view) void
     }
+    class CombatActionRequest {
+        &lt;&lt;interface&gt;&gt;
+        +MovementInput|AbilityUseRequest input
+        +string playerId
+    }
     class ConnectionHandler {
+        -ChampionSelectController|null championSelect
+        -CombatController|null combat
         -ConnectionControllers controllers
+        -DisconnectController|null disconnect
+        -boolean identified
+        -object onIdentified
+        -Player|null player
         -Socket socket
-        +ConnectionHandler(socket, controllers)
+        +ConnectionHandler(socket, controllers, onIdentified)
+        +bindMatch(match, view) void
+        -emitError(err) void
         +register() void
+        -requireIdentified() boolean
     }
     class ConnectionControllers {
         &lt;&lt;interface&gt;&gt;
-        +ChampionSelectController championSelect
-        +CombatController combat
-        +DisconnectController disconnect
         +PlayerIdentifyController identify
         +MatchmakingController matchmaking
     }
@@ -771,21 +794,41 @@
         +setModel(model) void
         +setView(view) void
     }
+    class DisconnectRequest {
+        &lt;&lt;interface&gt;&gt;
+        +string playerId
+    }
     class MatchmakingController {
         #Model model
+        -OnMatchCreated onMatchCreated
+        -MatchReportingClient reportingClient
+        -Map~string,Socket~ sockets
+        -TickLoop tickLoop
         #View view
-        +MatchmakingController(model, view)
+        +MatchmakingController(model, view, tickLoop, sockets, onMatchCreated, reportingClient)
+        -createMatch(playerIdA, usernameA, playerIdB, usernameB) void
         +getModel() Model
         +getView() View
         +operation(action, payload) void
         +setModel(model) void
         +setView(view) void
     }
+    class MatchmakingRequest {
+        &lt;&lt;interface&gt;&gt;
+        +Player player
+    }
     class MatchReportingClient {
         -string apiBaseUrl
         +MatchReportingClient(apiBaseUrl)
+        -post(path, body) Promise~void~
         +reportMatchBegin(matchId, participants) Promise~void~
         +reportMatchEnd(matchId, outcome) Promise~void~
+    }
+    class MatchReportingListener {
+        -[Player,Player] players
+        -MatchReportingClient reportingClient
+        +MatchReportingListener(match, players, reportingClient)
+        +modelChanged(event) void
     }
     class PlayerIdentifyController {
         #Model model
@@ -801,6 +844,7 @@
         -MatchModel model
         -Map~string,Socket~ sockets
         +MatchBroadcastView(model, sockets)
+        -broadcast(eventName, payload) void
         +getController() never
         +getModel() MatchModel
         +modelChanged(event) void
@@ -819,18 +863,36 @@
     }
     class ServerMain {
         +ServerMain()
-        +main()$ Promise~void~
+        +main(port)$ Promise~void~
     }
 
     MatchmakingQueue --&gt; QueueEntry
     MatchModel --&gt; ParticipantState
     TickLoop --&gt; MatchModel
+    ChampionSelectController --&gt; MatchModel
+    ChampionSelectController --&gt; MatchBroadcastView
+    ChampionSelectController ..&gt; ChampionSelectRequest
+    CombatController --&gt; MatchModel
+    CombatController --&gt; MatchBroadcastView
+    CombatController ..&gt; CombatActionRequest
+    ConnectionHandler --&gt; ChampionSelectController
+    ConnectionHandler --&gt; CombatController
     ConnectionHandler --&gt; ConnectionControllers
-    ConnectionControllers --&gt; ChampionSelectController
-    ConnectionControllers --&gt; CombatController
-    ConnectionControllers --&gt; DisconnectController
+    ConnectionHandler --&gt; DisconnectController
+    ConnectionHandler ..&gt; MatchModel
+    ConnectionHandler ..&gt; MatchBroadcastView
     ConnectionControllers --&gt; PlayerIdentifyController
     ConnectionControllers --&gt; MatchmakingController
+    DisconnectController --&gt; MatchModel
+    DisconnectController --&gt; MatchBroadcastView
+    DisconnectController ..&gt; DisconnectRequest
+    MatchmakingController --&gt; MatchReportingClient
+    MatchmakingController --&gt; TickLoop
+    MatchmakingController --&gt; MatchmakingQueue
+    MatchmakingController --&gt; MatchmakingBroadcastView
+    MatchmakingController ..&gt; MatchmakingRequest
+    MatchReportingListener --&gt; MatchReportingClient
+    MatchReportingListener --&gt; MatchModel
     MatchBroadcastView --&gt; MatchModel
     MatchmakingBroadcastView --&gt; MatchmakingQueue
 
@@ -841,12 +903,17 @@
     class QueueEntry:::server
     class TickLoop:::server
     class ChampionSelectController:::server
+    class ChampionSelectRequest:::server
     class CombatController:::server
+    class CombatActionRequest:::server
     class ConnectionHandler:::server
     class ConnectionControllers:::server
     class DisconnectController:::server
+    class DisconnectRequest:::server
     class MatchmakingController:::server
+    class MatchmakingRequest:::server
     class MatchReportingClient:::server
+    class MatchReportingListener:::server
     class PlayerIdentifyController:::server
     class MatchBroadcastView:::server
     class MatchmakingBroadcastView:::server
@@ -868,6 +935,7 @@
         +removeModelListener(listener) void
     }
     class ClientMatchModel {
+        +ChampionSelectedPayload|null championSelection
         +MatchStatePayload|null latestState
         +string|null matchId
         +MatchPhase|null phase
@@ -882,6 +950,7 @@
         +removeModelListener(listener) void
     }
     class ClientQueueModel {
+        +MatchFoundPayload|null matchPayload
         +number|null position
         +QueueStatus status
         +ClientQueueModel()
@@ -896,42 +965,49 @@
         -number capacity
         -MatchStatePayload[] samples
         +InterpolationBuffer(capacity)
+        -findPosition(snapshot, playerId) Position|undefined
         +getInterpolatedPosition(playerId, now) Position
         +push(snapshot) void
     }
     class ChampionSelectController {
-        #Model model
-        #View view
-        +ChampionSelectController(model, view)
-        +getModel() Model
-        +getView() View
+        #ClientMatchModel model
+        -SocketConnectionController socketController
+        #ChampionSelectView view
+        +ChampionSelectController(model, view, socketController)
+        +getModel() ClientMatchModel
+        +getView() ChampionSelectView
         +operation(action, payload) void
         +setModel(model) void
         +setView(view) void
     }
     class LobbyController {
-        #Model model
-        #View view
-        +LobbyController(model, view)
-        +getModel() Model
-        +getView() View
+        #ClientIdentityModel model
+        -SocketConnectionController socketController
+        #LobbyView view
+        +LobbyController(model, view, socketController)
+        +getModel() ClientIdentityModel
+        +getView() LobbyView
         +operation(action, payload) void
         +setModel(model) void
         +setView(view) void
     }
     class MatchController {
-        #Model model
-        #View view
-        +MatchController(model, view)
-        +getModel() Model
-        +getView() View
+        -number|null lastMoveEmitAt
+        #ClientMatchModel model
+        -object now
+        -SocketConnectionController socketController
+        #MatchHUDView view
+        +MatchController(model, view, socketController, now)
+        +getModel() ClientMatchModel
+        +getView() MatchHUDView
         +operation(action, payload) void
         +setModel(model) void
         +setView(view) void
     }
     class SocketConnectionController {
         -ClientModels models
-        +SocketConnectionController(models)
+        -Socket socket
+        +SocketConnectionController(socket, models)
         -bindInboundEvents() void
         +operation(action, payload) void
     }
@@ -943,71 +1019,101 @@
     }
     class ChampionSelectView {
         -ChampionSelectController controller
+        -ClientIdentityModel identityModel
         -ClientMatchModel model
         -object|null onUpdate
-        +ChampionSelectView(model, controller)
+        -ClientQueueModel queueModel
+        +ChampionSelectView(identityModel, model, queueModel, controller)
         +bindUpdateCallback(callback) void
         +getController() ChampionSelectController
+        +getIdentityModel() ClientIdentityModel
         +getModel() ClientMatchModel
+        +getQueueModel() ClientQueueModel
         +modelChanged(event) void
         +setController(controller) void
+        +setIdentityModel(identityModel) void
         +setModel(model) void
+        +setQueueModel(queueModel) void
     }
     class LobbyView {
         -LobbyController controller
         -ClientIdentityModel model
         -object|null onUpdate
-        +LobbyView(model, controller)
+        -ClientQueueModel queueModel
+        +LobbyView(model, queueModel, controller)
         +bindUpdateCallback(callback) void
         +getController() LobbyController
         +getModel() ClientIdentityModel
+        +getQueueModel() ClientQueueModel
         +modelChanged(event) void
         +setController(controller) void
         +setModel(model) void
+        +setQueueModel(queueModel) void
     }
     class MatchHUDView {
         -MatchController controller
+        -ClientIdentityModel identityModel
         -InterpolationBuffer interpolation
         -ClientMatchModel model
         -object|null onUpdate
-        +MatchHUDView(model, controller)
+        +MatchHUDView(identityModel, model, controller)
         +bindUpdateCallback(callback) void
         +getController() MatchController
+        +getIdentityModel() ClientIdentityModel
+        +getInterpolationBuffer() InterpolationBuffer
         +getModel() ClientMatchModel
         +modelChanged(event) void
         +setController(controller) void
+        +setIdentityModel(identityModel) void
         +setModel(model) void
     }
     class ResultsView {
         -LobbyController controller
         -ClientMatchModel model
         -object|null onUpdate
-        +ResultsView(model, controller)
+        -ClientQueueModel queueModel
+        +ResultsView(model, queueModel, controller)
         +bindUpdateCallback(callback) void
         +getController() LobbyController
         +getModel() ClientMatchModel
+        +getQueueModel() ClientQueueModel
         +modelChanged(event) void
         +setController(controller) void
         +setModel(model) void
+        +setQueueModel(queueModel) void
     }
     class ClientMain {
         +ClientMain()
-        +main()$ void
+        +main(socketFactory)$ void
     }
 
+    ChampionSelectController --&gt; ClientMatchModel
+    ChampionSelectController --&gt; SocketConnectionController
+    ChampionSelectController --&gt; ChampionSelectView
+    LobbyController --&gt; ClientIdentityModel
+    LobbyController --&gt; SocketConnectionController
+    LobbyController --&gt; LobbyView
+    MatchController --&gt; ClientMatchModel
+    MatchController --&gt; SocketConnectionController
+    MatchController --&gt; MatchHUDView
     SocketConnectionController --&gt; ClientModels
     ClientModels --&gt; ClientIdentityModel
     ClientModels --&gt; ClientMatchModel
     ClientModels --&gt; ClientQueueModel
     ChampionSelectView --&gt; ChampionSelectController
+    ChampionSelectView --&gt; ClientIdentityModel
     ChampionSelectView --&gt; ClientMatchModel
+    ChampionSelectView --&gt; ClientQueueModel
     LobbyView --&gt; LobbyController
     LobbyView --&gt; ClientIdentityModel
+    LobbyView --&gt; ClientQueueModel
     MatchHUDView --&gt; MatchController
+    MatchHUDView --&gt; ClientIdentityModel
     MatchHUDView --&gt; InterpolationBuffer
     MatchHUDView --&gt; ClientMatchModel
     ResultsView --&gt; LobbyController
     ResultsView --&gt; ClientMatchModel
+    ResultsView --&gt; ClientQueueModel
 
     classDef client fill:#DCF2F1,stroke:#2AA7B0,color:#1B222C
     class ClientIdentityModel:::client
@@ -1050,14 +1156,44 @@
     class MatchRepository {
         -PgPool pool
         +MatchRepository(pool)
-        +findHistoryForPlayer(playerId, page, pageSize) Promise~MatchParticipant[]~
+        +findHistoryForPlayer(playerId, page, pageSize) Promise~MatchHistoryRow[]~
         +recordMatch(match, participants) Promise~void~
     }
+    class MatchHistoryRow {
+        &lt;&lt;interface&gt;&gt;
+        +string championId
+        +number durationMs
+        +Date endedAt
+        +EndReason endReason
+        +string matchId
+        +string opponentUsername
+        +MatchResult result
+    }
     class PendingMatchCorrelator {
+        -Set~string~ completed
         -Map~string,PendingRecord~ pending
         +PendingMatchCorrelator()
         +recordBegin(matchId, participants) void
-        +recordEnd(matchId, outcome) PendingRecord|null
+        +recordEnd(matchId, outcome) CorrelatedMatchReport|null
+    }
+    class BeginParticipant {
+        &lt;&lt;interface&gt;&gt;
+        +string championId
+        +string playerId
+        +Team team
+        +string username
+    }
+    class CorrelatedMatchReport {
+        &lt;&lt;interface&gt;&gt;
+        +MatchOutcome outcome
+        +BeginParticipant[] participants
+    }
+    class MatchOutcome {
+        &lt;&lt;interface&gt;&gt;
+        +number durationMs
+        +Date endedAt
+        +EndReason endReason
+        +Team|null winningTeam
     }
     class PlayerRepository {
         -PgPool pool
@@ -1065,41 +1201,62 @@
         +findOrCreateByUsername(username) Promise~Player~
     }
     class InternalMatchController {
+        -PendingMatchCorrelator correlator
+        -ErrorResponseView errorView
+        -MatchRepository matchRepository
         #Model model
+        -PlayerRepository playerRepository
         #View view
-        +InternalMatchController(model, view)
+        +InternalMatchController(correlator, matchRepository, playerRepository, errorView)
         +getModel() Model
         +getView() View
         +handleBegin(req, res) Promise~void~
         +handleEnd(req, res) Promise~void~
         +operation(action, payload) void
+        -parseBeginBody(body) object
+        -parseEndBody(body) object
+        -parseParticipant(raw, index) BeginParticipant
+        -respondError(err, res) void
+        -resultFor(team, winningTeam) MatchResult
         +setModel(model) void
         +setView(view) void
     }
     class LeaderboardController {
+        -ErrorResponseView errorView
+        -LeaderboardRepository leaderboardRepository
         #Model model
+        -LeaderboardResponseView responseView
         #View view
-        +LeaderboardController(model, view)
+        +LeaderboardController(leaderboardRepository, responseView, errorView)
         +getChampionWinRates(req, res) Promise~void~
         +getLeaderboard(req, res) Promise~void~
         +getModel() Model
         +getView() View
         +operation(action, payload) void
+        -parseMinGames(raw) number
+        -respondError(err, res) void
         +setModel(model) void
         +setView(view) void
     }
     class MatchHistoryController {
+        -ErrorResponseView errorView
+        -MatchRepository matchRepository
         #Model model
+        -MatchHistoryResponseView responseView
         #View view
-        +MatchHistoryController(model, view)
+        +MatchHistoryController(matchRepository, responseView, errorView)
         +getHistory(req, res) Promise~void~
         +getModel() Model
         +getView() View
         +operation(action, payload) void
+        -parsePagination(rawPage, rawPageSize) object
+        -parsePositiveInt(raw, field) number
+        -respondError(err, res) void
         +setModel(model) void
         +setView(view) void
     }
     class ErrorResponseView {
+        -Record~string,number~ STATUS_BY_CODE$
         +ErrorResponseView()
         +render(error) object
     }
@@ -1109,29 +1266,57 @@
     }
     class MatchHistoryResponseView {
         +MatchHistoryResponseView()
-        +render(participants) MatchHistoryEntryDTO[]
+        +render(rows) MatchHistoryEntryDTO[]
     }
     class PgPool {
-        -string connectionString
+        -Pool pool
         +PgPool(connectionString)
+        +close() Promise~void~
         +query(sql, params) Promise~T[]~
+        +transaction(fn) Promise~T~
     }
     class ApiMain {
+        -PgPool|null pool$
+        -Server~unknown,unknown~|null server$
         +ApiMain()
         +main()$ Promise~void~
+        +stop()$ Promise~void~
     }
 
     LeaderboardRepository --&gt; PgPool
     LeaderboardRepository ..&gt; LeaderboardEntry
     MatchRepository --&gt; PgPool
+    MatchRepository ..&gt; MatchHistoryRow
+    PendingMatchCorrelator ..&gt; BeginParticipant
+    PendingMatchCorrelator ..&gt; MatchOutcome
+    PendingMatchCorrelator ..&gt; CorrelatedMatchReport
+    CorrelatedMatchReport --&gt; MatchOutcome
+    CorrelatedMatchReport --&gt; BeginParticipant
     PlayerRepository --&gt; PgPool
+    InternalMatchController --&gt; PendingMatchCorrelator
+    InternalMatchController --&gt; ErrorResponseView
+    InternalMatchController --&gt; MatchRepository
+    InternalMatchController --&gt; PlayerRepository
+    InternalMatchController ..&gt; BeginParticipant
+    LeaderboardController --&gt; ErrorResponseView
+    LeaderboardController --&gt; LeaderboardRepository
+    LeaderboardController --&gt; LeaderboardResponseView
+    MatchHistoryController --&gt; ErrorResponseView
+    MatchHistoryController --&gt; MatchRepository
+    MatchHistoryController --&gt; MatchHistoryResponseView
     LeaderboardResponseView ..&gt; LeaderboardEntry
+    MatchHistoryResponseView ..&gt; MatchHistoryRow
+    ApiMain --&gt; PgPool
 
     classDef api fill:#E7E3F5,stroke:#7C6FC4,color:#1B222C
     class LeaderboardEntry:::api
     class LeaderboardRepository:::api
     class MatchRepository:::api
+    class MatchHistoryRow:::api
     class PendingMatchCorrelator:::api
+    class BeginParticipant:::api
+    class CorrelatedMatchReport:::api
+    class MatchOutcome:::api
     class PlayerRepository:::api
     class InternalMatchController:::api
     class LeaderboardController:::api

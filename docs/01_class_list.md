@@ -115,6 +115,8 @@ A almost 1:1.)*
 | `MatchHistoryEntryDTO` | server→client (REST) | `matchId, opponentUsername, championId, result, endReason, durationMs, endedAt` |
 | `LeaderboardEntryDTO` | server→client (REST) | `username, wins, losses, draws, gamesPlayed, winRate` |
 | `ChampionWinRateDTO` | server→client (REST) | `championId, gamesPlayed, winRate` |
+| `MatchBeginReportDTO` | server→api (internal HTTP, `MatchReportingClient.reportMatchBegin`) | `matchId: MatchId`; `participants: { playerId: PlayerId; username: string; team: Team; championId: ChampionId }[]` |
+| `MatchEndReportDTO` | server→api (internal HTTP, `MatchReportingClient.reportMatchEnd`) | `matchId: MatchId`; `endReason: EndReason`; `winningTeam: Team \| null`; `durationMs: number`; `endedAt: string` (ISO-8601) |
 
 Every named Socket.IO event in SRS Appendix A (`identify`, `queue:join`, `queue:cancel`,
 `champion:select`, `match:action`, `match:reconnect`, `queue:joined`, `queue:cancelled`, `match:found`,
@@ -122,6 +124,17 @@ Every named Socket.IO event in SRS Appendix A (`identify`, `queue:join`, `queue:
 `match:player_reconnected`, `error`) has exactly one payload type above. This table **is** the versioned
 contract referenced by SRS 1.4 and R-D2 — Step 2's skeleton prompt will generate this file byte-for-byte
 from this table.
+
+**Step 10 correction (`packages/shared/src/contract/dto.ts`)**: `MatchBeginReportDTO` and
+`MatchEndReportDTO` are new types, not in the original Step-1/3 sketch of this table, added when
+`MatchReportingClient` (§5b) was actually implemented. §5b originally sketched `reportMatchBegin`/
+`reportMatchEnd` as taking `MatchParticipant[]`/an inline `{...}` outcome object directly, but
+`MatchParticipant` requires a `result: MatchResult` that doesn't exist yet at match-begin time, and an
+untyped outcome object left the server↔api wire shape unversioned. `MatchBeginReportDTO.participants` also
+carries `username` alongside the transient client-generated `playerId` — `PendingMatchCorrelator`/
+`InternalMatchController` (§7a/§7b) need it to resolve each participant's canonical `players.id` via
+`PlayerRepository.findOrCreateByUsername` before persisting, since `match_participants.player_id` has a
+foreign key to `players(id)` that the transient `playerId` alone can never satisfy.
 
 ---
 
@@ -143,7 +156,7 @@ base so the WebSocket `error` event and REST error responses can carry a machine
 | `AbilityOnCooldownError` | `ArenaError` | `ParticipantState.useAbility()` | R4.2 |
 | `InsufficientResourceError` | `ArenaError` | `ParticipantState.useAbility()` | R4.2 |
 | `ActorIncapacitatedError` | `ArenaError` | `ParticipantState.useAbility()`, `.move()` (dead or crowd-controlled) | R4.2, R6.1 |
-| `TargetOutOfRangeError` | `ArenaError` | `MatchModel.submitAbility()` (range check — `ParticipantState.useAbility()` has no target-position parameter to check against, so range is resolved by `MatchModel` before delegating) | R4.2 |
+| `TargetOutOfRangeError` | `ArenaError` | Defined but never thrown by the current implementation — see Step 10 correction below | R4.2 |
 | `GracePeriodExpiredError` | `ArenaError` | `MatchModel.reconnect()` | R6.4 |
 | `PlayerNotFoundError` | `ArenaError` | `PlayerRepository` lookups | general |
 | `PersistenceError` | `ArenaError` | any `*Repository` method | R7.4, R-DB4 |
@@ -151,7 +164,24 @@ base so the WebSocket `error` event and REST error responses can carry a machine
 
 `packages/shared/src/util/NotImplementedError.ts` (extends `Error`, not `ArenaError`) is the Step-3
 scaffolding exception every stub method throws so the skeleton compiles before implementations exist —
-not a domain exception, and it should not appear in the final diagram after Step 9–10.
+not a domain exception.
+
+**Step 10 correction**: contrary to this file's original prediction, `NotImplementedError` **does** still
+appear in the final Steps 9–10 code, in two legitimate, permanent (not scaffolding-leftover) roles: (1) the
+three `packages/api` REST controllers' unused `AbstractController.operation()` override, since routing goes
+through Express route handlers, not `operation()` (`LeaderboardController.ts`, `MatchHistoryController.ts`,
+`InternalMatchController.ts`); and (2) `getController()`/`setController()` on the two server broadcast
+views (`MatchmakingBroadcastView`, `MatchBroadcastView`, §5c), which are pure observers with no paired
+controller. Both are "this method is structurally required by an interface/base class but has no
+meaningful implementation for this concrete class" — a real, permanent use, not dead scaffolding.
+
+**Step 10 correction**: `TargetOutOfRangeError` (row above) is defined and exported but never actually
+thrown anywhere in the current implementation. `MatchModel.submitAbility()` (§5a) does compute a
+caster→target distance and compare it to `ability.range`, but on failure it silently `return`s rather than
+throwing — consistent with R4's "silently ignores" behavior for all per-ability validation failures
+(unknown ability, cooldown, insufficient resource, incapacitation, out-of-range target alike), not with
+this table's original "throws" framing. The exception class itself is harmless dead code; nothing needs to
+change in `MatchModel`, since silent-ignore is the actually-specified behavior.
 
 ---
 
@@ -164,7 +194,7 @@ not a domain exception, and it should not appear in the final diagram after Step
 | `QueueEntry` | — | `playerId: PlayerId`; `username: string`; `joinedAt: number` | `constructor(playerId, username, joinedAt)` |
 | `MatchmakingQueue` | `extends AbstractModel` | `private entries: QueueEntry[]`; `private activeMatchCount: number`; `private readonly maxConcurrentMatches: number` | `constructor(maxConcurrentMatches: number)`; `join(player: Player): number` — **throws** `AlreadyQueuedError` (R2.1, R2.2); `cancel(playerId: PlayerId): void` — **throws** `NotQueuedError` (R2.3); `tryPairNext(): [QueueEntry, QueueEntry] \| null` (R2.4, R2.5); `size(): number` |
 | `ParticipantState` | — | `playerId: PlayerId`; `team: Team`; `champion: Champion \| null`; `position: Position`; `health: number`; `resource: number`; `cooldowns: Map<string, number>`; `crowdControlledUntil: number`; `connectionStatus: ConnectionStatus`; `disconnectedAt: number \| null` | `constructor(playerId, team)`; `applyDamage(amount: number): void`; `applyHeal(amount: number): void`; `applyCrowdControl(durationMs: number, now: number): void`; `regenerateResource(deltaSeconds: number): void`; `canUseAbility(abilityId: string, now: number): boolean`; `useAbility(ability: Ability, now: number): void` — **throws** `AbilityOnCooldownError`, `InsufficientResourceError`, `ActorIncapacitatedError` (R4.2); `move(direction: MovementInput, deltaSeconds: number, now: number): void` — **throws** `ActorIncapacitatedError`; `isAlive(): boolean`; `toSnapshot(now: number): ParticipantSnapshot` |
-| `MatchModel` | `extends AbstractModel` | `readonly id: MatchId`; `phase: MatchPhase`; `participants: [ParticipantState, ParticipantState]`; `championSelectDeadline: number`; `startedAt: number \| null`; `endedAt: number \| null`; `endReason: EndReason \| null`; `winningTeam: Team \| null` | `constructor(id: MatchId, players: [Player, Player])`; `selectChampion(playerId: PlayerId, championId: ChampionId): void` — **throws** `InvalidChampionSelectionError`, `SelectionWindowExpiredError`, `InvalidMatchPhaseError` (R3.2–R3.5); `submitMove(playerId: PlayerId, input: MovementInput): void` — **throws** `InvalidMatchPhaseError` (R4.1); `submitAbility(playerId: PlayerId, req: AbilityUseRequest): void` — **throws** `InvalidMatchPhaseError` (invalid ability attempts are otherwise swallowed per R4's "silently ignores"); `tick(deltaSeconds: number): void` (R4.3–R4.6, calls `notifyChanged` with a `state` `ModelEvent`); `checkWinConditions(): EndReason \| null` (R5.1, R5.2); `disconnect(playerId: PlayerId): void` (R6.1, R6.2); `reconnect(playerId: PlayerId): void` — **throws** `GracePeriodExpiredError` (R6.3); `snapshot(): MatchStatePayload` |
+| `MatchModel` | `extends AbstractModel` | `readonly id: MatchId`; `phase: MatchPhase`; `private participants: [ParticipantState, ParticipantState]`; `championSelectDeadline: number`; `startedAt: number \| null`; `endedAt: number \| null`; `endReason: EndReason \| null`; `winningTeam: Team \| null`; `private tickCount = 0` (broadcast tick counter, not a timestamp); `private pendingMoves: Map<PlayerId, {dx, dy}>` (each participant's latest unapplied movement input, applied once per `tick()`) | `constructor(id: MatchId, players: [Player, Player])`; `selectChampion(playerId: PlayerId, championId: ChampionId): void` — **throws** `InvalidChampionSelectionError`, `SelectionWindowExpiredError`, `InvalidMatchPhaseError` (R3.2–R3.5); `submitMove(playerId: PlayerId, input: MovementInput): void` — **throws** `InvalidMatchPhaseError` (R4.1); `submitAbility(playerId: string, req: { abilityId: string; targetPlayerId?: string }): void` — **throws** `InvalidMatchPhaseError` (invalid ability attempts are otherwise swallowed per R4's "silently ignores"); `tick(deltaSeconds: number): void` (R4.3–R4.6, calls `notifyChanged` with a `state` `ModelEvent`); `checkWinConditions(): EndReason \| null` (R5.1, R5.2); `disconnect(playerId: PlayerId): void` (R6.1, R6.2); `reconnect(playerId: PlayerId): void` — **throws** `GracePeriodExpiredError` (R6.3); `snapshot(): MatchStatePayload` |
 | `TickLoop` | — | `private readonly tickRateHz = 20`; `private matches: Map<MatchId, MatchModel>`; `private handle: NodeJS.Timeout \| null` | `constructor(tickRateHz?: number)`; `register(match: MatchModel): void`; `unregister(matchId: MatchId): void`; `start(): void`; `stop(): void`; `private onTick(): void` (R-P1 — iterates all registered matches, calls `tick()` on each inside a try/catch **per match** so one match's internal error cannot affect another, satisfying R5.4 / 3.6.2) |
 
 **Step 9 correction**: `applyCrowdControl`, `move`, and `toSnapshot` gained a `now: number` parameter
@@ -172,18 +202,42 @@ during implementation — all three need the simulation clock to compute or comp
 (crowd-control expiry, remaining cooldowns), and `useAbility`/`canUseAbility` already established that
 pattern.
 
+**Step 10 correction**: `MatchModel.participants` is `private`, not the plain attribute this table originally
+implied, and the class carries two further undocumented private attributes (`tickCount`, `pendingMoves`) —
+now added to the row above. Also, `submitAbility`'s real parameter is the narrower inline
+`{ abilityId: string; targetPlayerId?: string }`, not the full shared `AbilityUseRequest` this table
+originally sketched — the implementation never reads `AbilityUseRequest.targetPosition` at all. See this
+prompt's closing summary for why that specific gap is flagged as a real (not just documentation) issue: it
+makes any `POSITIONING`-effect ability invoked without a `targetPlayerId` (i.e. every self-directed
+reposition, such as Vex's Phase Step) resolve its own target to itself and therefore move nowhere.
+
 ### 5b. `server/controller`
 
 | Class | Extends | Operations (throws) |
 |---|---|---|
-| `PlayerIdentifyController` | `extends AbstractController<Player-ish session model, ...>` | `operation('identify', payload: IdentifyPayload): void` — **throws** `InvalidUsernameError` (R1.1–R1.3) |
-| `MatchmakingController` | `extends AbstractController<MatchmakingQueue, MatchmakingBroadcastView>` | `operation(action: 'queue:join' \| 'queue:cancel', payload): void` — **throws** `AlreadyQueuedError`, `NotQueuedError`; on a successful pair, constructs a new `MatchModel` + `MatchBroadcastView` and registers it with `TickLoop` (R2.6) |
-| `ChampionSelectController` | `extends AbstractController<MatchModel, MatchBroadcastView>` | `operation('champion:select', payload): void` — catches `InvalidChampionSelectionError`/`SelectionWindowExpiredError` from the model and asks its view to emit an `error` payload (mirrors the AccountManager example's controller-catches/view-shows-popup pattern, adapted to a socket `error` emission) |
-| `CombatController` | `extends AbstractController<MatchModel, MatchBroadcastView>` | `operation('match:action', payload: MovementInput \| AbilityUseRequest): void` (R4.1, R4.2 — validation failures are swallowed per spec, not surfaced as exceptions to the player) |
-| `DisconnectController` | `extends AbstractController<MatchModel, MatchBroadcastView>` | `operation(action: 'disconnect' \| 'match:reconnect', payload): void` — **throws** `GracePeriodExpiredError` (R6.1–R6.4); forwards to `MatchModel.disconnect`/`reconnect` — the grace-period check itself lives in `MatchModel.tick()`, not here |
-| `ConnectionHandler` | *(not an `AbstractController` — a thin Socket.IO transport adapter, kept separate per 3.6.4 Maintainability so game logic is testable without a live socket)* | `constructor(socket: Socket, controllers: {...})`; `register(): void` (binds `socket.on(eventName, ...)` for every inbound event in the contract table, forwarding each to the right controller's `operation(...)`) |
-| `MatchReportingClient` | *(plain HTTP client, not MVC)* | `reportMatchBegin(matchId: MatchId, participants: MatchParticipant[]): Promise<void>`; `reportMatchEnd(matchId: MatchId, outcome: {...}): Promise<void>` — both log-and-swallow failures rather than throw, per R7.4 ("shall not interrupt or crash the live game server process") |
+| `PlayerIdentifyController` | `extends AbstractController` (untyped/default generics — see Step 10 correction below) | `operation('identify', payload: IdentifyPayload): void` — **throws** `InvalidUsernameError` (R1.1–R1.3) |
+| `MatchmakingController` | `extends AbstractController` (untyped/default generics) | `operation(action: 'queue:join' \| 'queue:cancel', payload): void` — **throws** `AlreadyQueuedError`, `NotQueuedError`; on a successful pair, constructs a new `MatchModel` + `MatchBroadcastView` and registers it with `TickLoop` (R2.6) |
+| `ChampionSelectController` | `extends AbstractController` (untyped/default generics) | `operation('champion:select', payload): void` — catches `InvalidChampionSelectionError`/`SelectionWindowExpiredError` from the model and asks its view to emit an `error` payload (mirrors the AccountManager example's controller-catches/view-shows-popup pattern, adapted to a socket `error` emission) |
+| `CombatController` | `extends AbstractController` (untyped/default generics) | `operation('match:action', payload: MovementInput \| AbilityUseRequest): void` (R4.1, R4.2 — validation failures are swallowed per spec, not surfaced as exceptions to the player) |
+| `DisconnectController` | `extends AbstractController` (untyped/default generics) | `operation(action: 'disconnect' \| 'match:reconnect', payload): void` — **throws** `GracePeriodExpiredError` (R6.1–R6.4); forwards to `MatchModel.disconnect`/`reconnect` — the grace-period check itself lives in `MatchModel.tick()`, not here |
+| `ConnectionHandler` | *(not an `AbstractController` — a thin Socket.IO transport adapter, kept separate per 3.6.4 Maintainability so game logic is testable without a live socket)* | `constructor(socket: Socket, controllers: {...}, onIdentified?: (player: Player) => void)`; `register(): void` (binds `socket.on(eventName, ...)` for every inbound event in the contract table, forwarding each to the right controller's `operation(...)`); `bindMatch(match: MatchModel, view: MatchBroadcastView): void` — see Step 10 correction below |
+| `MatchReportingClient` | *(plain HTTP client, not MVC)* | `reportMatchBegin(matchId: MatchId, participants: MatchBeginReportDTO['participants']): Promise<void>`; `reportMatchEnd(matchId: MatchId, outcome: Omit<MatchEndReportDTO, 'matchId'>): Promise<void>` — both log-and-swallow failures rather than throw, per R7.4 ("shall not interrupt or crash the live game server process") |
 | `MatchReportingListener` | `implements ModelListener` *(no paired controller/view — see note below)* | `constructor(match: MatchModel, players: [Player, Player], reportingClient: MatchReportingClient)` (registers itself via `match.addModelListener(this)`); `modelChanged(event: ModelEvent): void` — on `'match:start'`, zips `players` against `event.payload.initialState.participants` by `playerId` and calls `reportingClient.reportMatchBegin`; on `'match:end'`, calls `reportingClient.reportMatchEnd` with the event's `reason`/`winningTeam`/`durationMs` |
+
+**Step 10 correction**: the four `AbstractController<M,V>` "Extends" columns above were originally sketched
+with their concrete type parameters (e.g. `AbstractController<MatchmakingQueue, MatchmakingBroadcastView>`);
+the real implementations all extend the bare, untyped `AbstractController` (defaulting to `Model`/
+`View<Model,any>`) and cast internally where a concrete type is needed (e.g. `this.model as
+MatchmakingQueue`) — the same "default (untyped) `AbstractController` generics" pattern
+`PlayerIdentifyController` established first (per its own design note) and every other server controller
+then followed. `MatchReportingClient.reportMatchBegin`/`reportMatchEnd` also changed from taking
+`MatchParticipant[]`/an inline outcome object to the versioned `MatchBeginReportDTO`/`MatchEndReportDTO`
+shapes (see §3's matching correction note) — the row above reflects the current signatures.
+`ConnectionHandler`'s constructor gained a third, optional `onIdentified` callback (invoked once per
+successful `identify`, letting `ServerMain` register the connection's socket/handler into its own
+playerId-keyed maps) and a new public `bindMatch()` method (see the `MatchmakingController.
+onMatchCreated`-triggered wiring flow below) — neither was in this table's original constructor/operations
+sketch.
 
 > **Step 10 correction (`10_server_9`)**: `MatchReportingClient` (`10_server_6`) was implemented and unit
 > tested but had no real call site — `ServerMain.ts` explicitly documented this as deferred, leaving
@@ -194,7 +248,11 @@ pattern.
 > retains `Player.username` (only `ParticipantState.playerId`), so this listener is constructed with the
 > full `Player` objects from `MatchmakingController.createMatch()`, the one place both are in scope
 > together, rather than being added to `MatchModel` itself (which must stay free of network/HTTP
-> dependencies, 3.6.4). `MatchmakingController`'s constructor gained a trailing `reportingClient:
+> dependencies, 3.6.4). `MatchmakingController`'s constructor gained a fifth, penultimate `onMatchCreated:
+> (playerIds: [PlayerId, PlayerId], match: MatchModel, view: MatchBroadcastView) => void` parameter (also
+> undocumented until now — it is how `ConnectionHandler.bindMatch()` above gets invoked per paired
+> connection, since `ChampionSelectController`/`CombatController`/`DisconnectController` all need a
+> `MatchModel` that doesn't exist until pairing happens) plus a trailing `reportingClient:
 > MatchReportingClient` parameter (constructed once in `ServerMain.main()` and shared across every
 > connection's controller instance) so `createMatch()` can wire a `MatchReportingListener` per match.
 
@@ -213,13 +271,28 @@ pattern.
 
 | Class | Operations |
 |---|---|
-| `ServerMain` | `static async main(): Promise<void>` — creates the HTTP + Socket.IO server, the singleton `MatchmakingQueue` and `TickLoop`, wires a new `ConnectionHandler` per incoming socket connection, starts `TickLoop`, and listens on the configured port. `src/index.ts` is a two-line file calling `ServerMain.main()`. |
+| `ServerMain` | `static async main(port: number = Number(process.env.PORT) \|\| 3001): Promise<void>` — creates the HTTP + Socket.IO server, the singleton `MatchmakingQueue` and `TickLoop`, wires a new `ConnectionHandler` per incoming socket connection, starts `TickLoop`, and listens on the given port. `src/index.ts` is a two-line file calling `ServerMain.main()`. |
 
 > **Step 10 correction (`10_server_9`)**: `ServerMain.main()` now constructs one `MatchReportingClient`
 > (using an `API_BASE_URL` env var, defaulting to `http://localhost:4000`) before the `io.on('connection',
 > ...)` handler, and passes it to every connection's `MatchmakingController`. Previously this construction
 > was deliberately omitted with a comment noting "no call site exists yet" — see `MatchReportingListener`'s
 > correction note in §5b for the full gap this closes.
+
+> **Step 10 correction**: `main()` also gained an optional `port` parameter, defaulting to `process.env.PORT`
+> (falling back to `3001`), where this table originally sketched a zero-arg method — `port: 0` lets a test
+> ask the OS for a free ephemeral port instead of hardcoding or mutating env vars mid-suite. `src/index.ts`'s
+> call is unaffected, since the parameter is optional.
+
+> **Known gap surfaced by this audit, not fixed here (see this prompt's closing summary)**: `main()` only
+> calls `ConnectionHandler.bindMatch()` once per player, at the moment `MatchmakingController.
+> onMatchCreated` fires during initial pairing (`connectionHandlers.get(playerId)?.bindMatch(match, view)`,
+> §5b). A player who disconnects and reconnects gets a brand-new Socket.IO connection and therefore a
+> brand-new `ConnectionHandler` instance whose `championSelect`/`combat`/`disconnect` controllers are never
+> (re-)bound — `bindMatch()` is never called a second time for that player. This means the R6.2–R6.4
+> disconnect/reconnect grace-period mechanism, though correctly implemented and unit-tested in isolation on
+> `MatchModel`/`ParticipantState`/`DisconnectController`, has no live path by which an actual reconnecting
+> browser can ever reach it.
 
 ---
 
@@ -230,20 +303,43 @@ pattern.
 | Class | Extends | Attributes | Operations |
 |---|---|---|---|
 | `ClientIdentityModel` | `extends AbstractModel` | `playerId: PlayerId \| null`; `username: string \| null` | `constructor()`; `identify(username: string): void` (persists to `sessionStorage` per R1.2); `getPlayerId(): PlayerId` |
-| `ClientQueueModel` | `extends AbstractModel` | `status: 'idle' \| 'queued' \| 'matched'`; `position: number \| null` | `constructor()`; `setQueued(position: number): void`; `setCancelled(): void`; `setMatched(payload: MatchFoundPayload): void` |
+| `ClientQueueModel` | `extends AbstractModel` | `status: 'idle' \| 'queued' \| 'matched'`; `position: number \| null`; `matchPayload: MatchFoundPayload \| null` (the raw `match:found` payload, stored by `setMatched()`; read by `LobbyView`/`ChampionSelectView`/`ResultsView` for opponent username/team/roster) | `constructor()`; `setQueued(position: number): void`; `setCancelled(): void`; `setMatched(payload: MatchFoundPayload): void` |
 | `ClientMatchModel` | `extends AbstractModel` | `matchId: MatchId \| null`; `phase: MatchPhase \| null` (null until a match is found — unlike server's `MatchModel`, which always has a phase from construction); `latestState: MatchStatePayload \| null`; `result: MatchEndPayload \| null`; `championSelection: ChampionSelectedPayload \| null` | `constructor()`; `applyChampionSelected(payload: ChampionSelectedPayload): void`; `applyMatchStart(payload: MatchStartPayload): void`; `applyMatchState(payload: MatchStatePayload): void` (R4.7 — read-only mirror, never mutates authoritative values itself); `applyMatchEnd(payload: MatchEndPayload): void` |
 | `InterpolationBuffer` | — | `private samples: MatchStatePayload[]` (ring buffer) | `constructor(capacity: number)`; `push(snapshot: MatchStatePayload): void`; `getInterpolatedPosition(playerId: PlayerId, now: number): Position` (R4.7, R-P4 — smooths rendering between the server's 20Hz ticks without altering any authoritative value) |
+
+**Step 10 correction (`10_client_5`)**: `ClientQueueModel.matchPayload` (row above) is a new attribute, not
+in the original sketch. Separately, all three models' mutator methods (`ClientIdentityModel.identify`;
+`ClientQueueModel.setQueued`/`setCancelled`/`setMatched`; `ClientMatchModel.applyChampionSelected`/
+`applyMatchStart`/`applyMatchState`/`applyMatchEnd`) originally never called `notifyChanged()` — meaning no
+`ModelListener` (i.e. no View) was ever told a change happened, silently defeating the push-MVC contract
+this table specifies for every `client/model` class. `LobbyView` registering as the first real listener is
+what surfaced the gap; all mutators now call `notifyChanged()` after updating state.
 
 ### 6b. `client/controller`
 
 | Class | Extends | Operations |
 |---|---|---|
-| `SocketConnectionController` | *(not an `AbstractController` — a thin transport adapter coordinating three models, kept separate for the same reason `ConnectionHandler` is on the server side — see §5b)* | `constructor(socket: Socket, models: ClientModels)`; `operation(action: string, payload?: unknown): void` (sends `identify`/`queue:join`/`queue:cancel`/`champion:select`/`match:action`/`match:reconnect` over the socket); `private bindInboundEvents(): void` (routes every inbound event to the matching model's `apply*` method) |
+| `SocketConnectionController` | *(not an `AbstractController` — a thin transport adapter coordinating three models, kept separate for the same reason `ConnectionHandler` is on the server side — see §5b)* | `constructor(socket: Socket, models: ClientModels)`; `operation(action: string, payload?: unknown): void` (sends `identify`/`queue:join`/`queue:cancel`/`champion:select`/`match:action` over the socket); `private bindInboundEvents(): void` (routes every inbound event to the matching model's `apply*` method) |
 
 > **Step 10 correction**: `SocketConnectionController` gained a constructor-injected `socket: Socket` parameter during implementation — without a socket reference, `operation()` had nothing to emit on. Mirrors `ConnectionHandler`'s `Socket` parameter on the server side (§5b).
-| `LobbyController` | `extends AbstractController<ClientIdentityModel, LobbyView>` | `operation('submitUsername', payload: {username: string}): void` (client-side length/non-empty check mirroring R1.1, before delegating to `SocketConnectionController`) |
-| `ChampionSelectController` | `extends AbstractController<ClientMatchModel, ChampionSelectView>` | `operation('selectChampion', payload: {championId: ChampionId}): void` |
-| `MatchController` | `extends AbstractController<ClientMatchModel, MatchHUDView>` | `operation('move' \| 'useAbility', payload): void` (throttles/sends `match:action`) |
+>
+> **Known gap surfaced by this audit, not fixed here (see this prompt's closing summary)**: no client
+> controller ever actually calls `operation(SOCKET_EVENTS.MATCH_RECONNECT, ...)` — `match:reconnect` is
+> defined in the shared contract and handled server-side (`DisconnectController`, §5b) but nothing in
+> `packages/client` ever sends it. Combined with §5d's `ServerMain`/`ConnectionHandler.bindMatch()` gap,
+> this means the reconnect half of R6.1–R6.4 has no working path end-to-end despite being correctly
+> implemented and tested on both `MatchModel` and `DisconnectController` in isolation.
+| `LobbyController` | `extends AbstractController<ClientIdentityModel, LobbyView>` | `constructor(model: ClientIdentityModel, view: LobbyView, socketController: SocketConnectionController)`; `operation(action: 'submitUsername' \| 'joinQueue' \| 'cancelQueue' \| 'returnToQueue', payload?: {username: string}): void` (client-side length/non-empty check mirroring R1.1 for `'submitUsername'`, before delegating to `SocketConnectionController`; `'joinQueue'`/`'returnToQueue'` both emit `queue:join`, `'cancelQueue'` emits `queue:cancel`) |
+| `ChampionSelectController` | `extends AbstractController<ClientMatchModel, ChampionSelectView>` | `constructor(model: ClientMatchModel, view: ChampionSelectView, socketController: SocketConnectionController)`; `operation('selectChampion', payload: {championId: ChampionId}): void` |
+| `MatchController` | `extends AbstractController<ClientMatchModel, MatchHUDView>` | `constructor(model: ClientMatchModel, view: MatchHUDView, socketController: SocketConnectionController, now: () => number = () => Date.now())`; `operation('move' \| 'useAbility', payload): void` (throttles/sends `match:action`) |
+
+**Step 10 correction**: all three controllers above gained constructor parameters beyond the inherited
+`(model, view)` this table originally sketched — `socketController: SocketConnectionController` on all
+three (needed to actually emit anything, the same gap `MatchmakingController` closed on the server side),
+plus `now: () => number` on `MatchController` (injected clock for deterministic move-throttle testing).
+`LobbyController.operation()`'s action set also grew from just `'submitUsername'` to include `'joinQueue'`,
+`'cancelQueue'`, and `'returnToQueue'` (the last used by `ResultsView`'s return-to-queue control, per the
+6c gap-fill note below) — the row above reflects the current signatures.
 
 ### 6c. `client/view` (React screens per SRS 3.1.1)
 
@@ -256,19 +352,43 @@ pattern.
 
 **Note (Step 2 gap-fill):** `ResultsView` pairs with `LobbyController` rather than a dedicated results
 controller — "return to queue" is a lobby action, and no separate controller was specified for this view.
-Documented here rather than left as a silent inconsistency with 6b.
+Documented here rather than left as a silent inconsistency with 6b. **Verified still accurate** in the
+final implementation (`ResultsView.ts` constructs no controller of its own; `ClientMain`'s `wirePair` binds
+it to the existing `LobbyController`).
 
 Each `*View` class implements `modelChanged(event: ModelEvent): void` by invoking a bound React
-`setState`/hook-dispatch callback supplied at construction — the class is the MVC-facing object; the
-functional component it's paired with is the render target. This keeps the same push-MVC contract on the
-client that the server uses, satisfying the "system MUST exemplify MVC" requirement uniformly across
-subsystems.
+`setState`/hook-dispatch callback — **Step 10 correction**: contrary to this table's original "supplied at
+construction" framing, the callback is registered later, via a separate `bindUpdateCallback(callback: () =>
+void): void` method (not part of the shared `View<M,C>` interface), called from the paired Screen
+component's `useEffect` after mount, not passed into the `View` class's constructor. The `View` class
+remains the MVC-facing object; the functional component it's paired with is the render target. This keeps
+the same push-MVC contract on the client that the server uses, satisfying the "system MUST exemplify MVC"
+requirement uniformly across subsystems.
+
+**Step 10 correction**: all four `View` classes' constructors also take additional model references beyond
+the single model implied by `implements View, ModelListener` — `LobbyView(identityModel, queueModel,
+controller)`, `ChampionSelectView(identityModel, matchModel, queueModel, controller)`,
+`MatchHUDView(identityModel, matchModel, controller)`, `ResultsView(matchModel, queueModel, controller)` —
+each with matching `get`/`setXModel()` accessors outside the formal `View<M,C>` contract, needed because
+each screen's documented responsibility above (e.g. Lobby's "queue status/cancel") spans more than one
+model. `getModel()`/`setModel()` still resolve to the one model each view's paired controller expects.
+
+**Undocumented, paired React components:** each `*View` class's `.tsx` file also exports a same-named
+`*Screen` functional component (`LobbyScreen`, `ChampionSelectScreen`, `MatchHUDScreen`, `ResultsScreen`) —
+the actual render target the `View` class's `bindUpdateCallback` triggers, per SRS 3.1.1. These are real,
+separate, exported components with no row of their own in this table; only the four `View` classes above
+are enumerated. `ClientMain.tsx`'s `wirePair` helper is also undocumented here.
 
 ### 6d. Entry point
 
 | Class | Operations |
 |---|---|
-| `ClientMain` | `static main(): void` — mounts the React root, instantiates the model/controller graph, and renders the screen router (`src/index.tsx` calls `ClientMain.main()`). |
+| `ClientMain` | `static main(socketFactory: () => Socket = () => io()): void` — mounts the React root, instantiates the model/controller graph, and renders the screen router (`src/index.tsx` calls `ClientMain.main()`). |
+
+**Step 10 correction**: `main()` gained an optional `socketFactory` parameter, defaulting to a real `io()`
+call, where this table originally sketched a zero-arg method — this lets `ClientMain.main()` be exercised
+by a test without opening a live socket connection (master context §4.2's testability principle); a test
+supplies a mock satisfying the same `emit`/`on` shape instead.
 
 ---
 
@@ -279,41 +399,82 @@ subsystems.
 | Class | Attributes | Operations (throws) |
 |---|---|---|
 | `PlayerRepository` | — | `findOrCreateByUsername(username: string): Promise<Player>` — **throws** `PersistenceError` (R-DB1, 3.2.1) |
-| `MatchRepository` | — | `recordMatch(match: Match, participants: MatchParticipant[]): Promise<void>` — **throws** `PersistenceError` (R7.1, R-DB2, R-DB4); `findHistoryForPlayer(playerId: PlayerId, page: number, pageSize: number): Promise<MatchParticipant[]>` (R7.3, R-DB5) |
+| `MatchRepository` | — | `recordMatch(match: Match, participants: MatchParticipant[]): Promise<void>` — **throws** `PersistenceError` (R7.1, R-DB2, R-DB4); `findHistoryForPlayer(playerId: PlayerId, page: number, pageSize: number): Promise<MatchHistoryRow[]>` (R7.3, R-DB5) |
 | `LeaderboardEntry` | `playerId, username, wins, losses, draws, gamesPlayed, winRate` | `constructor(...)`; `static fromRow(row): LeaderboardEntry` |
 | `LeaderboardRepository` | — | `computeLeaderboard(minGames: number): Promise<LeaderboardEntry[]>` (R8.1, R8.2); `computeChampionWinRates(): Promise<ChampionWinRateDTO[]>` (R8.3) |
-| `PendingMatchCorrelator` | `private pending: Map<MatchId, Partial<{begin, end}>>` | `recordBegin(matchId: MatchId, participants: {...}): void`; `recordEnd(matchId: MatchId, outcome: {...}): {begin, end} \| null` (returns the combined record only once both halves are present — SRS 3.2.7.4 step 26) |
+| `PendingMatchCorrelator` | `private pending: Map<MatchId, PendingRecord>` (`PendingRecord = { begin?: BeginParticipant[]; end?: MatchOutcome }`); `private completed: Set<MatchId>` (idempotency guard — see note below) | `recordBegin(matchId: MatchId, participants: BeginParticipant[]): void`; `recordEnd(matchId: MatchId, outcome: MatchOutcome): CorrelatedMatchReport \| null` (`CorrelatedMatchReport = { participants: BeginParticipant[]; outcome: MatchOutcome }`; returns the combined record only once both halves are present — SRS 3.2.7.4 step 26) |
+
+**Step 10 correction**: `MatchRepository.findHistoryForPlayer` originally returned `Promise<MatchParticipant[]>`
+(commit `f32472d`, the "opponent-join correction"). `MatchParticipant` is a fixed per-participant
+persistence row (§4a) with no opponent reference, so it cannot carry the `opponentUsername` that
+`MatchHistoryEntryDTO` (§3, R7.3) needs. The real implementation instead returns the richer
+`MatchHistoryRow` shape (`matchId, opponentUsername, championId, result, endReason, durationMs, endedAt` —
+no `team`), built by a single query that self-joins `match_participants` to itself (excluding the querying
+player's own row — a 1v1 match always has exactly one other participant) plus `players` for that opponent's
+username, rather than an N+1 follow-up lookup per row.
+
+**Step 10 correction**: `PendingMatchCorrelator`'s attribute row above gained a second field,
+`completed: Set<MatchId>` — every `matchId` already handed off to the caller via `recordEnd()`, guarding
+against a retried report reviving an already-completed match. This is the class's actual idempotency
+mechanism (master context §8's "CRITICAL CHECKPOINT" for this class); the original `private pending: Map`
+alone was not enough to make `recordBegin`/`recordEnd` idempotent per `matchId`. `recordEnd`'s return shape
+also uses named fields `{ participants, outcome }` (`CorrelatedMatchReport`), not the originally-sketched
+`{ begin, end }`.
 
 ### 7b. `api/controller`
 
 | Class | Extends | Operations |
 |---|---|---|
-| `InternalMatchController` | `extends AbstractController` | `POST /internal/matches/begin`, `POST /internal/matches/end` — receives `MatchReportingClient`'s calls, uses `PendingMatchCorrelator` then `MatchRepository.recordMatch()`; not exposed to players |
+| `InternalMatchController` | `extends AbstractController` | `constructor(correlator: PendingMatchCorrelator, matchRepository: MatchRepository, playerRepository: PlayerRepository, errorView?: ErrorResponseView)`; `POST /internal/matches/begin`, `POST /internal/matches/end` — receives `MatchReportingClient`'s calls, uses `PendingMatchCorrelator` then `MatchRepository.recordMatch()`; not exposed to players |
 | `MatchHistoryController` | `extends AbstractController` | `GET /players/:id/matches?page=&pageSize=` (R7.3) |
 | `LeaderboardController` | `extends AbstractController` | `GET /leaderboard`, `GET /leaderboard/champions` (R8.1–R8.3) |
+
+**Step 10 correction**: `InternalMatchController`'s constructor gained an undocumented `playerRepository:
+PlayerRepository` dependency. `handleEnd` calls `playerRepository.findOrCreateByUsername(username)` per
+participant, resolving each `BeginParticipant.playerId` (a transient, client-generated session id, R1.2) to
+its canonical `players.id` before calling `MatchRepository.recordMatch()` — `match_participants.player_id`
+has a foreign key to `players(id)`, which the transient id alone can never satisfy. Not a code gap; the
+class's own doc comment calls this a "CRITICAL CORRECTION" and explains that without it, every single
+`recordMatch` call would fail its foreign-key constraint — the persistence path's core purpose (R7.1) would
+silently never work.
+
+All three api controllers pass a shared `NULL_MODEL`/`NULL_VIEW` pair (`packages/api/src/controller/
+nullMvc.ts`, undocumented until now) to `super(NULL_MODEL, NULL_VIEW)` — REST controllers have no domain
+`Model` to observe and no push-based `View` to notify (each request gets one synchronous response), but
+`AbstractController`'s constructor structurally requires a model/view pair. `nullMvc.ts` supplies a
+harmless no-op pair so no api controller needs to invent a fake domain object of its own.
 
 ### 7c. `api/view`
 
 | Class | Implements | Responsibility |
 |---|---|---|
 | `LeaderboardResponseView` | — | Formats `LeaderboardEntry[]` → `LeaderboardEntryDTO[]` JSON |
-| `MatchHistoryResponseView` | — | Formats `MatchParticipant[]` → paginated `MatchHistoryEntryDTO[]` JSON |
+| `MatchHistoryResponseView` | — | Formats `MatchHistoryRow[]` → `MatchHistoryEntryDTO[]` JSON (pagination happens upstream, in `MatchRepository`'s `LIMIT`/`OFFSET` query — this view is a pure formatter) |
 | `ErrorResponseView` | — | Formats a caught `ArenaError` into an HTTP status + JSON error body |
 
 Unlike the server's broadcast views, these are plain formatter classes (a `render()` method only) — a
 synchronous HTTP response has no push/observe relationship to establish, so implementing the full `View`
 interface would be unused ceremony.
 
+**Step 10 correction**: `MatchHistoryResponseView.render()`'s input type follows `MatchRepository.
+findHistoryForPlayer`'s Step 10 correction above — `MatchHistoryRow[]`, not `MatchParticipant[]` — and this
+table's original "paginated" framing was inaccurate: pagination is `LIMIT`/`OFFSET` in the repository's SQL,
+not logic in this view.
+
 ### 7d. `api/util` and entry point
 
 | Class | Operations |
 |---|---|
 | `PgPool` | `constructor(connectionString: string)`; `query<T>(sql: string, params: unknown[]): Promise<T[]>` — **throws** `PersistenceError`; `transaction<T>(fn: (query) => Promise<T>): Promise<T>` — runs `fn` atomically over one pooled connection (`BEGIN`/`COMMIT`/`ROLLBACK`) — **throws** `PersistenceError`; `close(): Promise<void>` — releases all pooled connections (process shutdown, test teardown) |
-| `ApiMain` | `static async main(): Promise<void>` — builds the Express app, wires middleware and the three controllers above to routes, connects `PgPool`, and listens on the configured port. |
+| `ApiMain` | `static async main(): Promise<void>` — builds the Express app, wires middleware and the three controllers above to routes, connects `PgPool`, and listens on the configured port; `static async stop(): Promise<void>` — closes the server and pool (test-only teardown) |
 
 **Step 9 addition**: `transaction<T>()` was added during `MatchRepository` implementation — `recordMatch`
 needs one `matches` row and two `match_participants` rows to commit or fail together (R-DB4), which plain
 `query()` calls against a connection pool cannot guarantee.
+
+**Step 10 addition**: `ApiMain.stop()` is a new method, not in the original sketch — added solely so a
+smoke test can tear the server and pool down cleanly; `ApiMain`'s own JSDoc flags it as outside this table's
+original entry-point sketch.
 
 ---
 
@@ -335,8 +496,9 @@ needs one `matches` row and two `match_participants` rows to commit or fail toge
 **Association (reference, not ownership):**
 - `ParticipantState` references a `Champion` by id (many participants across many matches can reference the same immutable `Champion` definition from `ChampionRoster`).
 - `MatchBroadcastView`/`MatchmakingBroadcastView` *observe* their `Model` (classic Observer/`ModelListener` association) and hold a reference to the `Socket`s they emit to.
-- `AbstractController` holds exactly one `Model` and one `View` (1-to-1 per controller instance, matching "one controller instance per view instance" from the course examples).
-- `*Repository` classes *depend on* `PgPool` (dependency, not ownership — the pool is shared/injected).
+- `AbstractController` holds exactly one `Model` and one `View` (1-to-1 per controller instance, matching "one controller instance per view instance" from the course examples); `packages/api`'s three REST controllers hold a shared no-op `NULL_MODEL`/`NULL_VIEW` pair (`api/src/controller/nullMvc.ts`) instead of a real domain model/view, since a synchronous HTTP response has no push/observe relationship to establish.
+- `*Repository` classes *depend on* `PgPool` (dependency, not ownership — the pool is shared/injected). `InternalMatchController` additionally depends on `PlayerRepository` directly (Step 10 correction, §7b), to resolve each reported participant's canonical player id before `MatchRepository.recordMatch()`.
+- **Step 10 addition**: `MatchModel` is observed by *two* independent `ModelListener`s per match, not one — `MatchBroadcastView` (broadcasts to sockets) and `MatchReportingListener` (reports begin/end to `packages/api` via `MatchReportingClient`). Neither listener is aware of the other; `MatchModel` itself has no reference to either (pure Observer push, per §1's MVC framework).
 
 **Cross-subsystem (not object references — network calls, worth flagging as a distinct relationship kind on the diagram):**
 - `server`'s `MatchReportingClient` → `api`'s `InternalMatchController`: HTTP, not an in-process reference. This is the one place the "independently deployable subsystems" boundary (SRS 2.1) cuts through what would otherwise look like a normal association — the diagram should render it as a dependency across a package/subsystem boundary, not a solid association line.
