@@ -35,6 +35,17 @@ export type MatchFoundBroadcast = MatchFoundPayload & { playerId: PlayerId };
 export type OnMatchCreated = (playerIds: [PlayerId, PlayerId], match: MatchModel, view: MatchBroadcastView) => void;
 
 /**
+ * One playerId's still-active match, as tracked by the process-wide match registry (10_server_10) — lets a
+ * reconnecting player's brand-new `ConnectionHandler` (a fresh Socket.IO connection gets a fresh handler,
+ * see `ServerMain`) be rebound to the match it's already in, since `bindMatch()` otherwise only ever fires
+ * once, at original pairing time.
+ */
+export interface MatchRegistryEntry {
+  match: MatchModel;
+  view: MatchBroadcastView;
+}
+
+/**
  * Handles queue join/cancel requests against the shared MatchmakingQueue and, on a successful pairing,
  * stands up a new match (R2.1–R2.6).
  */
@@ -50,6 +61,10 @@ export class MatchmakingController extends AbstractController {
     /** CORRECTION (Step 10, 10_server_9): every newly-created match's begin/end report goes through this
      * one shared client — see MatchReportingListener, constructed per-match in createMatch() below. */
     private readonly reportingClient: MatchReportingClient,
+    /** CORRECTION (Step 10, 10_server_10): process-wide playerId -> still-active-match registry, shared
+     * with ServerMain — populated here on pairing and cleared on 'match:end', so ServerMain can rebind a
+     * reconnecting player's fresh ConnectionHandler to their match (R6.1-R6.4). */
+    private readonly matchRegistry: Map<PlayerId, MatchRegistryEntry>,
   ) {
     super(model, view);
   }
@@ -79,6 +94,7 @@ export class MatchmakingController extends AbstractController {
   }
 
   private createMatch(playerIdA: PlayerId, usernameA: string, playerIdB: PlayerId, usernameB: string): void {
+    const queue = this.model as MatchmakingQueue;
     const view = this.view as MatchmakingBroadcastView;
     const matchId = randomUUID();
     const playerA = new Player(playerIdA, usernameA, new Date());
@@ -90,14 +106,27 @@ export class MatchmakingController extends AbstractController {
     // to the same MatchModel events; neither knows about the other).
     new MatchReportingListener(match, [playerA, playerB], this.reportingClient);
 
+    // CORRECTION (Step 10, 10_server_10): registers both players into the process-wide match registry so a
+    // reconnecting player's fresh ConnectionHandler can be rebound to this match later — see the cleanup
+    // listener below, which removes these same two entries once the match ends.
+    this.matchRegistry.set(playerIdA, { match, view: matchBroadcastView });
+    this.matchRegistry.set(playerIdB, { match, view: matchBroadcastView });
+
     this.tickLoop.register(match);
     // CORRECTION (Step 10): MatchBroadcastView has no TickLoop reference (docs/01_class_list.md §5c
     // constructor is (model, sockets) only), so nothing else unregisters a finished match. This listener
     // is the match's cleanup — added here, alongside registration, since this is the one place both halves
-    // of the match's TickLoop lifecycle are naturally symmetric.
+    // of the match's TickLoop lifecycle are naturally symmetric. CORRECTION (Step 10, 10_server_10): also
+    // releases the queue's R2.2/R2.5 tracking and clears the match registry — both must happen exactly
+    // once per match, and both need the same event, so this one listener does all three cleanup jobs
+    // rather than three separate 'match:end' listeners racing each other.
     match.addModelListener({
       modelChanged: (event) => {
-        if (event.type === 'match:end') this.tickLoop.unregister(match.id);
+        if (event.type !== 'match:end') return;
+        this.tickLoop.unregister(match.id);
+        queue.releaseMatch([playerIdA, playerIdB]);
+        this.matchRegistry.delete(playerIdA);
+        this.matchRegistry.delete(playerIdB);
       },
     });
 

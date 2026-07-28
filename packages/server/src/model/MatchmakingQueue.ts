@@ -15,6 +15,8 @@ import { QueueEntry } from './QueueEntry';
 export class MatchmakingQueue extends AbstractModel {
   private entries: QueueEntry[] = [];
   private activeMatchCount = 0;
+  /** Players currently paired into a live match (R2.2) — cleared per-player by releaseMatch() once that match ends. */
+  private activeParticipants = new Set<PlayerId>();
 
   constructor(
     /** Upper bound on matches running concurrently (R-P3); pairing is withheld once reached. */
@@ -30,7 +32,7 @@ export class MatchmakingQueue extends AbstractModel {
    * @throws {AlreadyQueuedError} if the player is already queued or already in an active match (R2.2)
    */
   join(player: Player): number {
-    if (this.entries.some((e) => e.playerId === player.id)) {
+    if (this.entries.some((e) => e.playerId === player.id) || this.activeParticipants.has(player.id)) {
       throw new AlreadyQueuedError(player.id);
     }
     this.entries.push(new QueueEntry(player.id, player.username, Date.now()));
@@ -70,11 +72,27 @@ export class MatchmakingQueue extends AbstractModel {
     if (this.activeMatchCount >= this.maxConcurrentMatches) return null;
     const [first, second] = this.entries.splice(0, 2);
     this.activeMatchCount += 1;
+    this.activeParticipants.add(first.playerId);
+    this.activeParticipants.add(second.playerId);
     return [first, second];
   }
 
   /** @returns the number of players currently waiting in the queue. */
   size(): number {
     return this.entries.length;
+  }
+
+  /**
+   * Releases a finished match's concurrent-match slot and clears both players' "in an active match" status
+   * (R2.2, R2.5). Must be called exactly once per match, when that match ends — without it,
+   * `activeMatchCount` never frees up and `tryPairNext()` permanently refuses to pair once
+   * `maxConcurrentMatches` has ever been reached, and the two players can never re-queue.
+   * @param playerIds - the two players who were paired into the now-ended match
+   */
+  releaseMatch(playerIds: [PlayerId, PlayerId]): void {
+    for (const playerId of playerIds) {
+      this.activeParticipants.delete(playerId);
+    }
+    this.activeMatchCount = Math.max(0, this.activeMatchCount - 1);
   }
 }

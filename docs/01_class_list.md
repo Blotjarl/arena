@@ -192,7 +192,7 @@ change in `MatchModel`, since silent-ignore is the actually-specified behavior.
 | Class | Extends/Implements | Attributes | Operations (throws) |
 |---|---|---|---|
 | `QueueEntry` | — | `playerId: PlayerId`; `username: string`; `joinedAt: number` | `constructor(playerId, username, joinedAt)` |
-| `MatchmakingQueue` | `extends AbstractModel` | `private entries: QueueEntry[]`; `private activeMatchCount: number`; `private readonly maxConcurrentMatches: number` | `constructor(maxConcurrentMatches: number)`; `join(player: Player): number` — **throws** `AlreadyQueuedError` (R2.1, R2.2); `cancel(playerId: PlayerId): void` — **throws** `NotQueuedError` (R2.3); `tryPairNext(): [QueueEntry, QueueEntry] \| null` (R2.4, R2.5); `size(): number` |
+| `MatchmakingQueue` | `extends AbstractModel` | `private entries: QueueEntry[]`; `private activeMatchCount: number`; `private readonly maxConcurrentMatches: number`; `private activeParticipants: Set<PlayerId>` (10_server_10 — see correction below) | `constructor(maxConcurrentMatches: number)`; `join(player: Player): number` — **throws** `AlreadyQueuedError` (R2.1, R2.2); `cancel(playerId: PlayerId): void` — **throws** `NotQueuedError` (R2.3); `tryPairNext(): [QueueEntry, QueueEntry] \| null` (R2.4, R2.5); `releaseMatch(playerIds: [PlayerId, PlayerId]): void` (10_server_10 — see correction below); `size(): number` |
 | `ParticipantState` | — | `playerId: PlayerId`; `team: Team`; `champion: Champion \| null`; `position: Position`; `health: number`; `resource: number`; `cooldowns: Map<string, number>`; `crowdControlledUntil: number`; `connectionStatus: ConnectionStatus`; `disconnectedAt: number \| null` | `constructor(playerId, team)`; `applyDamage(amount: number): void`; `applyHeal(amount: number): void`; `applyCrowdControl(durationMs: number, now: number): void`; `regenerateResource(deltaSeconds: number): void`; `canUseAbility(abilityId: string, now: number): boolean`; `useAbility(ability: Ability, now: number): void` — **throws** `AbilityOnCooldownError`, `InsufficientResourceError`, `ActorIncapacitatedError` (R4.2); `move(direction: MovementInput, deltaSeconds: number, now: number): void` — **throws** `ActorIncapacitatedError`; `isAlive(): boolean`; `toSnapshot(now: number): ParticipantSnapshot` |
 | `MatchModel` | `extends AbstractModel` | `readonly id: MatchId`; `phase: MatchPhase`; `private participants: [ParticipantState, ParticipantState]`; `championSelectDeadline: number`; `startedAt: number \| null`; `endedAt: number \| null`; `endReason: EndReason \| null`; `winningTeam: Team \| null`; `private tickCount = 0` (broadcast tick counter, not a timestamp); `private pendingMoves: Map<PlayerId, {dx, dy}>` (each participant's latest unapplied movement input, applied once per `tick()`) | `constructor(id: MatchId, players: [Player, Player])`; `selectChampion(playerId: PlayerId, championId: ChampionId): void` — **throws** `InvalidChampionSelectionError`, `SelectionWindowExpiredError`, `InvalidMatchPhaseError` (R3.2–R3.5); `submitMove(playerId: PlayerId, input: MovementInput): void` — **throws** `InvalidMatchPhaseError` (R4.1); `submitAbility(playerId: string, req: { abilityId: string; targetPlayerId?: string }): void` — **throws** `InvalidMatchPhaseError` (invalid ability attempts are otherwise swallowed per R4's "silently ignores"); `tick(deltaSeconds: number): void` (R4.3–R4.6, calls `notifyChanged` with a `state` `ModelEvent`); `checkWinConditions(): EndReason \| null` (R5.1, R5.2); `disconnect(playerId: PlayerId): void` (R6.1, R6.2); `reconnect(playerId: PlayerId): void` — **throws** `GracePeriodExpiredError` (R6.3); `snapshot(): MatchStatePayload` |
 | `TickLoop` | — | `private readonly tickRateHz = 20`; `private matches: Map<MatchId, MatchModel>`; `private handle: NodeJS.Timeout \| null` | `constructor(tickRateHz?: number)`; `register(match: MatchModel): void`; `unregister(matchId: MatchId): void`; `start(): void`; `stop(): void`; `private onTick(): void` (R-P1 — iterates all registered matches, calls `tick()` on each inside a try/catch **per match** so one match's internal error cannot affect another, satisfying R5.4 / 3.6.2) |
@@ -210,6 +210,20 @@ originally sketched — the implementation never reads `AbilityUseRequest.target
 prompt's closing summary for why that specific gap is flagged as a real (not just documentation) issue: it
 makes any `POSITIONING`-effect ability invoked without a `targetPlayerId` (i.e. every self-directed
 reposition, such as Vex's Phase Step) resolve its own target to itself and therefore move nowhere.
+
+> **Step 10 correction (`10_server_10`)**: `MatchmakingQueue.join()`'s own doc comment always said it
+> throws `AlreadyQueuedError` "if the player is already queued or already in an active match" (R2.2), but
+> until this correction the implementation only ever checked `entries` — the queue itself — with no
+> tracking of "currently in an active match" at all, so a player mid-match could re-queue and be paired
+> into a second, simultaneous match. Separately, `tryPairNext()` incremented `activeMatchCount` on every
+> successful pairing but nothing ever decremented it (R2.5), so once `maxConcurrentMatches` matches had
+> *ever* been played — even long-finished ones — pairing was permanently disabled for the rest of the
+> process's life. Both are fixed together: a new `private activeParticipants: Set<PlayerId>` (added to the
+> attribute list above) is populated by `tryPairNext()` on a successful pairing and checked by `join()`
+> alongside `entries`, and a new `releaseMatch(playerIds: [PlayerId, PlayerId]): void` method (added to the
+> operations list above) clears both players from `activeParticipants` and decrements `activeMatchCount`
+> (floored at 0). `releaseMatch()` is not called by `MatchmakingQueue` itself — it must be invoked exactly
+> once per match, by whatever observes that match ending; see `MatchmakingController`'s correction below.
 
 ### 5b. `server/controller`
 
@@ -256,6 +270,18 @@ sketch.
 > MatchReportingClient` parameter (constructed once in `ServerMain.main()` and shared across every
 > connection's controller instance) so `createMatch()` can wire a `MatchReportingListener` per match.
 
+> **Step 10 correction (`10_server_10`)**: `MatchmakingController`'s constructor gained a seventh, trailing
+> `matchRegistry: Map<PlayerId, MatchRegistryEntry>` parameter — `MatchRegistryEntry` (`{ match: MatchModel;
+> view: MatchBroadcastView }`) is a new type, exported alongside `OnMatchCreated`. `createMatch()` now
+> registers both paired players into this map (the same place `MatchReportingListener` gets constructed),
+> and the `match:end` cleanup listener already sitting on the new `MatchModel` (previously only
+> `tickLoop.unregister()`) now also calls `queue.releaseMatch([playerIdA, playerIdB])` (closing
+> `MatchmakingQueue`'s R2.2/R2.5 correction above) and deletes both players' `matchRegistry` entries — all
+> three cleanup actions share one listener rather than three separate `'match:end'` listeners, since all
+> three must fire exactly once, together, per match. `matchRegistry` itself is owned and constructed by
+> `ServerMain.main()` (see that class's correction below) and threaded in the same way `sockets`/
+> `onMatchCreated`/`reportingClient` already were.
+
 ### 5c. `server/view`
 
 | Class | Implements | Operations |
@@ -284,15 +310,24 @@ sketch.
 > ask the OS for a free ephemeral port instead of hardcoding or mutating env vars mid-suite. `src/index.ts`'s
 > call is unaffected, since the parameter is optional.
 
-> **Known gap surfaced by this audit, not fixed here (see this prompt's closing summary)**: `main()` only
-> calls `ConnectionHandler.bindMatch()` once per player, at the moment `MatchmakingController.
-> onMatchCreated` fires during initial pairing (`connectionHandlers.get(playerId)?.bindMatch(match, view)`,
-> §5b). A player who disconnects and reconnects gets a brand-new Socket.IO connection and therefore a
-> brand-new `ConnectionHandler` instance whose `championSelect`/`combat`/`disconnect` controllers are never
-> (re-)bound — `bindMatch()` is never called a second time for that player. This means the R6.2–R6.4
-> disconnect/reconnect grace-period mechanism, though correctly implemented and unit-tested in isolation on
-> `MatchModel`/`ParticipantState`/`DisconnectController`, has no live path by which an actual reconnecting
-> browser can ever reach it.
+> **Gap fixed by Step 10 correction (`10_server_10`)** — previously flagged above as a known, unfixed audit
+> gap: `main()` only called `ConnectionHandler.bindMatch()` once per player, at the moment
+> `MatchmakingController.onMatchCreated` fires during initial pairing
+> (`connectionHandlers.get(playerId)?.bindMatch(match, view)`, §5b). A player who disconnects and
+> reconnects gets a brand-new Socket.IO connection and therefore a brand-new `ConnectionHandler` instance
+> whose `championSelect`/`combat`/`disconnect` controllers were never (re-)bound — `bindMatch()` was never
+> called a second time for that player, so the R6.2–R6.4 grace-period mechanism, though correctly
+> implemented and unit-tested in isolation on `MatchModel`/`ParticipantState`/`DisconnectController`, had no
+> live path by which an actual reconnecting browser could ever reach it. Fixed by: `main()` now owns a
+> process-wide `matchRegistry: Map<PlayerId, MatchRegistryEntry>` (new, parallel to the existing `sockets`/
+> `connectionHandlers` maps — see `MatchmakingController`'s correction in §5b for how it's populated and
+> cleared), and a new standalone exported function, `rebindIfInMatch(handler: ConnectionHandler,
+> matchRegistry, playerId: PlayerId): void` (deliberately not inlined in `main()`'s connection closure, so
+> it's testable without a live socket per 3.6.4) — called from the existing `onIdentified` callback (the
+> same one that already does `sockets.set`/`connectionHandlers.set` on every successful identify, reconnect
+> included) — looks the newly-identified player up in `matchRegistry` and calls `handler.bindMatch(...)` if
+> found. A player whose match has already ended has no entry (cleared by `MatchmakingController`'s
+> `'match:end'` listener before this can ever run) and is correctly left unbound.
 
 ---
 
