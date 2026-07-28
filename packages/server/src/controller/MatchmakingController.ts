@@ -15,6 +15,8 @@ import { MatchModel } from '../model/MatchModel';
 import { TickLoop } from '../model/TickLoop';
 import { MatchmakingBroadcastView } from '../view/MatchmakingBroadcastView';
 import { MatchBroadcastView } from '../view/MatchBroadcastView';
+import { MatchReportingClient } from './MatchReportingClient';
+import { MatchReportingListener } from './MatchReportingListener';
 
 /** Payload ConnectionHandler forwards for `queue:join`/`queue:cancel` — the connection's identified player. */
 export interface MatchmakingRequest {
@@ -45,6 +47,9 @@ export class MatchmakingController extends AbstractController {
     private readonly sockets: Map<PlayerId, Socket>,
     /** CORRECTION (Step 10): cross-connection wiring callback — see OnMatchCreated doc above. Not part of docs/01_class_list.md's original constructor sketch, added because ChampionSelectController/CombatController/DisconnectController require a MatchModel that doesn't exist until pairing happens on (from either player's perspective) only one of the two connections. */
     private readonly onMatchCreated: OnMatchCreated,
+    /** CORRECTION (Step 10, 10_server_9): every newly-created match's begin/end report goes through this
+     * one shared client — see MatchReportingListener, constructed per-match in createMatch() below. */
+    private readonly reportingClient: MatchReportingClient,
   ) {
     super(model, view);
   }
@@ -80,6 +85,10 @@ export class MatchmakingController extends AbstractController {
     const playerB = new Player(playerIdB, usernameB, new Date());
     const match = new MatchModel(matchId, [playerA, playerB]);
     const matchBroadcastView = new MatchBroadcastView(match, this.sockets);
+    // CORRECTION (Step 10, 10_server_9): closes the R7.1-R7.4 persistence gap — reports this match's
+    // begin/end to packages/api. A second, independent listener alongside matchBroadcastView (both react
+    // to the same MatchModel events; neither knows about the other).
+    new MatchReportingListener(match, [playerA, playerB], this.reportingClient);
 
     this.tickLoop.register(match);
     // CORRECTION (Step 10): MatchBroadcastView has no TickLoop reference (docs/01_class_list.md §5c

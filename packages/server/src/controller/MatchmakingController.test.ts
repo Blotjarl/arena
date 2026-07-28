@@ -7,6 +7,15 @@ import type { MatchmakingBroadcastView } from '../view/MatchmakingBroadcastView'
 import type { MatchBroadcastView } from '../view/MatchBroadcastView';
 import type { Socket } from 'socket.io';
 import { QueueEntry } from '../model/QueueEntry';
+import type { MatchReportingClient } from './MatchReportingClient';
+import { MatchReportingListener } from './MatchReportingListener';
+
+function makeReportingClient(): MatchReportingClient {
+  return {
+    reportMatchBegin: jest.fn().mockResolvedValue(undefined),
+    reportMatchEnd: jest.fn().mockResolvedValue(undefined),
+  } as unknown as MatchReportingClient;
+}
 
 function makeQueue(overrides: Partial<MatchmakingQueue> = {}): MatchmakingQueue {
   return {
@@ -35,7 +44,7 @@ describe('MatchmakingController', () => {
       const view = makeView();
       const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
       const onMatchCreated = jest.fn();
-      const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), onMatchCreated);
+      const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), onMatchCreated, makeReportingClient());
 
       const player = new Player('p1', 'Alice', new Date());
       controller.operation('queue:join', { player });
@@ -58,6 +67,7 @@ describe('MatchmakingController', () => {
         { register: jest.fn() } as unknown as TickLoop,
         makeSockets(),
         jest.fn(),
+        makeReportingClient(),
       );
       expect(() => controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) })).toThrow(
         AlreadyQueuedError,
@@ -72,7 +82,7 @@ describe('MatchmakingController', () => {
         const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
         const onMatchCreated = jest.fn();
         const sockets = makeSockets();
-        const controller = new MatchmakingController(queue, view, tickLoop, sockets, onMatchCreated);
+        const controller = new MatchmakingController(queue, view, tickLoop, sockets, onMatchCreated, makeReportingClient());
 
         controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) });
 
@@ -92,7 +102,7 @@ describe('MatchmakingController', () => {
         const queue = makeQueue({ tryPairNext: jest.fn(() => pair) });
         const view = makeView();
         const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
-        const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), jest.fn());
+        const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), jest.fn(), makeReportingClient());
 
         controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) });
 
@@ -117,22 +127,31 @@ describe('MatchmakingController', () => {
         const view = makeView();
         const tickLoop = { register: jest.fn(), unregister: jest.fn() } as unknown as TickLoop;
         const onMatchCreated = jest.fn();
-        const controller = new MatchmakingController(queue, view, tickLoop, makeSockets(), onMatchCreated);
+        const controller = new MatchmakingController(
+          queue,
+          view,
+          tickLoop,
+          makeSockets(),
+          onMatchCreated,
+          makeReportingClient(),
+        );
 
         controller.operation('queue:join', { player: new Player('p1', 'Alice', new Date()) });
         const match = (tickLoop.register as jest.Mock).mock.calls[0][0] as MatchModel;
 
-        // The real MatchBroadcastView (constructed inside createMatch) also registers itself as a listener
-        // via addModelListener(this) — its own modelChanged is still an unimplemented stub (10_server_7),
-        // so it must never be invoked here. Identify it via the view captured by onMatchCreated, and find
-        // MatchmakingController's own cleanup listener by elimination — the other registered listener.
+        // createMatch() registers three listeners on the new MatchModel: the real MatchBroadcastView (its
+        // own modelChanged is still an unimplemented stub, 10_server_7, so it must never be invoked here),
+        // a MatchReportingListener (10_server_9 — reports to the api, also not under test here), and
+        // MatchmakingController's own anonymous cleanup listener. Identify the cleanup listener by
+        // elimination: it's the one registered listener that is neither a MatchBroadcastView nor a
+        // MatchReportingListener instance.
         const matchBroadcastView = onMatchCreated.mock.calls[0][2] as MatchBroadcastView;
         const registeredListeners = addListenerSpy.mock.calls.map(([listener]) => listener);
         expect(registeredListeners).toContain(matchBroadcastView);
 
-        const cleanupListener = registeredListeners.find((listener) => listener !== matchBroadcastView) as
-          | ModelListener
-          | undefined;
+        const cleanupListener = registeredListeners.find(
+          (listener) => listener !== matchBroadcastView && !(listener instanceof MatchReportingListener),
+        ) as ModelListener | undefined;
         expect(cleanupListener).toBeDefined();
 
         cleanupListener!.modelChanged(new ModelEvent(match, 'match:end', {}));
@@ -157,6 +176,7 @@ describe('MatchmakingController', () => {
         { register: jest.fn() } as unknown as TickLoop,
         makeSockets(),
         jest.fn(),
+        makeReportingClient(),
       );
       controller.operation('queue:cancel', { player: new Player('p1', 'Alice', new Date()) });
       expect(queue.cancel).toHaveBeenCalledWith('p1');
@@ -174,6 +194,7 @@ describe('MatchmakingController', () => {
         { register: jest.fn() } as unknown as TickLoop,
         makeSockets(),
         jest.fn(),
+        makeReportingClient(),
       );
       expect(() => controller.operation('queue:cancel', { player: new Player('p1', 'Alice', new Date()) })).toThrow(
         NotQueuedError,
