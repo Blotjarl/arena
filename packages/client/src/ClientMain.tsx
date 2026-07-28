@@ -69,6 +69,18 @@ function AppRouter(props: {
 }
 
 /**
+ * Server URL the default socketFactory connects to. A bare `io()` call with no URL argument connects
+ * to whatever origin served the page, which only works when client and server share an origin — not
+ * true across separate dev-server ports or separate production hosts. `__SERVER_URL__` is a global
+ * injected by `vite.config.ts` from the `VITE_SERVER_URL` env var (see that file for why it's a
+ * `define`d global rather than the more idiomatic `import.meta.env.VITE_SERVER_URL` — short version:
+ * `import.meta` syntax needs an ESM `module` target, which this file's CommonJS-targeted tsconfig
+ * can't use without breaking ts-jest). It's simply undeclared outside a Vite build (e.g. under Jest),
+ * where the `typeof` guard below falls back to a local-dev default instead.
+ */
+const DEFAULT_SERVER_URL = typeof __SERVER_URL__ !== 'undefined' ? __SERVER_URL__ : 'http://localhost:3001';
+
+/**
  * Application entry point for the Arena client. Constructs the full model/controller/view graph
  * and mounts the React root onto the DOM (SRS 2.1, R-D7).
  */
@@ -81,10 +93,14 @@ export class ClientMain {
    * is added, defaulting to a real `io()` call, so this method never needs to open a live socket
    * connection to be exercised by a test (master context §4.2's testability principle) — a test
    * supplies a mock satisfying the same `emit`/`on` shape instead.
+   *
+   * CORRECTION (Step 11): the default `socketFactory` now calls `io(DEFAULT_SERVER_URL)` instead of
+   * a bare `io()`, so it connects to the configured game server rather than assuming same-origin.
    * @param socketFactory - produces the Socket.IO client socket to use; defaults to a real connection
+   *   to `VITE_SERVER_URL` (or `http://localhost:3001` if unset)
    * @throws {Error} if no `#root` element exists in the document to mount into
    */
-  static main(socketFactory: () => Socket = () => io()): void {
+  static main(socketFactory: () => Socket = () => io(DEFAULT_SERVER_URL)): void {
     const identityModel = new ClientIdentityModel();
     const queueModel = new ClientQueueModel();
     const matchModel = new ClientMatchModel();

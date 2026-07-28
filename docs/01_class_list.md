@@ -439,6 +439,39 @@ connection that hasn't (re-)identified yet. This was previously a real, confirme
 emitted `match:reconnect` anywhere in `packages/client/src` (07_shared_1's audit), even though the wire
 event and the server-side `DisconnectController`/`MatchModel.reconnect()` handling already existed.
 
+### 6e. Build tooling (`11_client_1`)
+
+Through Step 10, `packages/client` was only ever exercised in isolation via Jest + jsdom + React Testing
+Library — it had no bundler, no `index.html`, and could never actually run as a web app. This step adds
+[Vite](https://vite.dev) (`vite`, `@vitejs/plugin-react`) as the client's dev/build tool:
+
+- `packages/client/index.html` — the SPA shell, with `<div id="root">` (matched by `ClientMain.main()`'s
+  existing `document.getElementById('root')` lookup, unchanged) and a module script pointing at the entry
+  file.
+- `packages/client/src/index.tsx` — the actual entry point (pre-existing from Step 10, unchanged by this
+  step): two lines, `import { ClientMain } from './ClientMain'; ClientMain.main();`. `ClientMain.tsx` itself
+  only exports the class; it has no side effects on import.
+- `packages/client/package.json` gained `dev` (`vite`), `build` (`vite build`), and `preview` (`vite
+  preview`) scripts — `npm run build` from the repo root now produces `packages/client/dist/`.
+- `packages/client/vite.config.ts` — minimal, one plugin (`@vitejs/plugin-react`).
+
+**Server URL configuration**: `ClientMain.main()`'s default `socketFactory` previously called a bare
+`io()` — Socket.IO interprets no URL as "connect to the page's own origin," which only works if client and
+server happen to share an origin (they don't: separate processes, separate ports in dev, likely separate
+hosts in production). The default now reads a `VITE_SERVER_URL` env var, falling back to
+`http://localhost:3001` for local dev, e.g. `VITE_SERVER_URL=https://api.example.com npm run build -w
+@arena/client`.
+
+**Deviation from Vite's usual `import.meta.env.VITE_*` convention**: `import.meta` syntax is only legal
+TypeScript under an ESM `module` target, but `packages/client/tsconfig.json` targets CommonJS so that
+ts-jest can transform the same source files for Jest — switching the workspace to an ESM target would
+require reworking Jest's transform for ESM too, well outside this step's scope (and explicitly flagged in
+`11_client_1` as a reason to stop and reconsider). Instead, `vite.config.ts` reads `VITE_SERVER_URL` via
+`loadEnv()` and injects it as a plain global, `__SERVER_URL__` (declared ambient in `src/vite-env.d.ts`),
+via Vite's `define`. `ClientMain.tsx` reads it through a `typeof __SERVER_URL__ !== 'undefined'` guard,
+which is `false` (falling back to the localhost default) whenever the file is compiled outside a Vite
+build — e.g. by ts-jest — so no test needed to change.
+
 ---
 
 ## 7. `packages/api` (En) — REST API + persistence
