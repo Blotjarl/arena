@@ -219,8 +219,23 @@ and R6.1–R6.4 are functional end-to-end (server-side rebinding verified via co
 client-side emission verified via its own mocked-socket test suite — genuine two-client end-to-end
 reconnection has not been manually exercised against a live server).
 
+## Step 11 — Conduct acceptance tests; fix faults if found
+
+`docs/ProjectProcess.txt` step 11, verbatim. Four prompts — nothing in `packages/` has ever actually been
+run together as live processes before this batch; two real gaps were found just designing these prompts
+(the client has no build tooling at all, and its socket connection is hardcoded same-origin) and are fixed
+as prerequisites rather than discovered mid-test.
+
+| # | File | Owner | Depends on | Status |
+|---|---|---|---|---|
+| 1 | `11_client_1_build-tooling.md` | **Raj** | none | [ ] |
+| 2 | `11_shared_1_dockerize.md` | **Marshall** | none (independent of 1) | [ ] |
+| 3 | `11_shared_2_e2e-acceptance-test.md` | **Marshall** | #1 (needs a servable client) | [ ] |
+| 4 | `11_shared_3_ci-pipeline.md` | **Marshall** | #3 (needs the e2e test to exist) | [ ] |
+
+Prompt 3 is explicitly authorized to fix real integration bugs it finds, unlike `07_shared_1` — Step 11's
+own process wording is "conduct acceptance tests; fix faults if found," not docs-only reconciliation.
+
 ## Later steps
 
-Steps 11 (acceptance tests, incl. the required Playwright e2e test), 12 (final reverse-engineered
-diagram), and 13 (final javadoc) have not had prompts written yet. Nothing in the Step 9–10 batch remains
-outstanding — Step 11 is unblocked.
+Steps 12 (final reverse-engineered diagram) and 13 (final javadoc) have not had prompts written yet.
