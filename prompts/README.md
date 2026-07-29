@@ -229,7 +229,7 @@ as prerequisites rather than discovered mid-test.
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
 | 1 | `11_client_1_build-tooling.md` | **Raj** | none | [x] |
-| 2 | `11_shared_1_dockerize.md` | **Marshall** | none (independent of 1) | [ ] |
+| 2 | `11_shared_1_dockerize.md` | **Marshall** | none (independent of 1) | [x] |
 | 3 | `11_shared_2_e2e-acceptance-test.md` | **Marshall** | #1 (needs a servable client) | [ ] |
 | 4 | `11_shared_3_ci-pipeline.md` | **Marshall** | #3 (needs the e2e test to exist) | [ ] |
 
