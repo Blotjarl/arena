@@ -99,6 +99,9 @@ button {
   flex-direction: column;
   align-items: center;
   padding: 3rem 1.5rem;
+  /* align-items above only centers a screen's own children; a screen that itself constrains its
+     width via max-width (e.g. screen-match-hud) also needs to center itself on the page. */
+  margin: 0 auto;
 }
 
 .card {
@@ -481,7 +484,7 @@ button {
 }
 
 .arena {
-  width: 400px;
+  width: 700px;
   max-width: 100%;
   background: repeating-linear-gradient(
       45deg,
@@ -495,23 +498,31 @@ button {
   overflow: hidden;
 }
 
+/* The marker is a ring/glow (whose vs opponent) layered behind a champion-specific pixel sprite
+   (which champion) — the sprite's own colors say who, the ring says whose side (see 11_client_3). */
 .marker {
-  width: 22px;
-  height: 22px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  border: 2px solid var(--color-bg);
-  box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .marker--you {
-  background: var(--color-you);
-  box-shadow: 0 0 10px 2px var(--color-you);
+  background: radial-gradient(circle, rgba(79, 163, 227, 0.35) 0%, rgba(79, 163, 227, 0) 70%);
+  box-shadow: 0 0 14px 3px rgba(79, 163, 227, 0.55);
 }
 
 .marker--opponent {
-  background: var(--color-opponent);
-  box-shadow: 0 0 10px 2px var(--color-opponent);
+  background: radial-gradient(circle, rgba(224, 82, 74, 0.35) 0%, rgba(224, 82, 74, 0) 70%);
+  box-shadow: 0 0 14px 3px rgba(224, 82, 74, 0.55);
+}
+
+.champion-sprite {
+  display: block;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
 }
 
 .movement-controls {
