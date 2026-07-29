@@ -72,6 +72,7 @@ used by matchmaking and persistence alike.)*
 | `EndReason` | enum | `ELIMINATION`, `TIME_LIMIT`, `DISCONNECT_FORFEIT`, `SELECTION_TIMEOUT` (R5.3, R-DB3) | — |
 | `MatchResult` | enum | `WIN`, `LOSS`, `DRAW` (R-DB3) | — |
 | `EffectType` | enum | `DAMAGE`, `HEAL`, `CROWD_CONTROL`, `POSITIONING` (SRS 1.4 definitions) | — |
+| `ARENA_WIDTH`, `ARENA_HEIGHT` | `const number` (`Arena.ts`, Step 11) | both `400` — the arena's game-logic coordinate bounds, not pixels | — |
 | `Position` | class | `x: number`; `y: number` | `constructor(x: number, y: number)`; `distanceTo(other: Position): number` |
 | `Ability` | class | `id: string`; `name: string`; `cooldownSeconds: number`; `resourceCost: number`; `range: number`; `effectType: EffectType`; `magnitude: number` | `constructor(id, name, cooldownSeconds, resourceCost, range, effectType, magnitude)` |
 | `Champion` | class | `id: ChampionId`; `name: string`; `role: string`; `maxHealth: number`; `maxResource: number`; `resourceRegenRate: number`; `moveSpeed: number`; `abilities: Ability[]` | `constructor(...)`; `getAbility(abilityId: string): Ability` — **throws** `InvalidChampionSelectionError` if not found |
@@ -88,6 +89,17 @@ with no network round trip — the same reasoning behind the Account Manager exa
 `shared/domain` (like a hardwired constants class), while `packages/api`'s persistence layer (also En's)
 is the separate concern of recording match *results*, not defining champion *data*. Flag this for En so
 the divergence from the AI-use-plan table's literal package name is understood as intentional.
+
+> **Step 11 correction — real bug found by manually playing a match (`11_server_2`)**: `ARENA_WIDTH`/
+> `ARENA_HEIGHT` (row above) are new — before this correction, `ParticipantState.move()` (§5a) applied
+> speed/deltaSeconds math with zero clamping, so a player could move infinitely far in any direction, and
+> `MatchModel`'s constructor (§5a) gave both `ParticipantState`s the same default `Position(0, 0)`, so both
+> participants spawned stacked on top of each other. Both are real gameplay gaps a unit test alone would
+> never surface (every existing test drove `move()`/the constructor directly, never rendered the result).
+> `400` was chosen to match the scale every champion's `moveSpeed` and every ability's `range` in
+> `ChampionRoster` was already implicitly tuned against (Vex's Arcane Bolt range 600 comfortably exceeds a
+> 400x400 arena's ~565.7 diagonal; a full-speed sprint at Vex's 220 moveSpeed crosses the whole width in
+> under 2 seconds) — it does not change any existing game-logic values, only adds a boundary around them.
 
 ---
 
@@ -222,6 +234,17 @@ reposition, such as Vex's Phase Step) resolve its own target to itself and there
 > speed, for the rest of the match. Fixed by deleting the participant's `pendingMoves` entry immediately
 > after (attempting to) apply it each tick, regardless of success — bringing the implementation back in
 > line with what this table already said it should do.
+
+> **Step 11 correction — real bug found by end-to-end acceptance testing (`11_server_2`)**: two real
+> gameplay gaps, both invisible to every prior unit test since none of them ever rendered a match or moved
+> a participant more than once. First, `ParticipantState.move()`'s resulting position is now clamped to
+> `[0, ARENA_WIDTH]` x `[0, ARENA_HEIGHT]` (§2's new constants) after the existing speed/deltaSeconds math
+> — previously unbounded, so a player could walk off the edge of whatever arena the client draws and never
+> stop. Second, `MatchModel`'s constructor now assigns each `ParticipantState` a distinct spawn `Position`
+> on opposite sides of the arena (`(SPAWN_WALL_MARGIN, ARENA_HEIGHT / 2)` and
+> `(ARENA_WIDTH - SPAWN_WALL_MARGIN, ARENA_HEIGHT / 2)`) instead of leaving both at `ParticipantState`'s own
+> default `Position(0, 0)` — previously both participants spawned stacked on top of each other. Neither
+> change alters `ParticipantState`'s or `MatchModel`'s constructor signature.
 
 > **Step 10 correction (`10_server_10`)**: `MatchmakingQueue.join()`'s own doc comment always said it
 > throws `AlreadyQueuedError` "if the player is already queued or already in an active match" (R2.2), but

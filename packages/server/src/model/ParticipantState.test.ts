@@ -7,6 +7,9 @@ import {
   ActorIncapacitatedError,
   AbilityOnCooldownError,
   InsufficientResourceError,
+  Position,
+  ARENA_WIDTH,
+  ARENA_HEIGHT,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
 
@@ -210,6 +213,52 @@ describe('ParticipantState', () => {
       const p = makeParticipant();
       p.applyCrowdControl(5000, 1000);
       expect(() => p.move({ dx: 1, dy: 0 }, 0.5, 2000)).toThrow(ActorIncapacitatedError);
+    });
+
+    describe('CORRECTION (Step 11): arena wall clamping', () => {
+      it('a normal movement well within bounds is completely unaffected by the clamp', () => {
+        const p = makeParticipant(); // moveSpeed 200
+        p.position = new Position(ARENA_WIDTH / 2, ARENA_HEIGHT / 2);
+        p.move({ dx: 1, dy: 0 }, 0.1, 1000); // 200 * 0.1 = 20, nowhere near a wall
+        expect(p.position.x).toBe(ARENA_WIDTH / 2 + 20);
+        expect(p.position.y).toBe(ARENA_HEIGHT / 2);
+      });
+
+      it('repeated movement toward the right wall stops exactly at ARENA_WIDTH, not beyond it', () => {
+        const p = makeParticipant();
+        p.position = new Position(ARENA_WIDTH - 10, ARENA_HEIGHT / 2);
+        for (let i = 0; i < 5; i++) {
+          p.move({ dx: 1, dy: 0 }, 1, 1000 + i); // 200/s -- would massively overshoot without clamping
+        }
+        expect(p.position.x).toBe(ARENA_WIDTH);
+      });
+
+      it('repeated movement toward the left wall stops exactly at 0, not beyond it', () => {
+        const p = makeParticipant();
+        p.position = new Position(10, ARENA_HEIGHT / 2);
+        for (let i = 0; i < 5; i++) {
+          p.move({ dx: -1, dy: 0 }, 1, 1000 + i);
+        }
+        expect(p.position.x).toBe(0);
+      });
+
+      it('repeated movement toward the bottom wall stops exactly at ARENA_HEIGHT, not beyond it', () => {
+        const p = makeParticipant();
+        p.position = new Position(ARENA_WIDTH / 2, ARENA_HEIGHT - 10);
+        for (let i = 0; i < 5; i++) {
+          p.move({ dx: 0, dy: 1 }, 1, 1000 + i);
+        }
+        expect(p.position.y).toBe(ARENA_HEIGHT);
+      });
+
+      it('repeated movement toward the top wall stops exactly at 0, not beyond it', () => {
+        const p = makeParticipant();
+        p.position = new Position(ARENA_WIDTH / 2, 10);
+        for (let i = 0; i < 5; i++) {
+          p.move({ dx: 0, dy: -1 }, 1, 1000 + i);
+        }
+        expect(p.position.y).toBe(0);
+      });
     });
   });
 

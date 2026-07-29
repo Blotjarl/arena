@@ -101,8 +101,9 @@ test.describe('a complete Arena match', () => {
     await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible();
     await expect(attacker.locator('div[aria-label="ability-controls"]')).toBeVisible();
 
-    // Touch real movement input too (both spawn co-located, so this isn't needed for range, but it's
-    // a real player action the HUD exposes and the server validates — exercise it for real).
+    // Touch real movement input too (both participants spawn well within Arcane Bolt's 600-range of each
+    // other regardless, so this isn't needed for range, but it's a real player action the HUD exposes and
+    // the server validates — exercise it for real).
     await attacker.getByRole('button', { name: 'Move Up' }).click();
     await defender.getByRole('button', { name: 'Move Down' }).click();
 
