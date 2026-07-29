@@ -221,10 +221,11 @@ reconnection has not been manually exercised against a live server).
 
 ## Step 11 — Conduct acceptance tests; fix faults if found
 
-`docs/ProjectProcess.txt` step 11, verbatim. Four prompts — nothing in `packages/` has ever actually been
-run together as live processes before this batch; two real gaps were found just designing these prompts
-(the client has no build tooling at all, and its socket connection is hardcoded same-origin) and are fixed
-as prerequisites rather than discovered mid-test.
+`docs/ProjectProcess.txt` step 11, verbatim. Five prompts — nothing in `packages/` has ever actually been
+run together as live processes before this batch; two real gaps were found just designing the first four
+prompts (the client has no build tooling at all, and its socket connection is hardcoded same-origin) and
+were fixed as prerequisites rather than discovered mid-test. A full post-batch audit found two more real
+gaps that prompt 3's own e2e test never covered — prompt 5 closes those.
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -232,9 +233,14 @@ as prerequisites rather than discovered mid-test.
 | 2 | `11_shared_1_dockerize.md` | **Marshall** | none (independent of 1) | [x] |
 | 3 | `11_shared_2_e2e-acceptance-test.md` | **Marshall** | #1 (needs a servable client) | [x] |
 | 4 | `11_shared_3_ci-pipeline.md` | **Marshall** | #3 (needs the e2e test to exist) | [x] |
+| 5 | `11_shared_4_reconnection-and-persistence-e2e-coverage.md` | **Marshall** | #3, #4 | [ ] |
 
-Prompt 3 is explicitly authorized to fix real integration bugs it finds, unlike `07_shared_1` — Step 11's
-own process wording is "conduct acceptance tests; fix faults if found," not docs-only reconciliation.
+Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
+Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
+reconciliation. Prompt 5 exists because a full audit after 3-4 landed found R6.1–R6.4 (disconnect/
+reconnect) was never exercised end-to-end — unlike prompt 3's four bugs, this one's outcome (does the real
+wiring actually work?) is genuinely unknown until the prompt runs — plus a match-persistence path that was
+verified working by hand but never given permanent test coverage.
 
 ## Later steps
 
