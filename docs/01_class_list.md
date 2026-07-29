@@ -365,6 +365,21 @@ sketch.
 > Socket.IO server (which also closes the underlying HTTP server). Test-only, like `ApiMain.stop()` — not
 > part of this table.
 
+> **Step 11 correction (`11_shared_4`) — real bug found by disconnect/reconnect end-to-end testing**:
+> `main()`'s `SocketIOServer` constructor now passes `{ pingInterval: 2_000, pingTimeout: 3_000 }` alongside
+> its existing `cors` option. Socket.IO/Engine.IO's *default* heartbeat (`pingInterval` 25s, `pingTimeout`
+> 20s) can take up to ~45 seconds to notice a transport that has gone silent without an explicit close —
+> exactly what a real network drop looks like (no TCP FIN/RST, frames just stop), as opposed to a tab
+> closing cleanly. Against this game's 30-second disconnect grace period (R6.4), that ~45s default
+> detection window is not a rare edge case: it could consume the *entire* grace period before the server
+> even began counting, meaning a genuinely disconnected player could be held far longer than R6.4 promises,
+> and the "notifies the remaining player" half of R6.2 would only fire tens of seconds after the actual
+> disconnect. Every individual piece (grace-period math, `MatchRegistryEntry` rebinding, the client's
+> reconnect handler) was already correct in isolation — this was invisible to all of them, and only
+> surfaced once a real dropped connection was driven through the real stack. Tightened so a genuinely dead
+> connection is detected within ~5 seconds, comfortably inside the grace period. Server-only configuration,
+> delivered to clients via the Engine.IO handshake — no client-side change needed.
+
 ---
 
 ## 6. `packages/client` (Raj) — the React browser client
