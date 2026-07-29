@@ -71,6 +71,50 @@ describe('InterpolationBuffer', () => {
       expect(pos).toBeInstanceOf(Position);
     });
 
+    // ── REGRESSION (11_client_4) ───────────────────────────────────────────
+    // The bug this guards against was invisible to every test above: makeParticipant() always
+    // builds `position: new Position(x, y)`, a real class instance, so `toBeInstanceOf(Position)`
+    // passed trivially even on the buggy code path that returned a snapshot's raw `.position` field
+    // unwrapped. Over a real Socket.IO connection, a snapshot's `.position` is a plain deserialized
+    // object with no prototype methods — these tests build the fixture the same (unwrapped) way to
+    // actually exercise that path, then call a real Position method to prove it isn't just "looks
+    // like a Position," it behaves like one.
+    describe('every return path yields a real, working Position (not just object-shaped)', () => {
+      const asPlainObject = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
+      it('single-sample branch', () => {
+        const buf = new InterpolationBuffer(5);
+        buf.push(asPlainObject(makeSnapshot(1, 5, 10)));
+        const pos = buf.getInterpolatedPosition('p1', 1000);
+        expect(() => pos.distanceTo(new Position(0, 0))).not.toThrow();
+        expect(pos.distanceTo(new Position(0, 0))).toBeCloseTo(Math.hypot(5, 10), 5);
+      });
+
+      it('"now" before the earliest bracketing sample (no pPrev) branch', () => {
+        const buf = new InterpolationBuffer(5);
+        buf.push(asPlainObject(makeSnapshot(10, 0, 0)));
+        buf.push(asPlainObject(makeSnapshot(11, 100, 0)));
+        const pos = buf.getInterpolatedPosition('p1', -99999);
+        expect(() => pos.distanceTo(new Position(0, 0))).not.toThrow();
+      });
+
+      it('"now" past the last snapshot (no pNext) branch', () => {
+        const buf = new InterpolationBuffer(5);
+        buf.push(asPlainObject(makeSnapshot(10, 0, 0)));
+        buf.push(asPlainObject(makeSnapshot(11, 100, 0)));
+        const pos = buf.getInterpolatedPosition('p1', 99999);
+        expect(() => pos.distanceTo(new Position(0, 0))).not.toThrow();
+      });
+
+      it('fully-interpolated branch', () => {
+        const buf = new InterpolationBuffer(5);
+        buf.push(asPlainObject(makeSnapshot(10, 0, 0)));
+        buf.push(asPlainObject(makeSnapshot(11, 100, 0)));
+        const pos = buf.getInterpolatedPosition('p1', 975);
+        expect(() => pos.distanceTo(new Position(0, 0))).not.toThrow();
+      });
+    });
+
     // ── CRITICAL CHECKPOINT ─────────────────────────────────────────────────
     it('CRITICAL: does not mutate ClientMatchModel or any external state', () => {
       const buf = new InterpolationBuffer(5);
