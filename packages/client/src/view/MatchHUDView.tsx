@@ -10,6 +10,8 @@ import {
   SOCKET_EVENTS,
   PlayerDisconnectedPayload,
   PlayerReconnectedPayload,
+  ARENA_WIDTH,
+  ARENA_HEIGHT,
 } from '@arena/shared';
 import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientMatchModel } from '../model/ClientMatchModel';
@@ -23,6 +25,119 @@ const MOVE_DIRECTIONS: Record<string, { dx: number; dy: number }> = {
   Left: { dx: -1, dy: 0 },
   Right: { dx: 1, dy: 0 },
 };
+
+/** WASD -> the same direction presets the movement buttons already dispatch. */
+const WASD_DIRECTIONS: Record<string, { dx: number; dy: number }> = {
+  w: MOVE_DIRECTIONS.Up,
+  s: MOVE_DIRECTIONS.Down,
+  a: MOVE_DIRECTIONS.Left,
+  d: MOVE_DIRECTIONS.Right,
+};
+
+/**
+ * Rendered pixel size of the (square) arena. `Position` values from the server stay in
+ * ARENA_WIDTH/ARENA_HEIGHT game-logic units (11_server_2) — this is purely a display-time scale
+ * factor, so growing the arena on screen never changes how far a step actually moves a champion.
+ */
+const ARENA_RENDER_SIZE_PX = 700;
+
+/** Server tick rate (R-P1) — re-dispatching held WASD moves faster than this just wastes socket traffic. */
+const MOVE_REPEAT_INTERVAL_MS = 50;
+
+function toRenderPixels(position: { x: number; y: number }): { x: number; y: number } {
+  return {
+    x: (position.x / ARENA_WIDTH) * ARENA_RENDER_SIZE_PX,
+    y: (position.y / ARENA_HEIGHT) * ARENA_RENDER_SIZE_PX,
+  };
+}
+
+/**
+ * Small hand-built pixel grids, one per champion, dark-fantasy silhouettes matching each
+ * champion's established identity: Korr (bruiser) wide/bulky, Vex (mage) slender/hooded/robed,
+ * Rin (duelist) lean with an angular blade accent. Chars: '.' transparent, 'O' outline, 'B' body
+ * (the champion's own accent color), 'E' eye, 'A' blade/highlight accent.
+ */
+const CHAMPION_SPRITES: Record<string, readonly string[]> = {
+  korr: [
+    '...OOOOO...',
+    '..OBBBBBO..',
+    '..OBEOEBO..',
+    '..OBBBBBO..',
+    '.OOBBBBBOO.',
+    'OBBBBBBBBBO',
+    'OBBBBBBBBBO',
+    'OBBBBBBBBBO',
+    'OBBBBBBBBBO',
+    '.OBBBBBBBO.',
+    '.OBB...BBO.',
+    '.OB.....BO.',
+    '.OO.....OO.',
+  ],
+  vex: [
+    '.....O.....',
+    '....OOO....',
+    '...OBBBO...',
+    '...OBEBO...',
+    '...OBBBO...',
+    '....OBO....',
+    '...OBBBO...',
+    '..OBBBBBO..',
+    '..OBBBBBO..',
+    '.OBBBBBBBO.',
+    '.OBBBBBBBO.',
+    'OBBBBBBBBBO',
+    'OB.......BO',
+  ],
+  rin: [
+    '...OOOOO...',
+    '..OBBBBBO..',
+    '..OBEOEBO..',
+    '..OBBBBBO..',
+    '...OBBBO...',
+    '..OBBBBBO..',
+    '.OBBBBBBOA.',
+    '..OBBBBBOA.',
+    '..OBBBBBBO.',
+    '..OB.O.BO..',
+    '..OB...BO..',
+    '..OO...OO..',
+  ],
+};
+
+/** Pixel-art cell size, in real px, for each sprite grid unit. */
+const SPRITE_CELL_PX = 4;
+
+const SPRITE_PIXEL_COLORS: Record<string, string> = {
+  O: 'var(--color-border-strong)',
+  B: 'var(--champion-accent)',
+  E: 'var(--color-text)',
+  A: 'var(--color-text-muted)',
+};
+
+/** Renders one champion's inline-SVG pixel sprite. A genuinely blocky look, no image assets. */
+function ChampionSprite(props: { championId: string }): JSX.Element {
+  const grid = CHAMPION_SPRITES[props.championId] ?? CHAMPION_SPRITES.korr;
+  const cols = Math.max(...grid.map((row) => row.length));
+  const rows = grid.length;
+  return (
+    <svg
+      className={`champion-sprite champion-${props.championId}`}
+      width={cols * SPRITE_CELL_PX}
+      height={rows * SPRITE_CELL_PX}
+      viewBox={`0 0 ${cols} ${rows}`}
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+    >
+      {grid.flatMap((row, y) =>
+        row.split('').map((cell, x) => {
+          const fill = SPRITE_PIXEL_COLORS[cell];
+          if (!fill) return null;
+          return <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={fill} />;
+        }),
+      )}
+    </svg>
+  );
+}
 
 /**
  * MVC View for the in-combat HUD screen. Observes ClientMatchModel for authoritative tick
@@ -200,6 +315,41 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const controller = view.getController();
   const interpolation = view.getInterpolationBuffer();
 
+  // WASD hold-to-move (11_client_3): an addition alongside the movement buttons, dispatching the
+  // exact same controller.operation('move', direction) call those buttons already make. Held keys
+  // are re-dispatched on a fixed interval, cleaned up on unmount, matching the project's existing
+  // discipline around listener/timer cleanup (see this view's own doc comments elsewhere).
+  useEffect(() => {
+    const heldKeys = new Set<string>();
+
+    const dispatchHeldMoves = (): void => {
+      heldKeys.forEach((key) => {
+        controller.operation('move', WASD_DIRECTIONS[key]);
+      });
+    };
+
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      const key = event.key.toLowerCase();
+      if (!(key in WASD_DIRECTIONS) || heldKeys.has(key)) return;
+      heldKeys.add(key);
+      controller.operation('move', WASD_DIRECTIONS[key]);
+    };
+
+    const handleKeyUp = (event: KeyboardEvent): void => {
+      heldKeys.delete(event.key.toLowerCase());
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    const intervalId = window.setInterval(dispatchHeldMoves, MOVE_REPEAT_INTERVAL_MS);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.clearInterval(intervalId);
+    };
+  }, [controller]);
+
   const state = match.latestState;
   if (!state) {
     return <p>Waiting for match state...</p>;
@@ -212,8 +362,8 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const opponentChampion = ChampionRoster.getById(opponent.championId);
 
   const now = Date.now();
-  const myPosition = interpolation.getInterpolatedPosition(me.playerId, now);
-  const opponentPosition = interpolation.getInterpolatedPosition(opponent.playerId, now);
+  const myPixel = toRenderPixels(interpolation.getInterpolatedPosition(me.playerId, now));
+  const opponentPixel = toRenderPixels(interpolation.getInterpolatedPosition(opponent.playerId, now));
 
   const opponentDisconnect = view.getOpponentDisconnect();
 
@@ -264,17 +414,25 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
           </div>
         </div>
       </div>
-      <div aria-label="arena" className="arena" style={{ position: 'relative', width: 400, height: 400 }}>
+      <div
+        aria-label="arena"
+        className="arena"
+        style={{ position: 'relative', width: ARENA_RENDER_SIZE_PX, height: ARENA_RENDER_SIZE_PX }}
+      >
         <div
           aria-label="you-marker"
-          className="marker marker--you"
-          style={{ position: 'absolute', left: myPosition.x, top: myPosition.y }}
-        />
+          className={`marker marker--you champion-${me.championId}`}
+          style={{ position: 'absolute', left: myPixel.x, top: myPixel.y }}
+        >
+          <ChampionSprite championId={me.championId} />
+        </div>
         <div
           aria-label="opponent-marker"
-          className="marker marker--opponent"
-          style={{ position: 'absolute', left: opponentPosition.x, top: opponentPosition.y }}
-        />
+          className={`marker marker--opponent champion-${opponent.championId}`}
+          style={{ position: 'absolute', left: opponentPixel.x, top: opponentPixel.y }}
+        >
+          <ChampionSprite championId={opponent.championId} />
+        </div>
       </div>
       <div aria-label="movement-controls" className="movement-controls">
         {Object.entries(MOVE_DIRECTIONS).map(([label, direction]) => (
