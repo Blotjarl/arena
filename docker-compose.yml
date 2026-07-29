@@ -1,0 +1,54 @@
+# Full local stack (SRS 2.5 — demonstrable entirely locally via Docker, no cloud access required).
+# NOT the same file as docker-compose.test.yml, which spins up an ephemeral, schema-only Postgres for
+# Jest integration tests. This one persists data across restarts and runs the real api/server images.
+#
+# The client is deliberately not a service here — per R-D4/SRS 2.4, its operating environment is an
+# evergreen browser, not a container. Run it separately:
+#   npm run dev -w @arena/client        (or: npm run preview -w @arena/client)
+# pointed at this stack via VITE_SERVER_URL=http://localhost:3001.
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: arena
+      POSTGRES_PASSWORD: arena
+      POSTGRES_DB: arena
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./packages/api/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arena -d arena"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgresql://arena:arena@postgres:5432/arena
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    environment:
+      PORT: 3001
+      API_BASE_URL: http://api:4000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
