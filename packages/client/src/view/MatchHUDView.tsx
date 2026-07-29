@@ -1,5 +1,16 @@
 import { useEffect, useReducer } from 'react';
-import { View, ModelListener, ModelEvent, ChampionRoster, MatchStatePayload, EffectType } from '@arena/shared';
+import type { Socket } from 'socket.io-client';
+import {
+  View,
+  ModelListener,
+  ModelEvent,
+  ChampionRoster,
+  MatchStatePayload,
+  EffectType,
+  SOCKET_EVENTS,
+  PlayerDisconnectedPayload,
+  PlayerReconnectedPayload,
+} from '@arena/shared';
 import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientMatchModel } from '../model/ClientMatchModel';
 import { MatchController } from '../controller/MatchController';
@@ -29,21 +40,71 @@ export class MatchHUDView implements View, ModelListener {
   private readonly interpolation = new InterpolationBuffer(10);
 
   /**
+   * Transient, UI-only banner state for the opponent's live connection status — deliberately NOT a
+   * ClientMatchModel field. Per SocketConnectionController.bindInboundEvents' own doc comment,
+   * `match:player_disconnected`/`match:player_reconnected` are intentionally never routed through any
+   * model (disconnect status is already carried per-tick via ParticipantSnapshot.connectionStatus, and
+   * a view wanting a transient banner is expected to listen to the raw socket event directly instead).
+   * This view does exactly that, via the optional `socket` constructor param below, rather than having
+   * SocketConnectionController invent a new model field just for this. Cleared on a matching reconnect,
+   * never persisted, never read by anything outside this view.
+   */
+  private opponentDisconnect: PlayerDisconnectedPayload | null = null;
+
+  /**
    * CORRECTION (Step 10): same pattern as LobbyView/ChampionSelectView — distinguishing "you" from
    * "the opponent" in the HUD needs this connection's own playerId, which ClientMatchModel does not
    * carry. getModel()/setModel() still resolve to ClientMatchModel, matching MatchController's
    * `AbstractController<ClientMatchModel, MatchHUDView>` pairing; ClientIdentityModel is reachable via
    * a separate getIdentityModel() accessor, outside the formal View<M,C> contract.
+   *
+   * CORRECTION (Step 11, 11_shared_4): `socket` is a new, optional 4th param — see `opponentDisconnect`
+   * above for why. Optional (rather than required) so every existing call site that has no reason to
+   * care about the disconnect banner (e.g. most unit tests) is unaffected; ClientMain.tsx passes the
+   * real socket.
    * @param identityModel - supplies this connection's own playerId, to tell "you" apart from the opponent
    * @param model - the match model this view observes for authoritative combat state
    * @param controller - the controller this view forwards player input through
+   * @param socket - the live Socket.IO client connection, listened to directly for the two transient
+   *   connection-status events; omit in contexts (most tests) that don't exercise the disconnect banner
    */
   constructor(
     private identityModel: ClientIdentityModel,
     private model: ClientMatchModel,
     private controller: MatchController,
+    private readonly socket?: Pick<Socket, 'on'>,
   ) {
     this.model.addModelListener(this);
+    this.bindSocketEvents();
+  }
+
+  /**
+   * Listens directly to the raw socket (when provided) for the opponent's connection status, bypassing
+   * both ClientMatchModel and SocketConnectionController — see `opponentDisconnect`'s doc comment above.
+   * A disconnect payload naming this connection's own playerId is ignored (this connection is, by
+   * definition, still connected if it's running this code); a reconnect payload only clears the banner
+   * if it names the same player currently shown as disconnected.
+   */
+  private bindSocketEvents(): void {
+    this.socket?.on(SOCKET_EVENTS.MATCH_PLAYER_DISCONNECTED, (payload: PlayerDisconnectedPayload) => {
+      if (payload.playerId === this.identityModel.playerId) return;
+      this.opponentDisconnect = payload;
+      this.onUpdate?.();
+    });
+    this.socket?.on(SOCKET_EVENTS.MATCH_PLAYER_RECONNECTED, (payload: PlayerReconnectedPayload) => {
+      if (this.opponentDisconnect?.playerId !== payload.playerId) return;
+      this.opponentDisconnect = null;
+      this.onUpdate?.();
+    });
+  }
+
+  /**
+   * Returns the opponent's current disconnect banner state, or null if the opponent is connected (or
+   * this view was constructed without a socket). Read by MatchHUDScreen to render the transient banner.
+   * @returns the most recent unresolved PlayerDisconnectedPayload naming the opponent, or null
+   */
+  getOpponentDisconnect(): PlayerDisconnectedPayload | null {
+    return this.opponentDisconnect;
   }
 
   /**
@@ -153,8 +214,15 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const myPosition = interpolation.getInterpolatedPosition(me.playerId, now);
   const opponentPosition = interpolation.getInterpolatedPosition(opponent.playerId, now);
 
+  const opponentDisconnect = view.getOpponentDisconnect();
+
   return (
     <div>
+      {opponentDisconnect && (
+        <p aria-label="disconnect-banner">
+          Opponent disconnected — reconnecting in {opponentDisconnect.gracePeriodSeconds}s
+        </p>
+      )}
       <div aria-label="you-hud">
         <p>
           You: HP {me.health} / Resource {me.resource}

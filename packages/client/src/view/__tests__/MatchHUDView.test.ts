@@ -8,6 +8,18 @@ function makeController(): MatchController {
   return { operation: jest.fn() } as unknown as MatchController;
 }
 
+/** Same shape as ClientMain.test.tsx's fake socket — captures handlers registered via on(). */
+function makeFakeSocket() {
+  const handlers = new Map<string, (payload?: unknown) => void>();
+  const socket = {
+    on: jest.fn((event: string, handler: (payload?: unknown) => void) => {
+      handlers.set(event, handler);
+    }),
+    emit: jest.fn(),
+  };
+  return { socket, handlers };
+}
+
 function makeParticipant(playerId: string): ParticipantSnapshot {
   return {
     playerId,
@@ -123,6 +135,88 @@ describe('MatchHUDView', () => {
 
       expect(callback).toHaveBeenCalled();
       expect(pushSpy).toHaveBeenCalledWith(state);
+    });
+  });
+
+  describe('opponent disconnect banner (R6.1-R6.4) — raw socket listener, per SocketConnectionController.bindInboundEvents\' own doc comment', () => {
+    it('does not throw when constructed with no socket (socket param is optional)', () => {
+      expect(() => new MatchHUDView(new ClientIdentityModel(), new ClientMatchModel(), makeController())).not.toThrow();
+    });
+
+    it('starts with no disconnect banner', () => {
+      const view = new MatchHUDView(new ClientIdentityModel(), new ClientMatchModel(), makeController());
+      expect(view.getOpponentDisconnect()).toBeNull();
+    });
+
+    it("binds listeners for 'match:player_disconnected' and 'match:player_reconnected' when a socket is provided", () => {
+      const { socket } = makeFakeSocket();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new MatchHUDView(new ClientIdentityModel(), new ClientMatchModel(), makeController(), socket as any);
+
+      expect(socket.on).toHaveBeenCalledWith('match:player_disconnected', expect.any(Function));
+      expect(socket.on).toHaveBeenCalledWith('match:player_reconnected', expect.any(Function));
+    });
+
+    it("CRITICAL CHECKPOINT: a 'match:player_disconnected' payload for the opponent sets the banner and triggers onUpdate", () => {
+      const { socket, handlers } = makeFakeSocket();
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const view = new MatchHUDView(identity, new ClientMatchModel(), makeController(), socket as any);
+      const callback = jest.fn();
+      view.bindUpdateCallback(callback);
+
+      handlers.get('match:player_disconnected')!({ playerId: 'p2', gracePeriodSeconds: 30 });
+
+      expect(view.getOpponentDisconnect()).toEqual({ playerId: 'p2', gracePeriodSeconds: 30 });
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores a match:player_disconnected payload naming this connection\'s own playerId', () => {
+      const { socket, handlers } = makeFakeSocket();
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const view = new MatchHUDView(identity, new ClientMatchModel(), makeController(), socket as any);
+      const callback = jest.fn();
+      view.bindUpdateCallback(callback);
+
+      handlers.get('match:player_disconnected')!({ playerId: 'p1', gracePeriodSeconds: 30 });
+
+      expect(view.getOpponentDisconnect()).toBeNull();
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it("CRITICAL CHECKPOINT: a matching 'match:player_reconnected' payload clears the banner and triggers onUpdate", () => {
+      const { socket, handlers } = makeFakeSocket();
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const view = new MatchHUDView(identity, new ClientMatchModel(), makeController(), socket as any);
+      handlers.get('match:player_disconnected')!({ playerId: 'p2', gracePeriodSeconds: 30 });
+      const callback = jest.fn();
+      view.bindUpdateCallback(callback);
+
+      handlers.get('match:player_reconnected')!({ playerId: 'p2' });
+
+      expect(view.getOpponentDisconnect()).toBeNull();
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('a match:player_reconnected payload for a different playerId than the current banner does not clear it', () => {
+      const { socket, handlers } = makeFakeSocket();
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const view = new MatchHUDView(identity, new ClientMatchModel(), makeController(), socket as any);
+      handlers.get('match:player_disconnected')!({ playerId: 'p2', gracePeriodSeconds: 30 });
+      const callback = jest.fn();
+      view.bindUpdateCallback(callback);
+
+      handlers.get('match:player_reconnected')!({ playerId: 'someone-else' });
+
+      expect(view.getOpponentDisconnect()).toEqual({ playerId: 'p2', gracePeriodSeconds: 30 });
+      expect(callback).not.toHaveBeenCalled();
     });
   });
 });

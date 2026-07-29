@@ -365,6 +365,21 @@ sketch.
 > Socket.IO server (which also closes the underlying HTTP server). Test-only, like `ApiMain.stop()` — not
 > part of this table.
 
+> **Step 11 correction (`11_shared_4`) — real bug found by disconnect/reconnect end-to-end testing**:
+> `main()`'s `SocketIOServer` constructor now passes `{ pingInterval: 2_000, pingTimeout: 3_000 }` alongside
+> its existing `cors` option. Socket.IO/Engine.IO's *default* heartbeat (`pingInterval` 25s, `pingTimeout`
+> 20s) can take up to ~45 seconds to notice a transport that has gone silent without an explicit close —
+> exactly what a real network drop looks like (no TCP FIN/RST, frames just stop), as opposed to a tab
+> closing cleanly. Against this game's 30-second disconnect grace period (R6.4), that ~45s default
+> detection window is not a rare edge case: it could consume the *entire* grace period before the server
+> even began counting, meaning a genuinely disconnected player could be held far longer than R6.4 promises,
+> and the "notifies the remaining player" half of R6.2 would only fire tens of seconds after the actual
+> disconnect. Every individual piece (grace-period math, `MatchRegistryEntry` rebinding, the client's
+> reconnect handler) was already correct in isolation — this was invisible to all of them, and only
+> surfaced once a real dropped connection was driven through the real stack. Tightened so a genuinely dead
+> connection is detected within ~5 seconds, comfortably inside the grace period. Server-only configuration,
+> delivered to clients via the Engine.IO handshake — no client-side change needed.
+
 ---
 
 ## 6. `packages/client` (Raj) — the React browser client
@@ -461,6 +476,18 @@ self-directed design intent (§1.4's champion kit design notes).
 the actual render target the `View` class's `bindUpdateCallback` triggers, per SRS 3.1.1. These are real,
 separate, exported components with no row of their own in this table; only the four `View` classes above
 are enumerated. `ClientMain.tsx`'s `wirePair` helper is also undocumented here.
+
+**Step 11 correction (11_shared_4) — `MatchHUDView` gains a 5th, optional constructor param**:
+`MatchHUDView(identityModel, matchModel, controller, socket?)`. `socket` is the live Socket.IO client
+connection, listened to directly for `match:player_disconnected`/`match:player_reconnected` — per
+`SocketConnectionController.bindInboundEvents`'s own doc comment (§6b), those two events are deliberately
+never routed through any model, so this view listens to the raw socket itself rather than a new model
+field being invented for them. Backs a new transient, UI-only `opponentDisconnect` field (never persisted,
+never exposed to `ClientMatchModel`) and a matching `getOpponentDisconnect()` accessor, which
+`MatchHUDScreen` renders as a "Opponent disconnected — reconnecting in Ns" banner (R6.2, 3.6.5 Usability)
+that clears once the matching `match:player_reconnected` arrives. `socket` is optional (defaulting to
+unset, in which case the banner never appears) so every pre-existing call site that has no reason to
+exercise it — most unit tests — is unaffected; `ClientMain.tsx` passes the real socket.
 
 ### 6d. Entry point
 
