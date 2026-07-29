@@ -238,7 +238,7 @@ on top of each other, and an arena too small/plain to read at a glance (prompts 
 | 4 | `11_shared_3_ci-pipeline.md` | **Marshall** | #3 (needs the e2e test to exist) | [x] |
 | 5 | `11_shared_4_reconnection-and-persistence-e2e-coverage.md` | **Marshall** | #3, #4 | [x] |
 | 6 | `11_client_2_visual-design-pass.md` | **Raj** | none (independent — pure CSS/markup, no new functionality) | [x] |
-| 7 | `11_server_2_arena-boundaries.md` | **Marshall** | none | [ ] |
+| 7 | `11_server_2_arena-boundaries.md` | **Marshall** | none | [x] |
 | 8 | `11_client_3_arena-visuals-and-wasd-input.md` | **Raj** | #7 (needs the real `ARENA_WIDTH`/`ARENA_HEIGHT` export) | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
