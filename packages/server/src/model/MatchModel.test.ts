@@ -14,11 +14,14 @@ import {
   InvalidMatchPhaseError,
   SelectionWindowExpiredError,
   InvalidChampionSelectionError,
+  ARENA_WIDTH,
+  ARENA_OBSTACLES,
+  isWithinObstacle,
 } from '@arena/shared';
 import { MatchModel } from './MatchModel';
 
 const SPAWN_P1_X = 50; // must match MatchModel's SPAWN_WALL_MARGIN
-const SPAWN_P2_X = 350; // must match MatchModel's ARENA_WIDTH - SPAWN_WALL_MARGIN
+const SPAWN_P2_X = 550; // must match MatchModel's ARENA_WIDTH - SPAWN_WALL_MARGIN (CORRECTION 11_server_3: ARENA_WIDTH is now 600)
 
 const VEX = new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 10, 200, [
   new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30),
@@ -150,6 +153,20 @@ describe('MatchModel', () => {
       expect(b.position).not.toEqual({ x: 0, y: 0 });
       expect(Math.abs(a.position.x - b.position.x)).toBeGreaterThan(50); // not immediately adjacent
     });
+
+    it('CORRECTION (Step 11, 11_server_3): neither spawn position falls inside an obstacle at the widened arena', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const snap = match.snapshot();
+      const a = snap.participants.find((p) => p.playerId === 'p1')!;
+      const b = snap.participants.find((p) => p.playerId === 'p2')!;
+      expect(a.position.x).toBe(SPAWN_P1_X);
+      expect(b.position.x).toBe(SPAWN_P2_X);
+      expect(SPAWN_P2_X).toBe(ARENA_WIDTH - SPAWN_P1_X);
+      expect(isWithinObstacle(a.position.x, a.position.y)).toBe(false);
+      expect(isWithinObstacle(b.position.x, b.position.y)).toBe(false);
+      expect(ARENA_OBSTACLES.length).toBeGreaterThan(0);
+    });
   });
 
   describe('submitMove / tick — movement', () => {
@@ -229,6 +246,17 @@ describe('MatchModel', () => {
     it('applies crowd control converting magnitude (seconds) to a duration window', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
+      // CORRECTION (Step 11, 11_server_3): the widened 600-wide arena puts the two spawns 500 apart, which
+      // now exceeds 'root' (Frost Lance)'s 400 range -- pull p2 within range directly, the same way the
+      // out-of-range test above manipulates position directly to keep this test about CC application, not
+      // spawn-distance geometry.
+      const p1State = (match as unknown as { participants: { playerId: string; position: Position }[] }).participants.find(
+        (p) => p.playerId === 'p1',
+      )!;
+      const p2State = (match as unknown as { participants: { playerId: string; position: Position }[] }).participants.find(
+        (p) => p.playerId === 'p2',
+      )!;
+      p2State.position = new Position(p1State.position.x + 100, p1State.position.y);
       match.submitAbility('p1', { abilityId: 'root', targetPlayerId: 'p2' });
       const before = match.snapshot().participants.find((p) => p.playerId === 'p2')!.position;
       match.submitMove('p2', { dx: 1, dy: 0 });

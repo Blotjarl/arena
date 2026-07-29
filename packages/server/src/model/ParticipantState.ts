@@ -11,6 +11,7 @@ import {
   InsufficientResourceError,
   ARENA_WIDTH,
   ARENA_HEIGHT,
+  isWithinObstacle,
 } from '@arena/shared';
 
 /**
@@ -152,6 +153,11 @@ export class ParticipantState {
    * CORRECTION (Step 11): the resulting position is now clamped to `[0, ARENA_WIDTH]` x `[0, ARENA_HEIGHT]`
    * — previously unbounded, so a player could move infinitely far in any direction (found by real
    * end-to-end play, see `docs/01_class_list.md` §5a).
+   * CORRECTION (Step 11, 11_server_3): the wall-clamped position is then checked against `ARENA_OBSTACLES`
+   * — if it would land inside one, the movement is rejected outright and the participant stays at their
+   * pre-move position for this tick, the same way an out-of-bounds position is prevented rather than
+   * allowed and corrected after the fact. Obstacles block movement only; ability range/targeting is
+   * unaffected (see `docs/01_class_list.md` §2).
    * @param direction - raw movement input for this tick; scaled by champion move speed, not pre-normalized
    * @param deltaSeconds - elapsed simulation time since the previous tick
    * @param now - current simulation time, for incapacitation comparison
@@ -164,10 +170,10 @@ export class ParticipantState {
     const speed = this.champion?.moveSpeed ?? 0;
     const newX = this.position.x + direction.dx * speed * deltaSeconds;
     const newY = this.position.y + direction.dy * speed * deltaSeconds;
-    this.position = new Position(
-      Math.max(0, Math.min(ARENA_WIDTH, newX)),
-      Math.max(0, Math.min(ARENA_HEIGHT, newY)),
-    );
+    const clampedX = Math.max(0, Math.min(ARENA_WIDTH, newX));
+    const clampedY = Math.max(0, Math.min(ARENA_HEIGHT, newY));
+    if (isWithinObstacle(clampedX, clampedY)) return;
+    this.position = new Position(clampedX, clampedY);
   }
 
   /** @returns true if health is above zero. */
