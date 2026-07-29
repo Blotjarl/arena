@@ -1,0 +1,105 @@
+name: CI
+
+# R-D5: Jest (unit) and Playwright (end-to-end) must both run in CI on every change proposed to the
+# shared repository. No `branches:` filter on either trigger, on purpose — this project runs three
+# parallel track branches (shared/server/client/api) plus main, and R-D5 doesn't say "only main".
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # One matrix leg per workspace instead of one big job: this project's four packages have four
+  # different owners working in parallel on independent branches (see prompts/00_master_context.md
+  # §2.1) — a matrix gives each track its own pass/fail check in the PR UI, and fail-fast: false means
+  # e.g. a client-only failure never hides whether server/api/shared are green. The extra setup (one
+  # workspace name threaded through a few steps) is small relative to that payoff.
+  test:
+    name: typecheck + test (${{ matrix.workspace }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: [shared, server, client, api]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      # packages/api's Jest suite talks to a real Postgres (see e.g. packages/api/src/util/PgPool.test.ts),
+      # hardcoded to postgresql://arena:arena@localhost:55432/arena_test. Reuse docker-compose.test.yml
+      # verbatim via the npm scripts that already wrap it, rather than a GitHub Actions `services:`
+      # postgres container — a `services:` container starts before checkout, so it can't apply
+      # schema.sql via docker-entrypoint-initdb.d the way docker-compose.test.yml does, which would mean
+      # inventing a second schema-application mechanism just for CI. `docker compose up` as a normal
+      # step (after checkout) doesn't have that problem, and ubuntu-latest runners ship Docker already.
+      - name: Start test database
+        if: matrix.workspace == 'api'
+        run: npm run test:db:up
+
+      - name: Wait for Postgres to accept connections
+        if: matrix.workspace == 'api'
+        run: |
+          for i in $(seq 1 30); do
+            if docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U arena -d arena_test > /dev/null 2>&1; then
+              echo "Postgres is ready"
+              exit 0
+            fi
+            echo "Waiting for Postgres... ($i/30)"
+            sleep 1
+          done
+          echo "Postgres did not become ready in time" >&2
+          exit 1
+
+      # Same npm scripts every workspace already uses locally/in review — not reinvented here.
+      - name: Typecheck
+        run: npm run typecheck -w @arena/${{ matrix.workspace }}
+
+      - name: Test
+        run: npm run test -w @arena/${{ matrix.workspace }}
+
+      - name: Stop test database
+        if: matrix.workspace == 'api' && always()
+        run: npm run test:db:down
+
+  e2e:
+    name: Playwright e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      # playwright.config.ts has no explicit `projects:`, so Playwright's single default project uses
+      # chromium only — no need to install firefox/webkit.
+      - run: npx playwright install --with-deps chromium
+
+      # `npm run test:e2e` is already fully self-contained: root package.json's pretest:e2e hook builds
+      # packages/shared, and e2e/global-setup.ts brings up docker-compose.test.yml's Postgres itself
+      # (npm run test:db:up), waits for it, then starts real ApiMain/ServerMain in-process before
+      # playwright.config.ts's webServer starts the client's Vite dev server. No separate Postgres
+      # services: block or manual process orchestration needed here — confirmed by reading
+      # e2e/global-setup.ts rather than assumed.
+      - run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
