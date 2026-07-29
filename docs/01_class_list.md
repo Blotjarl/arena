@@ -72,7 +72,10 @@ used by matchmaking and persistence alike.)*
 | `EndReason` | enum | `ELIMINATION`, `TIME_LIMIT`, `DISCONNECT_FORFEIT`, `SELECTION_TIMEOUT` (R5.3, R-DB3) | — |
 | `MatchResult` | enum | `WIN`, `LOSS`, `DRAW` (R-DB3) | — |
 | `EffectType` | enum | `DAMAGE`, `HEAL`, `CROWD_CONTROL`, `POSITIONING` (SRS 1.4 definitions) | — |
-| `ARENA_WIDTH`, `ARENA_HEIGHT` | `const number` (`Arena.ts`, Step 11) | both `400` — the arena's game-logic coordinate bounds, not pixels | — |
+| `ARENA_WIDTH`, `ARENA_HEIGHT` | `const number` (`Arena.ts`, Step 11) | `600` x `400` (Step 11 correction below) — the arena's game-logic coordinate bounds, not pixels | — |
+| `ArenaObstacle` | interface (`Arena.ts`, Step 11) | `x: number`; `y: number`; `width: number`; `height: number` | — |
+| `ARENA_OBSTACLES` | `const readonly ArenaObstacle[]` (`Arena.ts`, Step 11) | 3 fixed rectangles in the arena's middle third, mirrored left-right (Step 11 correction below) | — |
+| `isWithinObstacle` | free function (`Arena.ts`, Step 11) | — | `(x: number, y: number): boolean` — true if the point falls within (or on the boundary of) any `ARENA_OBSTACLES` rectangle |
 | `Position` | class | `x: number`; `y: number` | `constructor(x: number, y: number)`; `distanceTo(other: Position): number` |
 | `Ability` | class | `id: string`; `name: string`; `cooldownSeconds: number`; `resourceCost: number`; `range: number`; `effectType: EffectType`; `magnitude: number` | `constructor(id, name, cooldownSeconds, resourceCost, range, effectType, magnitude)` |
 | `Champion` | class | `id: ChampionId`; `name: string`; `role: string`; `maxHealth: number`; `maxResource: number`; `resourceRegenRate: number`; `moveSpeed: number`; `abilities: Ability[]` | `constructor(...)`; `getAbility(abilityId: string): Ability` — **throws** `InvalidChampionSelectionError` if not found |
@@ -100,6 +103,36 @@ the divergence from the AI-use-plan table's literal package name is understood a
 > `ChampionRoster` was already implicitly tuned against (Vex's Arcane Bolt range 600 comfortably exceeds a
 > 400x400 arena's ~565.7 diagonal; a full-speed sprint at Vex's 220 moveSpeed crosses the whole width in
 > under 2 seconds) — it does not change any existing game-logic values, only adds a boundary around them.
+
+> **Step 11 correction (`11_server_3`)**: `ARENA_WIDTH` widened from `400` to `600` (1.5x) per this prompt's
+> request for a *wider*, not bigger-square, arena — `ARENA_HEIGHT` stays `400`. Re-checked the same balance
+> the correction above already verified once: the new diagonal is `√(600² + 400²) ≈ 721.1`, so Vex's
+> Arcane Bolt (range 600) no longer reaches every corner-to-corner case — a reasonable, even welcome
+> consequence of a bigger space, not a regression to route around. A full-speed sprint across the new width
+> still takes a reasonable few seconds (Korr 180 moveSpeed: 3.33s; Rin 200: 3.00s; Vex 220: 2.73s), not
+> instant or a full minute. `MatchModel`'s spawn formula (`SPAWN_WALL_MARGIN` and
+> `ARENA_WIDTH - SPAWN_WALL_MARGIN`, §5a) is already width-relative and needed no code change, only
+> re-verification that the two spawns remain distinct and outside every obstacle (below) at the new width.
+>
+> The same prompt adds three new exports to `Arena.ts` (rows above): the `ArenaObstacle` shape, a fixed
+> `ARENA_OBSTACLES` list of three static rectangles, and `isWithinObstacle(x, y)`, a pure helper checking a
+> point against all of them. The three obstacles sit in the arena's middle third (`x` in roughly
+> `[205, 395]`), well clear of both spawn points (`(50, 200)` and `(550, 200)`, at least 150 units from the
+> nearest obstacle edge) and of the side walls, and are mirrored left-right around the arena's horizontal
+> center (`x = 300`) so neither spawn has a positional advantage — the two flanking pillars are exact mirror
+> images of each other, and the top-center block is self-mirrored. None spans the arena's full width or
+> height, and a clear ~90-unit gap is kept around dead-center so a straight path always exists between the
+> pillars as well as around every obstacle. **Scope decision**: obstacles block movement only, not ability
+> range/targeting or line of sight — `MatchModel.submitAbility`'s existing distance-based range check (§5a)
+> is unaffected by this prompt; a genuinely bigger "obstacles affect abilities too" feature is left for a
+> later prompt.
+>
+> `ParticipantState.move()` (§5a) now checks the wall-clamped resulting position against `ARENA_OBSTACLES`
+> after the existing clamp math: if it would land inside one, the movement is rejected outright for that
+> tick (participant stays at their pre-move position), the same way an out-of-bounds position is prevented
+> rather than allowed and corrected after the fact — a simple reject-the-whole-move approach, not an
+> axis-separated "slide along the obstacle" response. This does not change `move()`'s signature or its
+> thrown exceptions; a blocked move is silent, matching the existing pattern for other movement no-ops.
 
 ---
 

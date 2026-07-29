@@ -10,6 +10,7 @@ import {
   Position,
   ARENA_WIDTH,
   ARENA_HEIGHT,
+  ARENA_OBSTACLES,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
 
@@ -258,6 +259,73 @@ describe('ParticipantState', () => {
           p.move({ dx: 0, dy: -1 }, 1, 1000 + i);
         }
         expect(p.position.y).toBe(0);
+      });
+    });
+
+    describe('CORRECTION (Step 11, 11_server_3): server-authoritative obstacles', () => {
+      const [leftPillar, rightPillar, topBlock] = ARENA_OBSTACLES;
+      // 200 moveSpeed * 0.025s = 5 per tick -- fine-grained enough to approach an obstacle without a
+      // single tick's movement jumping clean over it (unlike the coarse 1s ticks the wall-clamp tests
+      // above use, which would skip past these smaller obstacles entirely).
+      const STEP_DELTA_SECONDS = 0.025;
+
+      it('repeated movement toward the left pillar from the right stops before entering it, not inside or beyond', () => {
+        const p = makeParticipant(); // moveSpeed 200
+        p.position = new Position(leftPillar.x + leftPillar.width + 20, leftPillar.y + leftPillar.height / 2);
+        for (let i = 0; i < 8; i++) {
+          p.move({ dx: -1, dy: 0 }, STEP_DELTA_SECONDS, 1000 + i);
+        }
+        expect(p.position.x).toBe(leftPillar.x + leftPillar.width + 5); // one 5-unit step short of the edge
+      });
+
+      it('repeated movement toward the right pillar from the left stops before entering it', () => {
+        const p = makeParticipant();
+        p.position = new Position(rightPillar.x - 20, rightPillar.y + rightPillar.height / 2);
+        for (let i = 0; i < 8; i++) {
+          p.move({ dx: 1, dy: 0 }, STEP_DELTA_SECONDS, 1000 + i);
+        }
+        expect(p.position.x).toBe(rightPillar.x - 5);
+      });
+
+      it('repeated movement toward the top block from below stops before entering it', () => {
+        const p = makeParticipant();
+        p.position = new Position(topBlock.x + topBlock.width / 2, topBlock.y + topBlock.height + 20);
+        for (let i = 0; i < 8; i++) {
+          p.move({ dx: 0, dy: -1 }, STEP_DELTA_SECONDS, 1000 + i);
+        }
+        expect(p.position.y).toBe(topBlock.y + topBlock.height + 5);
+      });
+
+      it('repeated movement into the left pillar from directly above (a different approach axis) stops before entering it', () => {
+        const p = makeParticipant();
+        p.position = new Position(leftPillar.x + leftPillar.width / 2, leftPillar.y - 20);
+        for (let i = 0; i < 8; i++) {
+          p.move({ dx: 0, dy: 1 }, STEP_DELTA_SECONDS, 1000 + i);
+        }
+        expect(p.position.y).toBe(leftPillar.y - 5);
+      });
+
+      it('a single large movement that would jump clean into a pillar from just outside it is also rejected, not just slow approaches', () => {
+        const p = makeParticipant();
+        p.position = new Position(leftPillar.x - 5, leftPillar.y + leftPillar.height / 2);
+        p.move({ dx: 1, dy: 0 }, 0.15, 1000); // 200 * 0.15 = 30 -- lands inside the pillar (width 50), not beyond it
+        expect(p.position.x).toBe(leftPillar.x - 5); // move rejected outright; participant stays put
+      });
+
+      it('movement well clear of every obstacle is completely unaffected (no false-positive blocking)', () => {
+        const p = makeParticipant(); // moveSpeed 200
+        p.position = new Position(ARENA_WIDTH / 2, ARENA_HEIGHT / 2); // dead center, in the gap between pillars
+        p.move({ dx: 1, dy: 0 }, 0.1, 1000); // 200 * 0.1 = 20 -- stays in the gap, nowhere near a pillar
+        expect(p.position.x).toBe(ARENA_WIDTH / 2 + 20);
+        expect(p.position.y).toBe(ARENA_HEIGHT / 2);
+      });
+
+      it('movement clear across the near-empty bottom half of the arena is completely unaffected', () => {
+        const p = makeParticipant();
+        p.position = new Position(ARENA_WIDTH / 2, ARENA_HEIGHT - 50);
+        p.move({ dx: 1, dy: 0 }, 0.5, 1000); // 200 * 0.5 = 100, well below every obstacle's y-range
+        expect(p.position.x).toBe(ARENA_WIDTH / 2 + 100);
+        expect(p.position.y).toBe(ARENA_HEIGHT - 50);
       });
     });
   });
