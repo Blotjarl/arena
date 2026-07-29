@@ -226,9 +226,11 @@ moving to Steps 12-13. Nothing in `packages/` had ever run together as live proc
 two real gaps were found just designing those (the client has no build tooling at all, and its socket
 connection is hardcoded same-origin) and were fixed as prerequisites rather than discovered mid-test. A
 full post-batch audit found two more real gaps prompt 3's own e2e test never covered (prompt 5), and
-manually testing the locally-deployed app surfaced two more rounds after that: no visual design at all
+manually testing the locally-deployed app surfaced three more rounds after that: no visual design at all
 (prompt 6), then — after actually playing a real match — no arena wall boundaries, both players spawning
-on top of each other, and an arena too small/plain to read at a glance (prompts 7-8).
+on top of each other, and an arena too small/plain to read at a glance (prompts 7-8), then a real usability
+gap in ability feedback (prompt 9): the server's silent-ignore-on-out-of-range behavior (R4.2, correct and
+unchanged) was indistinguishable from a broken button with zero client-side range indication.
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -240,6 +242,7 @@ on top of each other, and an arena too small/plain to read at a glance (prompts 
 | 6 | `11_client_2_visual-design-pass.md` | **Raj** | none (independent — pure CSS/markup, no new functionality) | [x] |
 | 7 | `11_server_2_arena-boundaries.md` | **Marshall** | none | [x] |
 | 8 | `11_client_3_arena-visuals-and-wasd-input.md` | **Raj** | #7 (needs the real `ARENA_WIDTH`/`ARENA_HEIGHT` export) | [x] |
+| 9 | `11_client_4_ability-feedback-and-larger-arena.md` | **Raj** | #8 (needs `toRenderPixels`/`ARENA_RENDER_SIZE_PX`) | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
