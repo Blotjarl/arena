@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import type { Server as HttpServer } from 'node:http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { PlayerId, Player } from '@arena/shared';
 import { MatchmakingQueue } from './model/MatchmakingQueue';
@@ -42,6 +43,13 @@ export function rebindIfInMatch(
 
 /** The server subsystem's entry point (SRS 2.1) — wires every server component together and starts listening. */
 export class ServerMain {
+  /** Set once `main()` starts listening; lets `stop()` shut the same server back down for tests. */
+  private static httpServer: HttpServer | null = null;
+  /** Set once `main()` creates the Socket.IO server; closing it also closes the underlying httpServer. */
+  private static io: SocketIOServer | null = null;
+  /** Set once `main()` starts ticking; lets `stop()` clear the interval so a test process can exit. */
+  private static tickLoop: TickLoop | null = null;
+
   /**
    * Creates the HTTP + Socket.IO server, the process-wide MatchmakingQueue and TickLoop, wires a new
    * ConnectionHandler (with its own set of per-connection controllers) for every incoming socket
@@ -97,10 +105,33 @@ export class ServerMain {
     });
 
     tickLoop.start();
+    ServerMain.httpServer = httpServer;
+    ServerMain.io = io;
+    ServerMain.tickLoop = tickLoop;
     // unref: lets a test process exit without an explicit close() even though the server is still
     // listening — harmless in production, since TickLoop's own setInterval already keeps the event loop
     // alive independently of this handle.
     httpServer.unref();
     await new Promise<void>((resolve) => httpServer.listen(port, resolve));
+  }
+
+  /**
+   * Test-only teardown hook — stops the tick loop and closes the Socket.IO/HTTP server started by
+   * `main()`, if any. Not part of `docs/01_class_list.md`'s `ServerMain` entry (which specifies only
+   * `main()`), matching `ApiMain.stop()`'s precedent. Added for Step 11's Playwright acceptance test:
+   * without it, `TickLoop`'s `setInterval` (never `unref`'d, unlike `httpServer`) keeps the process
+   * alive indefinitely and a second `main()` call in the same process would collide on the same port.
+   */
+  static async stop(): Promise<void> {
+    const tickLoop = ServerMain.tickLoop;
+    ServerMain.tickLoop = null;
+    tickLoop?.stop();
+
+    const io = ServerMain.io;
+    ServerMain.io = null;
+    ServerMain.httpServer = null;
+    if (io) {
+      await new Promise<void>((resolve) => io.close(() => resolve()));
+    }
   }
 }

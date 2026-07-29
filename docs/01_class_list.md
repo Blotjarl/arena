@@ -211,6 +211,18 @@ prompt's closing summary for why that specific gap is flagged as a real (not jus
 makes any `POSITIONING`-effect ability invoked without a `targetPlayerId` (i.e. every self-directed
 reposition, such as Vex's Phase Step) resolve its own target to itself and therefore move nowhere.
 
+> **Step 11 correction — real bug found by end-to-end acceptance testing**: `tick()`'s implementation had
+> silently diverged from this table's own `pendingMoves` description above ("applied once per `tick()`") —
+> a submitted movement input was never removed from `pendingMoves` after being applied, so it kept being
+> re-applied on every subsequent tick forever, not just the next one. Invisible to every prior unit test
+> (each one only ever calls `tick()` once after a single `submitMove()`), it surfaced immediately in real
+> end-to-end play: `MatchHUDScreen`'s movement controls are plain discrete `onClick` buttons with no
+> press/hold semantics and no "stop" control that could ever submit `{dx:0, dy:0}`, so a single accidental
+> click on a movement button left that participant walking in a straight line, uncontrollably, at full move
+> speed, for the rest of the match. Fixed by deleting the participant's `pendingMoves` entry immediately
+> after (attempting to) apply it each tick, regardless of success — bringing the implementation back in
+> line with what this table already said it should do.
+
 > **Step 10 correction (`10_server_10`)**: `MatchmakingQueue.join()`'s own doc comment always said it
 > throws `AlreadyQueuedError` "if the player is already queued or already in an active match" (R2.2), but
 > until this correction the implementation only ever checked `entries` — the queue itself — with no
@@ -252,6 +264,21 @@ successful `identify`, letting `ServerMain` register the connection's socket/han
 playerId-keyed maps) and a new public `bindMatch()` method (see the `MatchmakingController.
 onMatchCreated`-triggered wiring flow below) — neither was in this table's original constructor/operations
 sketch.
+
+> **Step 11 correction — real bug found by end-to-end acceptance testing**: `register()`'s raw `'disconnect'`
+> socket handler previously only forwarded to `DisconnectController`, and only once `bindMatch()` had bound
+> one (i.e. only for a player already paired into a match). A player who disconnected while merely queued —
+> the ordinary case of closing a tab, navigating away, or reloading before being matched — left their
+> `QueueEntry` in `MatchmakingQueue` forever, since `MatchmakingQueue` has no other cleanup path for it. A
+> later `tryPairNext()` could then pair a live, waiting player against that dead entry, silently stranding
+> them at Champion Select with an opponent who could never select (until R3.4's 30-second timeout ended the
+> match) — this could not have been caught by any prior unit test, since every one of them drives `MatchModel`/
+> `MatchmakingQueue` directly rather than through a real, disconnectable Socket.IO connection. Fixed by:
+> when `'disconnect'` fires for an identified player with no bound `DisconnectController` (i.e. still only
+> queued, never paired), `register()` now calls `MatchmakingController.operation('queue:cancel', { player })`
+> and swallows the resulting `NotQueuedError` if the player had never actually joined the queue (e.g.
+> disconnecting between `identify` and `queue:join`) — there is no socket left to usefully receive an error
+> emission either way.
 
 > **Step 10 correction (`10_server_9`)**: `MatchReportingClient` (`10_server_6`) was implemented and unit
 > tested but had no real call site — `ServerMain.ts` explicitly documented this as deferred, leaving
@@ -328,6 +355,15 @@ sketch.
 > included) — looks the newly-identified player up in `matchRegistry` and calls `handler.bindMatch(...)` if
 > found. A player whose match has already ended has no entry (cleared by `MatchmakingController`'s
 > `'match:end'` listener before this can ever run) and is correctly left unbound.
+
+> **Step 11 addition**: `ServerMain.stop(): Promise<void>` is a new method, not in the original sketch —
+> added for the same reason as `ApiMain.stop()` (§8's `ApiMain` entry): a Playwright acceptance test starts
+> a real `ServerMain.main()` and needs to tear it down cleanly afterward. Without it, `TickLoop`'s
+> `setInterval` (deliberately never `unref`'d, unlike `httpServer`, since it's what keeps a real production
+> process alive) would keep the test process running indefinitely, and a second `main()` call in the same
+> process would collide on the already-bound port. `stop()` calls `tickLoop.stop()` and closes the
+> Socket.IO server (which also closes the underlying HTTP server). Test-only, like `ApiMain.stop()` — not
+> part of this table.
 
 ---
 
@@ -407,6 +443,18 @@ controller)`, `ChampionSelectView(identityModel, matchModel, queueModel, control
 each with matching `get`/`setXModel()` accessors outside the formal `View<M,C>` contract, needed because
 each screen's documented responsibility above (e.g. Lobby's "queue status/cancel") spans more than one
 model. `getModel()`/`setModel()` still resolve to the one model each view's paired controller expects.
+
+**Step 11 correction — real bug found by end-to-end acceptance testing**: `MatchHUDScreen`'s ability-control
+buttons (paired with `MatchHUDView`) previously called `controller.operation('useAbility', { abilityId })`
+with no `targetPlayerId` for every ability, regardless of `effectType`. `MatchModel.submitAbility` (§5a)
+treats a request naming no target as self-targeted — correct for a self-heal kit, but it meant every
+`DAMAGE`/`CROWD_CONTROL` ability a player fired landed on themself, never their opponent: real combat
+between two live players could not deal damage to the opponent through the actual built UI. This was
+invisible to every prior test, including `MatchHUDScreen.test.tsx`'s own click-forwarding test, since all of
+them asserted only that *an* ability request reached the socket, not who it targeted. Fixed by: the button's
+`onClick` now includes `targetPlayerId: opponent.playerId` when `ability.effectType` is `DAMAGE` or
+`CROWD_CONTROL`; `HEAL`/`POSITIONING` abilities keep the previous no-target (self) behavior, matching their
+self-directed design intent (§1.4's champion kit design notes).
 
 **Undocumented, paired React components:** each `*View` class's `.tsx` file also exports a same-named
 `*Screen` functional component (`LobbyScreen`, `ChampionSelectScreen`, `MatchHUDScreen`, `ResultsScreen`) —

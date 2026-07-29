@@ -144,6 +144,16 @@ describe('MatchModel', () => {
       expect(p1.position.x).toBe(100);
     });
 
+    it('CORRECTION (Step 11): a single submitMove() only moves the participant on the next tick, not every tick thereafter', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      match.submitMove('p1', { dx: 1, dy: 0 });
+      match.tick(0.5); // vex moveSpeed 200 * 0.5 = 100
+      match.tick(0.5); // no new submitMove -- position must not advance again
+      const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+      expect(p1.position.x).toBe(100);
+    });
+
     it('throws InvalidMatchPhaseError if submitted before the match is ACTIVE', () => {
       const match = new MatchModel('m1', makePlayers());
       expect(() => match.submitMove('p1', { dx: 1, dy: 0 })).toThrow(InvalidMatchPhaseError);
