@@ -12,6 +12,7 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "pretest:e2e": "npm run build -w @arena/shared",
     "test:e2e": "playwright test",
     "docs": "typedoc",
     "diagram:reverse-engineer": "node scripts/generate-class-diagram.js",
