@@ -12,12 +12,14 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
     "docs": "typedoc",
     "diagram:reverse-engineer": "node scripts/generate-class-diagram.js",
     "test:db:up": "docker compose -f docker-compose.test.yml up -d",
     "test:db:down": "docker compose -f docker-compose.test.yml down"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "typedoc": "^0.28.20",
     "typescript": "^5.6.0"
   }
