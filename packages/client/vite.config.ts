@@ -16,5 +16,20 @@ export default defineConfig(({ mode }) => {
     define: {
       __SERVER_URL__: JSON.stringify(env.VITE_SERVER_URL || 'http://localhost:3001'),
     },
+    // @arena/shared is an npm workspace package built as CommonJS (tsconfig.base.json's `module:
+    // CommonJS`, chosen so ts-jest can transform the same sources across every package — see
+    // ClientMain.tsx's DEFAULT_SERVER_URL comment). Vite resolves workspace symlinks to their real path
+    // outside node_modules, so it never pre-bundles @arena/shared into ESM the way it does for ordinary
+    // node_modules dependencies; the browser then receives raw `require`/`exports` syntax as a native
+    // ES module and fails with "does not provide an export named ...". Forcing it into optimizeDeps
+    // makes esbuild convert it to ESM like any other CJS dependency, for both dev and `vite build`.
+    optimizeDeps: {
+      include: ['@arena/shared'],
+    },
+    build: {
+      commonjsOptions: {
+        include: [/shared/, /node_modules/],
+      },
+    },
   };
 });

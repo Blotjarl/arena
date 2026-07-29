@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react';
-import { View, ModelListener, ModelEvent, ChampionRoster, MatchStatePayload } from '@arena/shared';
+import { View, ModelListener, ModelEvent, ChampionRoster, MatchStatePayload, EffectType } from '@arena/shared';
 import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientMatchModel } from '../model/ClientMatchModel';
 import { MatchController } from '../controller/MatchController';
@@ -190,14 +190,29 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
         ))}
       </div>
       <div aria-label="ability-controls">
-        {myChampion.abilities.map((ability) => (
-          <button
-            key={ability.id}
-            onClick={() => controller.operation('useAbility', { abilityId: ability.id })}
-          >
-            {ability.name}
-          </button>
-        ))}
+        {myChampion.abilities.map((ability) => {
+          // CORRECTION (Step 11): MatchModel.submitAbility treats a request naming no target as
+          // self-targeted (see its own doc comment) — that's correct for HEAL (self-heal kits) but
+          // means an offensive ability fired with no target here would land on the caster, never the
+          // opponent. In this 1v1 game the opponent is the only sensible target for a DAMAGE or
+          // CROWD_CONTROL ability, so those two effect types explicitly target them; HEAL/POSITIONING
+          // keep the previous no-target (self) behavior.
+          const isOffensive =
+            ability.effectType === EffectType.DAMAGE || ability.effectType === EffectType.CROWD_CONTROL;
+          return (
+            <button
+              key={ability.id}
+              onClick={() =>
+                controller.operation('useAbility', {
+                  abilityId: ability.id,
+                  ...(isOffensive ? { targetPlayerId: opponent.playerId } : {}),
+                })
+              }
+            >
+              {ability.name}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

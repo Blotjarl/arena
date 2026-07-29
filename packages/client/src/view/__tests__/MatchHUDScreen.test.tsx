@@ -92,7 +92,7 @@ describe('MatchHUDScreen', () => {
     expect(screen.getByText('arcane-bolt: 2.3s')).toBeTruthy();
   });
 
-  it('renders one ability button per ability of my selected champion, and clicking forwards useAbility', () => {
+  it('renders one ability button per ability of my selected champion, and clicking a DAMAGE ability forwards useAbility targeting the opponent', () => {
     const identity = new ClientIdentityModel();
     identity.playerId = 'p1';
     const controller = makeMockController();
@@ -107,7 +107,31 @@ describe('MatchHUDScreen', () => {
     render(<MatchHUDScreen view={view} />);
     fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
 
-    expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'arcane-bolt' });
+    // CORRECTION (Step 11): MatchModel.submitAbility treats a request naming no target as
+    // self-targeted — a DAMAGE ability fired with no target would land on the caster, never the
+    // opponent, so the button must explicitly supply the opponent's playerId as the target.
+    expect(controller.operation).toHaveBeenCalledWith('useAbility', {
+      abilityId: 'arcane-bolt',
+      targetPlayerId: 'p2',
+    });
+  });
+
+  it('clicking a self-targeted (HEAL/POSITIONING) ability forwards useAbility with no target', () => {
+    const identity = new ClientIdentityModel();
+    identity.playerId = 'p1';
+    const controller = makeMockController();
+    const match = new ClientMatchModel();
+    match.applyMatchState({
+      matchId: 'm1',
+      tick: 1,
+      participants: [makeParticipant('p1', { championId: 'rin' }), makeParticipant('p2')],
+    });
+    const view = new MatchHUDView(identity, match, controller);
+
+    render(<MatchHUDScreen view={view} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Vital Siphon' }));
+
+    expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'vital-siphon' });
   });
 
   it('movement buttons forward move with the corresponding direction', () => {
