@@ -247,8 +247,8 @@ obstacles).
 | 7 | `11_server_2_arena-boundaries.md` | **Marshall** | none | [x] |
 | 8 | `11_client_3_arena-visuals-and-wasd-input.md` | **Raj** | #7 (needs the real `ARENA_WIDTH`/`ARENA_HEIGHT` export) | [x] |
 | 9 | `11_client_4_ability-feedback-and-larger-arena.md` | **Raj** | #8 (needs `toRenderPixels`/`ARENA_RENDER_SIZE_PX`) | [x] |
-| 10 | `11_client_5_fix-initial-render-and-verify-input.md` | **Raj** | none — highest priority, real regression | [ ] |
-| 11 | `11_server_3_wider-arena-and-obstacles.md` | **Marshall** | none (independent of 10) | [ ] |
+| 10 | `11_client_5_fix-initial-render-and-verify-input.md` | **Raj** | none — highest priority, real regression | [x] |
+| 11 | `11_server_3_wider-arena-and-obstacles.md` | **Marshall** | none (independent of 10) | [x] |
 | 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
