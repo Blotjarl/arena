@@ -242,7 +242,7 @@ unchanged) was indistinguishable from a broken button with zero client-side rang
 | 6 | `11_client_2_visual-design-pass.md` | **Raj** | none (independent — pure CSS/markup, no new functionality) | [x] |
 | 7 | `11_server_2_arena-boundaries.md` | **Marshall** | none | [x] |
 | 8 | `11_client_3_arena-visuals-and-wasd-input.md` | **Raj** | #7 (needs the real `ARENA_WIDTH`/`ARENA_HEIGHT` export) | [x] |
-| 9 | `11_client_4_ability-feedback-and-larger-arena.md` | **Raj** | #8 (needs `toRenderPixels`/`ARENA_RENDER_SIZE_PX`) | [ ] |
+| 9 | `11_client_4_ability-feedback-and-larger-arena.md` | **Raj** | #8 (needs `toRenderPixels`/`ARENA_RENDER_SIZE_PX`) | [x] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
