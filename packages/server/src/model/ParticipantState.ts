@@ -9,6 +9,8 @@ import {
   ActorIncapacitatedError,
   AbilityOnCooldownError,
   InsufficientResourceError,
+  ARENA_WIDTH,
+  ARENA_HEIGHT,
 } from '@arena/shared';
 
 /**
@@ -142,9 +144,14 @@ export class ParticipantState {
   }
 
   /**
-   * Validates and applies movement input, scaled by elapsed time and the champion's move speed.
+   * Validates and applies movement input, scaled by elapsed time and the champion's move speed. The
+   * resulting position is clamped to the arena bounds — pushing into a wall stops the participant exactly
+   * at it, rather than rejecting the movement or letting it continue unbounded (R4.1).
    *
    * CORRECTION (Step 9): added the `now` parameter, for the same reason as `applyCrowdControl` above.
+   * CORRECTION (Step 11): the resulting position is now clamped to `[0, ARENA_WIDTH]` x `[0, ARENA_HEIGHT]`
+   * — previously unbounded, so a player could move infinitely far in any direction (found by real
+   * end-to-end play, see `docs/01_class_list.md` §5a).
    * @param direction - raw movement input for this tick; scaled by champion move speed, not pre-normalized
    * @param deltaSeconds - elapsed simulation time since the previous tick
    * @param now - current simulation time, for incapacitation comparison
@@ -155,9 +162,11 @@ export class ParticipantState {
       throw new ActorIncapacitatedError(this.playerId, this.isAlive() ? 'crowd-controlled' : 'dead');
     }
     const speed = this.champion?.moveSpeed ?? 0;
+    const newX = this.position.x + direction.dx * speed * deltaSeconds;
+    const newY = this.position.y + direction.dy * speed * deltaSeconds;
     this.position = new Position(
-      this.position.x + direction.dx * speed * deltaSeconds,
-      this.position.y + direction.dy * speed * deltaSeconds,
+      Math.max(0, Math.min(ARENA_WIDTH, newX)),
+      Math.max(0, Math.min(ARENA_HEIGHT, newY)),
     );
   }
 

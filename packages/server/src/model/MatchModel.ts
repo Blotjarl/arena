@@ -6,6 +6,7 @@ import {
   EffectType,
   Team,
   Player,
+  Position,
   MatchStatePayload,
   ModelEvent,
   ChampionRoster,
@@ -14,12 +15,16 @@ import {
   GracePeriodExpiredError,
   InvalidMatchPhaseError,
   SelectionWindowExpiredError,
+  ARENA_WIDTH,
+  ARENA_HEIGHT,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
 
 const CHAMPION_SELECT_WINDOW_MS = 30_000;
 const MATCH_TIME_LIMIT_MS = 5 * 60_000;
 const DISCONNECT_GRACE_PERIOD_MS = 30_000;
+/** Distance kept from the arena's side walls when placing each participant's spawn (Step 11). */
+const SPAWN_WALL_MARGIN = 50;
 
 /**
  * One instance of gameplay, champion selection through a win condition — the authoritative source of
@@ -55,6 +60,12 @@ export class MatchModel extends AbstractModel {
       new ParticipantState(players[0].id, Team.A),
       new ParticipantState(players[1].id, Team.B),
     ];
+    // CORRECTION (Step 11): previously both participants kept ParticipantState's own default position
+    // (0, 0), stacking both players on top of each other at match start (found by real end-to-end play,
+    // see docs/01_class_list.md §5a). Spawned on opposite sides of the arena instead, with margin from
+    // the walls the same prompt just added clamping against.
+    this.participants[0].position = new Position(SPAWN_WALL_MARGIN, ARENA_HEIGHT / 2);
+    this.participants[1].position = new Position(ARENA_WIDTH - SPAWN_WALL_MARGIN, ARENA_HEIGHT / 2);
     this.championSelectDeadline = Date.now() + CHAMPION_SELECT_WINDOW_MS;
   }
 

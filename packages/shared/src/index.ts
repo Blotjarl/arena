@@ -15,6 +15,7 @@ export * from './domain/ConnectionStatus';
 export * from './domain/EndReason';
 export * from './domain/MatchResult';
 export * from './domain/EffectType';
+export * from './domain/Arena';
 export * from './domain/Position';
 export * from './domain/Ability';
 export * from './domain/Champion';

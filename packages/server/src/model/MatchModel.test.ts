@@ -9,12 +9,16 @@ import {
   ChampionRoster,
   ModelListener,
   ConnectionStatus,
+  Position,
   GracePeriodExpiredError,
   InvalidMatchPhaseError,
   SelectionWindowExpiredError,
   InvalidChampionSelectionError,
 } from '@arena/shared';
 import { MatchModel } from './MatchModel';
+
+const SPAWN_P1_X = 50; // must match MatchModel's SPAWN_WALL_MARGIN
+const SPAWN_P2_X = 350; // must match MatchModel's ARENA_WIDTH - SPAWN_WALL_MARGIN
 
 const VEX = new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 10, 200, [
   new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30),
@@ -134,6 +138,20 @@ describe('MatchModel', () => {
     });
   });
 
+  describe('constructor — spawn positions', () => {
+    it('CORRECTION (Step 11): spawns the two participants at distinct positions on opposite sides of the arena, not both at (0, 0)', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match); // toSnapshot()'s precondition requires a champion to be selected first
+      const snap = match.snapshot();
+      const a = snap.participants.find((p) => p.playerId === 'p1')!;
+      const b = snap.participants.find((p) => p.playerId === 'p2')!;
+      expect(a.position).not.toEqual(b.position);
+      expect(a.position).not.toEqual({ x: 0, y: 0 });
+      expect(b.position).not.toEqual({ x: 0, y: 0 });
+      expect(Math.abs(a.position.x - b.position.x)).toBeGreaterThan(50); // not immediately adjacent
+    });
+  });
+
   describe('submitMove / tick — movement', () => {
     it('buffers movement and applies it scaled by deltaSeconds on the next tick', () => {
       const match = new MatchModel('m1', makePlayers());
@@ -141,7 +159,7 @@ describe('MatchModel', () => {
       match.submitMove('p1', { dx: 1, dy: 0 });
       match.tick(0.5); // vex moveSpeed 200 * 0.5 = 100
       const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
-      expect(p1.position.x).toBe(100);
+      expect(p1.position.x).toBe(SPAWN_P1_X + 100);
     });
 
     it('CORRECTION (Step 11): a single submitMove() only moves the participant on the next tick, not every tick thereafter', () => {
@@ -151,7 +169,7 @@ describe('MatchModel', () => {
       match.tick(0.5); // vex moveSpeed 200 * 0.5 = 100
       match.tick(0.5); // no new submitMove -- position must not advance again
       const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
-      expect(p1.position.x).toBe(100);
+      expect(p1.position.x).toBe(SPAWN_P1_X + 100);
     });
 
     it('throws InvalidMatchPhaseError if submitted before the match is ACTIVE', () => {
@@ -180,8 +198,14 @@ describe('MatchModel', () => {
     it('silently ignores an out-of-range target (no effect, no throw)', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
-      match.submitMove('p2', { dx: 1, dy: 0 });
-      match.tick(10); // push p2 far out of bolt's 500-range
+      // CORRECTION (Step 11): movement is now clamped to the arena, so pushing p2 via submitMove/tick can
+      // no longer reliably exceed bolt's 500-range within a 400x400 arena. Set the target's position
+      // directly instead, to keep this test about range-checking, not the wall clamp (covered separately
+      // in ParticipantState.test.ts).
+      const p2State = (match as unknown as { participants: { playerId: string; position: Position }[] }).participants.find(
+        (p) => p.playerId === 'p2',
+      )!;
+      p2State.position = new Position(p2State.position.x + 1000, p2State.position.y);
       expect(() => match.submitAbility('p1', { abilityId: 'bolt', targetPlayerId: 'p2' })).not.toThrow();
       const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
       expect(p2.health).toBe(85);
