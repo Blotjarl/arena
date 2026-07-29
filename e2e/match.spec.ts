@@ -1,4 +1,6 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test';
+import { test, expect, Page, BrowserContext, APIRequestContext } from '@playwright/test';
+import type { LeaderboardEntryDTO } from '@arena/shared';
+import { API_PORT } from './global-setup';
 
 /**
  * The one required Playwright end-to-end acceptance test (Step 11, R-D5, 3.6.4): two independent
@@ -43,6 +45,30 @@ async function castArcaneBoltAndWaitForCooldown(page: Page): Promise<void> {
   await expect(arcaneBoltCooldown(page)).toHaveCount(0, { timeout: 10_000 });
 }
 
+/**
+ * Polls `GET /leaderboard` (real HTTP, via Playwright's built-in `request` fixture) until the named
+ * player has a recorded entry, or `timeoutMs` elapses. Necessary because `MatchReportingListener`'s calls
+ * to the api are fire-and-forget from the server's perspective (master context §2.3) — a single
+ * immediate check right after the match ends would be flaky, catching the leaderboard mid-write rather
+ * than actually verifying persistence.
+ */
+async function pollLeaderboardEntry(
+  request: APIRequestContext,
+  username: string,
+  timeoutMs = 15_000,
+): Promise<LeaderboardEntryDTO | undefined> {
+  const deadline = Date.now() + timeoutMs;
+  let entries: LeaderboardEntryDTO[] = [];
+  while (Date.now() < deadline) {
+    const res = await request.get(`http://localhost:${API_PORT}/leaderboard`);
+    entries = await res.json();
+    const entry = entries.find((e) => e.username === username);
+    if (entry) return entry;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  return entries.find((e) => e.username === username);
+}
+
 test.describe('a complete Arena match', () => {
   let attackerContext: BrowserContext;
   let defenderContext: BrowserContext;
@@ -52,7 +78,7 @@ test.describe('a complete Arena match', () => {
     await defenderContext?.close();
   });
 
-  test('two players connect, queue, select champions, fight, and reach a consistent result', async ({ browser }) => {
+  test('two players connect, queue, select champions, fight, and reach a consistent result', async ({ browser, request }) => {
     attackerContext = await browser.newContext();
     defenderContext = await browser.newContext();
     const attacker = await attackerContext.newPage();
@@ -94,5 +120,119 @@ test.describe('a complete Arena match', () => {
 
     await expect(attacker.getByRole('button', { name: 'Return to Queue' })).toBeVisible();
     await expect(defender.getByRole('button', { name: 'Return to Queue' })).toBeVisible();
+
+    // R7.1-R7.4/R8.1-R8.3: the server reports this match's begin/end to the api over HTTP
+    // (MatchReportingListener, fire-and-forget), which persists it and folds it into the leaderboard.
+    // Poll rather than check once immediately -- see pollLeaderboardEntry's own doc comment.
+    const [aliceEntry, bobEntry] = await Promise.all([
+      pollLeaderboardEntry(request, 'Alice'),
+      pollLeaderboardEntry(request, 'Bob'),
+    ]);
+
+    expect(aliceEntry, 'Alice (the winner) should have a persisted leaderboard entry').toBeDefined();
+    expect(aliceEntry!.wins).toBe(1);
+    expect(aliceEntry!.losses).toBe(0);
+
+    expect(bobEntry, 'Bob (the loser) should have a persisted leaderboard entry').toBeDefined();
+    expect(bobEntry!.wins).toBe(0);
+    expect(bobEntry!.losses).toBe(1);
+  });
+});
+
+/**
+ * R6.1-R6.4 disconnect/reconnect, exercised for real: server-side wiring (10_server_10), client-side
+ * emission (10_client_10), and grace-period logic (09_server_5) had each only ever been tested in
+ * isolation with mocks before this. `BrowserContext.setOffline(true)` simulates a real network-level
+ * drop — the underlying Socket.IO connection actually disconnects and the server detects a genuine
+ * 'disconnect' event, not a mocked one (see Playwright docs on setOffline).
+ */
+test.describe('disconnect and reconnect during an active match (R6.1-R6.4)', () => {
+  let attackerContext: BrowserContext;
+  let defenderContext: BrowserContext;
+
+  test.afterEach(async () => {
+    await attackerContext?.close();
+    await defenderContext?.close();
+  });
+
+  test('the remaining player sees a disconnect banner, and play resumes correctly once the disconnected player reconnects within the grace period', async ({
+    browser,
+  }) => {
+    attackerContext = await browser.newContext();
+    defenderContext = await browser.newContext();
+    const attacker = await attackerContext.newPage();
+    const defender = await defenderContext.newPage();
+
+    await identifyAndQueue(attacker, 'Carol');
+    await identifyAndQueue(defender, 'Dave');
+
+    await expect(attacker.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+    await expect(defender.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+
+    await selectChampion(attacker, 'Vex');
+    await selectChampion(defender, 'Vex');
+
+    await expect(attacker.locator('div[aria-label="movement-controls"]')).toBeVisible();
+    await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible();
+
+    // Drop Dave's real network connection. Carol's client should see the server's real
+    // match:player_disconnected broadcast and show the Part 1 banner (R6.2, 3.6.5 Usability).
+    await defenderContext.setOffline(true);
+
+    const banner = attacker.locator('p[aria-label="disconnect-banner"]');
+    await expect(banner).toBeVisible({ timeout: 20_000 });
+    await expect(banner).toContainText('30');
+
+    // Well inside the 30s grace period — the match must not have ended yet (R6.1).
+    await expect(attacker.getByRole('heading', { name: /Victory|Defeat/ })).not.toBeVisible();
+
+    // A real but modest wait — long enough to prove the connection genuinely dropped (not a mock),
+    // short enough not to risk the full 30s grace period expiring (that's a separate, optional test).
+    await attacker.waitForTimeout(5_000);
+
+    // Reconnect. This exercises ClientMain's real 'connect' handler (10_client_10), which must
+    // re-identify and then emit a real match:reconnect for the still-active match.
+    await defenderContext.setOffline(false);
+
+    await expect(banner).toBeHidden({ timeout: 20_000 });
+
+    // Play resumes, bidirectionally, proving match state wasn't corrupted by the disconnect: Carol
+    // (still connected throughout) lands an Arcane Bolt on Dave, then Dave — now reconnected — lands
+    // one back on Carol. Both are Vex (85 HP); Arcane Bolt deals 32.
+    await castArcaneBoltAndWaitForCooldown(attacker);
+    await expect(attacker.locator('div[aria-label="opponent-hud"]')).toContainText('HP 53');
+
+    await castArcaneBoltAndWaitForCooldown(defender);
+    await expect(defender.locator('div[aria-label="opponent-hud"]')).toContainText('HP 53');
+  });
+
+  test('a disconnected player who never reconnects is forfeited once the real 30s grace period elapses', async ({
+    browser,
+  }) => {
+    attackerContext = await browser.newContext();
+    defenderContext = await browser.newContext();
+    const attacker = await attackerContext.newPage();
+    const defender = await defenderContext.newPage();
+
+    await identifyAndQueue(attacker, 'Erin');
+    await identifyAndQueue(defender, 'Frank');
+
+    await expect(attacker.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+    await expect(defender.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+
+    await selectChampion(attacker, 'Vex');
+    await selectChampion(defender, 'Vex');
+
+    await expect(attacker.locator('div[aria-label="movement-controls"]')).toBeVisible();
+    await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible();
+
+    await defenderContext.setOffline(true);
+    await expect(attacker.locator('p[aria-label="disconnect-banner"]')).toBeVisible({ timeout: 20_000 });
+
+    // Real ~30s wait for the grace period to actually elapse via the live TickLoop, confirming the
+    // timing path genuinely works end to end — not just the grace-period math already unit-tested at
+    // the 29.9s/30.1s boundary in MatchModel.test.ts. Never reconnects Frank.
+    await expect(attacker.getByRole('heading', { name: 'Victory' })).toBeVisible({ timeout: 40_000 });
+    await expect(attacker.getByText('Reason: Opponent disconnected')).toBeVisible();
   });
 });

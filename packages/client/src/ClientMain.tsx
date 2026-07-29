@@ -146,7 +146,7 @@ export class ClientMain {
     );
 
     const { view: matchHUDView } = wirePair<ClientMatchModel, MatchHUDView, MatchController>(
-      (placeholder) => new MatchHUDView(identityModel, matchModel, placeholder),
+      (placeholder) => new MatchHUDView(identityModel, matchModel, placeholder, socket),
       (view) => new MatchController(matchModel, view, socketController),
     );
 

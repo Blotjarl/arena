@@ -65,7 +65,19 @@ export class ServerMain {
     const maxConcurrentMatches = Number(process.env.MAX_CONCURRENT_MATCHES) || DEFAULT_MAX_CONCURRENT_MATCHES;
 
     const httpServer = createServer();
-    const io = new SocketIOServer(httpServer, { cors: { origin: '*' } });
+    // CORRECTION (Step 11, 11_shared_4 — real gap found by disconnect/reconnect e2e testing):
+    // Socket.IO/Engine.IO's default heartbeat (pingInterval 25s, pingTimeout 20s) can take up to ~45s
+    // to notice a transport that has gone silent without an explicit close — e.g. a client that drops
+    // off the network rather than closing its tab, exactly what a real disconnect looks like (and what
+    // Playwright's BrowserContext.setOffline simulates: outbound/inbound frames just stop, no TCP
+    // FIN/RST). Against this game's 30-second disconnect grace period (R6.4) and 50ms broadcast-latency
+    // target (R-P2), a 45s detection window is not a rare edge case — it can eat the entire grace
+    // period before the server even starts counting, so a real disconnected player could be held far
+    // longer than R6.4 intends, and the "notifies the remaining player" half of R6.2 would only fire
+    // tens of seconds after the fact. Tightened so a genuinely dead connection is detected within ~5s,
+    // comfortably inside the grace period. Values are server-only config, delivered to clients as part
+    // of the Engine.IO handshake — no client-side change needed.
+    const io = new SocketIOServer(httpServer, { cors: { origin: '*' }, pingInterval: 2_000, pingTimeout: 3_000 });
 
     const sockets = new Map<PlayerId, Socket>();
     const connectionHandlers = new Map<PlayerId, ConnectionHandler>();

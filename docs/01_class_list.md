@@ -462,6 +462,18 @@ the actual render target the `View` class's `bindUpdateCallback` triggers, per S
 separate, exported components with no row of their own in this table; only the four `View` classes above
 are enumerated. `ClientMain.tsx`'s `wirePair` helper is also undocumented here.
 
+**Step 11 correction (11_shared_4) — `MatchHUDView` gains a 5th, optional constructor param**:
+`MatchHUDView(identityModel, matchModel, controller, socket?)`. `socket` is the live Socket.IO client
+connection, listened to directly for `match:player_disconnected`/`match:player_reconnected` — per
+`SocketConnectionController.bindInboundEvents`'s own doc comment (§6b), those two events are deliberately
+never routed through any model, so this view listens to the raw socket itself rather than a new model
+field being invented for them. Backs a new transient, UI-only `opponentDisconnect` field (never persisted,
+never exposed to `ClientMatchModel`) and a matching `getOpponentDisconnect()` accessor, which
+`MatchHUDScreen` renders as a "Opponent disconnected — reconnecting in Ns" banner (R6.2, 3.6.5 Usability)
+that clears once the matching `match:player_reconnected` arrives. `socket` is optional (defaulting to
+unset, in which case the banner never appears) so every pre-existing call site that has no reason to
+exercise it — most unit tests — is unaffected; `ClientMain.tsx` passes the real socket.
+
 ### 6d. Entry point
 
 | Class | Operations |

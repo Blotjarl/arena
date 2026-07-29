@@ -25,6 +25,18 @@ function makeMockController(): MatchController & { operation: jest.Mock } {
   return { operation: jest.fn() } as unknown as MatchController & { operation: jest.Mock };
 }
 
+/** Same shape as ClientMain.test.tsx's fake socket — captures handlers registered via on(). */
+function makeFakeSocket() {
+  const handlers = new Map<string, (payload?: unknown) => void>();
+  const socket = {
+    on: jest.fn((event: string, handler: (payload?: unknown) => void) => {
+      handlers.set(event, handler);
+    }),
+    emit: jest.fn(),
+  };
+  return { socket, handlers };
+}
+
 describe('MatchHUDScreen', () => {
   it('shows a waiting message before the first match:state snapshot arrives', () => {
     const view = new MatchHUDView(new ClientIdentityModel(), new ClientMatchModel(), makeMockController());
@@ -188,5 +200,36 @@ describe('MatchHUDScreen', () => {
 
     expect(match.latestState).toBe(snapshot);
     expect(match.latestState!.participants[0].position).toEqual(new Position(10, 20));
+  });
+
+  describe('opponent disconnect banner (R6.1-R6.4)', () => {
+    it('shows a disconnect banner naming the grace period once match:player_disconnected arrives, and clears it on match:player_reconnected', () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1'), makeParticipant('p2')],
+      });
+      const { socket, handlers } = makeFakeSocket();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const view = new MatchHUDView(identity, match, makeMockController(), socket as any);
+
+      render(<MatchHUDScreen view={view} />);
+      expect(screen.queryByLabelText('disconnect-banner')).toBeNull();
+
+      act(() => {
+        handlers.get('match:player_disconnected')!({ playerId: 'p2', gracePeriodSeconds: 30 });
+      });
+
+      expect(screen.getByLabelText('disconnect-banner').textContent).toMatch(/30/);
+
+      act(() => {
+        handlers.get('match:player_reconnected')!({ playerId: 'p2' });
+      });
+
+      expect(screen.queryByLabelText('disconnect-banner')).toBeNull();
+    });
   });
 });
