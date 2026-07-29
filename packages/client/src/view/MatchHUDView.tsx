@@ -7,6 +7,7 @@ import {
   ModelEvent,
   ChampionRoster,
   MatchStatePayload,
+  MatchStartPayload,
   Ability,
   EffectType,
   SOCKET_EVENTS,
@@ -382,11 +383,17 @@ export class MatchHUDView implements View, ModelListener {
   /**
    * Called by AbstractModel when the match model fires a change event (i.e. a new tick snapshot
    * has arrived). Feeds the snapshot into the interpolation buffer, then invokes onUpdate.
+   * REGRESSION FIX (11_client_5): `matchStart` carries the real spawn positions in
+   * `payload.initialState` (a MatchStatePayload) but was never routed into the buffer, so both
+   * markers rendered at the buffer's empty-state (0,0) fallback until the first `matchState` tick
+   * arrived — a visible corner-stack on match start.
    * @param event - the model event describing what changed
    */
   modelChanged(event: ModelEvent): void {
     if (event.type === 'matchState') {
       this.interpolation.push(event.payload as MatchStatePayload);
+    } else if (event.type === 'matchStart') {
+      this.interpolation.push((event.payload as MatchStartPayload).initialState);
     }
     this.onUpdate?.();
   }

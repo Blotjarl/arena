@@ -1,4 +1,4 @@
-import { ModelEvent, Team, ConnectionStatus, ParticipantSnapshot, Position } from '@arena/shared';
+import { ModelEvent, Team, ConnectionStatus, ParticipantSnapshot, Position, MatchStatePayload, MatchStartPayload } from '@arena/shared';
 import { MatchHUDView } from '../MatchHUDView';
 import { ClientIdentityModel } from '../../model/ClientIdentityModel';
 import { ClientMatchModel } from '../../model/ClientMatchModel';
@@ -113,14 +113,61 @@ describe('MatchHUDView', () => {
       expect(pushSpy).toHaveBeenCalledWith(state);
     });
 
-    it("does not push into the interpolation buffer for a non-'matchState' event", () => {
+    it("does not push into the interpolation buffer for a non-'matchState'/'matchStart' event", () => {
       const match = new ClientMatchModel();
       const view = new MatchHUDView(new ClientIdentityModel(), match, makeController());
       const pushSpy = jest.spyOn(view.getInterpolationBuffer(), 'push');
 
-      view.modelChanged(new ModelEvent(match, 'matchStart', {}));
+      view.modelChanged(new ModelEvent(match, 'championSelection:changed', {}));
 
       expect(pushSpy).not.toHaveBeenCalled();
+    });
+
+    it("REGRESSION (11_client_5): a 'matchStart' event pushes its initialState (not the raw payload) into the interpolation buffer", () => {
+      const match = new ClientMatchModel();
+      const view = new MatchHUDView(new ClientIdentityModel(), match, makeController());
+      const pushSpy = jest.spyOn(view.getInterpolationBuffer(), 'push');
+      const initialState: MatchStatePayload = {
+        matchId: 'm1',
+        tick: 0,
+        participants: [makeParticipant('p1'), makeParticipant('p2')],
+      };
+      const startPayload: MatchStartPayload = { matchId: 'm1', initialState };
+
+      view.modelChanged(new ModelEvent(match, 'matchStart', startPayload));
+
+      expect(pushSpy).toHaveBeenCalledWith(initialState);
+    });
+
+    it('REGRESSION (11_client_5): after matchStart, the very first synchronous getInterpolatedPosition call returns the real spawn position, not (0,0)', () => {
+      const match = new ClientMatchModel();
+      const view = new MatchHUDView(new ClientIdentityModel(), match, makeController());
+      const p1 = { ...makeParticipant('p1'), position: new Position(300, 450) };
+      const p2 = { ...makeParticipant('p2'), position: new Position(600, 120) };
+      const initialState: MatchStatePayload = { matchId: 'm1', tick: 0, participants: [p1, p2] };
+      const startPayload: MatchStartPayload = { matchId: 'm1', initialState };
+
+      view.modelChanged(new ModelEvent(match, 'matchStart', startPayload));
+
+      const now = Date.now();
+      expect(view.getInterpolationBuffer().getInterpolatedPosition('p1', now)).toEqual(new Position(300, 450));
+      expect(view.getInterpolationBuffer().getInterpolatedPosition('p2', now)).toEqual(new Position(600, 120));
+    });
+
+    it('REGRESSION (11_client_5): firing match.applyMatchStart() end-to-end reaches the interpolation buffer with the real initialState', () => {
+      const match = new ClientMatchModel();
+      const view = new MatchHUDView(new ClientIdentityModel(), match, makeController());
+      const callback = jest.fn();
+      view.bindUpdateCallback(callback);
+      const pushSpy = jest.spyOn(view.getInterpolationBuffer(), 'push');
+      const p1 = { ...makeParticipant('p1'), position: new Position(200, 200) };
+      const p2 = { ...makeParticipant('p2'), position: new Position(500, 500) };
+      const initialState: MatchStatePayload = { matchId: 'm1', tick: 0, participants: [p1, p2] };
+
+      match.applyMatchStart({ matchId: 'm1', initialState });
+
+      expect(callback).toHaveBeenCalled();
+      expect(pushSpy).toHaveBeenCalledWith(initialState);
     });
 
     it('CRITICAL CHECKPOINT: firing match.applyMatchState() actually reaches the bound callback end-to-end and feeds the interpolation buffer', () => {
