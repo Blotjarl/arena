@@ -15,6 +15,7 @@ import {
   PlayerReconnectedPayload,
   ARENA_WIDTH,
   ARENA_HEIGHT,
+  ARENA_OBSTACLES,
 } from '@arena/shared';
 import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientMatchModel } from '../model/ClientMatchModel';
@@ -41,15 +42,21 @@ const WASD_DIRECTIONS: Record<string, { dx: number; dy: number }> = {
 const ABILITY_HOTKEYS = ['1', '2', '3', '4'];
 
 /**
- * Rendered pixel size of the (square) arena. `Position` values from the server stay in
+ * Rendered pixel box of the arena. `Position` values from the server stay in
  * ARENA_WIDTH/ARENA_HEIGHT game-logic units (11_server_2) — this is purely a display-time scale
  * factor, so growing the arena on screen never changes how far a step actually moves a champion.
  * CORRECTION (11_client_4): a fixed 700px box still read as small on a real desktop viewport, so the
  * rendered size now tracks the viewport (capped at ARENA_RENDER_SIZE_MAX_PX) via
  * computeArenaRenderSizePx() instead of a constant.
+ * CORRECTION (11_client_6): the arena is no longer square (ARENA_WIDTH:ARENA_HEIGHT is 1.5:1 as of
+ * 11_server_3) — computeArenaRenderSizePx() now returns a width/height pair that always preserves that
+ * ratio, fitting the largest such rectangle inside the viewport-fraction/max-px bounding box. Because
+ * the ratio is preserved exactly, the resulting px-per-game-unit scale is identical on both axes (see
+ * the rangeRingRadiusPx comment below), so toRenderPixels/circular ranges don't need to change.
  */
 const ARENA_RENDER_SIZE_MAX_PX = 900;
 const ARENA_VIEWPORT_FRACTION = 0.85;
+const ARENA_ASPECT_RATIO = ARENA_WIDTH / ARENA_HEIGHT;
 
 /** Server tick rate (R-P1) — re-dispatching held WASD moves faster than this just wastes socket traffic. */
 const MOVE_REPEAT_INTERVAL_MS = 50;
@@ -58,22 +65,31 @@ const MOVE_REPEAT_INTERVAL_MS = 50;
 const CAST_EFFECT_DURATION_MS = 500;
 const DAMAGE_POPUP_DURATION_MS = 900;
 
-function computeArenaRenderSizePx(): number {
-  if (typeof window === 'undefined') return ARENA_RENDER_SIZE_MAX_PX;
-  return Math.min(
+/** Rendered arena box, in px — always in ARENA_WIDTH:ARENA_HEIGHT proportion (11_client_6). */
+interface ArenaRenderSize {
+  readonly width: number;
+  readonly height: number;
+}
+
+function computeArenaRenderSizePx(): ArenaRenderSize {
+  if (typeof window === 'undefined') {
+    return { width: ARENA_RENDER_SIZE_MAX_PX, height: ARENA_RENDER_SIZE_MAX_PX / ARENA_ASPECT_RATIO };
+  }
+  const width = Math.min(
     window.innerWidth * ARENA_VIEWPORT_FRACTION,
-    window.innerHeight * ARENA_VIEWPORT_FRACTION,
+    window.innerHeight * ARENA_VIEWPORT_FRACTION * ARENA_ASPECT_RATIO,
     ARENA_RENDER_SIZE_MAX_PX,
   );
+  return { width, height: width / ARENA_ASPECT_RATIO };
 }
 
 function toRenderPixels(
   position: { x: number; y: number },
-  arenaRenderSizePx: number,
+  arenaRenderSizePx: ArenaRenderSize,
 ): { x: number; y: number } {
   return {
-    x: (position.x / ARENA_WIDTH) * arenaRenderSizePx,
-    y: (position.y / ARENA_HEIGHT) * arenaRenderSizePx,
+    x: (position.x / ARENA_WIDTH) * arenaRenderSizePx.width,
+    y: (position.y / ARENA_HEIGHT) * arenaRenderSizePx.height,
   };
 }
 
@@ -589,7 +605,10 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const showRangeRing =
     hoveredAbility &&
     (hoveredAbility.effectType === EffectType.DAMAGE || hoveredAbility.effectType === EffectType.CROWD_CONTROL);
-  const rangeRingRadiusPx = hoveredAbility ? (hoveredAbility.range / ARENA_WIDTH) * arenaRenderSizePx : 0;
+  // Px-per-game-unit is identical on both axes (ARENA_WIDTH:ARENA_HEIGHT ratio is preserved exactly by
+  // computeArenaRenderSizePx), so scaling this game-space radius by the width axis alone still yields a
+  // geometrically correct circle.
+  const rangeRingRadiusPx = hoveredAbility ? (hoveredAbility.range / ARENA_WIDTH) * arenaRenderSizePx.width : 0;
 
   const opponentDisconnect = view.getOpponentDisconnect();
 
@@ -643,8 +662,25 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
       <div
         aria-label="arena"
         className="arena"
-        style={{ position: 'relative', width: arenaRenderSizePx, height: arenaRenderSizePx }}
+        style={{ position: 'relative', width: arenaRenderSizePx.width, height: arenaRenderSizePx.height }}
       >
+        {ARENA_OBSTACLES.map((obstacle, index) => {
+          const topLeft = toRenderPixels(obstacle, arenaRenderSizePx);
+          return (
+            <div
+              key={`obstacle-${index}`}
+              aria-hidden="true"
+              className="arena-obstacle"
+              style={{
+                position: 'absolute',
+                left: topLeft.x,
+                top: topLeft.y,
+                width: (obstacle.width / ARENA_WIDTH) * arenaRenderSizePx.width,
+                height: (obstacle.height / ARENA_HEIGHT) * arenaRenderSizePx.height,
+              }}
+            />
+          );
+        })}
         {showRangeRing && (
           <div
             className="range-ring"
