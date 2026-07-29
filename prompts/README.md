@@ -221,12 +221,14 @@ reconnection has not been manually exercised against a live server).
 
 ## Step 11 — Conduct acceptance tests; fix faults if found
 
-`docs/ProjectProcess.txt` step 11, verbatim. Six prompts — nothing in `packages/` has ever actually been
-run together as live processes before this batch; two real gaps were found just designing the first four
-prompts (the client has no build tooling at all, and its socket connection is hardcoded same-origin) and
-were fixed as prerequisites rather than discovered mid-test. A full post-batch audit found two more real
-gaps that prompt 3's own e2e test never covered — prompt 5 closes those. Manually testing the deployed-
-locally app surfaced a sixth: the client has never had any visual design pass — prompt 6 closes that.
+`docs/ProjectProcess.txt` step 11, verbatim, plus continued UX/gameplay polish the team chose to do before
+moving to Steps 12-13. Nothing in `packages/` had ever run together as live processes before prompts 1-5;
+two real gaps were found just designing those (the client has no build tooling at all, and its socket
+connection is hardcoded same-origin) and were fixed as prerequisites rather than discovered mid-test. A
+full post-batch audit found two more real gaps prompt 3's own e2e test never covered (prompt 5), and
+manually testing the locally-deployed app surfaced two more rounds after that: no visual design at all
+(prompt 6), then — after actually playing a real match — no arena wall boundaries, both players spawning
+on top of each other, and an arena too small/plain to read at a glance (prompts 7-8).
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -236,6 +238,8 @@ locally app surfaced a sixth: the client has never had any visual design pass �
 | 4 | `11_shared_3_ci-pipeline.md` | **Marshall** | #3 (needs the e2e test to exist) | [x] |
 | 5 | `11_shared_4_reconnection-and-persistence-e2e-coverage.md` | **Marshall** | #3, #4 | [x] |
 | 6 | `11_client_2_visual-design-pass.md` | **Raj** | none (independent — pure CSS/markup, no new functionality) | [x] |
+| 7 | `11_server_2_arena-boundaries.md` | **Marshall** | none | [ ] |
+| 8 | `11_client_3_arena-visuals-and-wasd-input.md` | **Raj** | #7 (needs the real `ARENA_WIDTH`/`ARENA_HEIGHT` export) | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
