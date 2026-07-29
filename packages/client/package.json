@@ -2,6 +2,10 @@
   "name": "@arena/client",
   "version": "0.1.0",
   "scripts": {
+    "pretypecheck": "npm run build -w @arena/shared",
+    "pretest": "npm run build -w @arena/shared",
+    "predev": "npm run build -w @arena/shared",
+    "prebuild": "npm run build -w @arena/shared",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "dev": "vite",
