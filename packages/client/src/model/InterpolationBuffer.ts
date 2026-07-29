@@ -31,6 +31,14 @@ export class InterpolationBuffer {
    * between the two bracketing snapshots. Never mutates any stored model state.
    * CRITICAL: the returned Position is for display only — never write it back into ClientMatchModel
    * or any authoritative field (prompts/00_master_context.md §8, R4.7 / R-P4).
+   * CORRECTION (11_client_4, found via real e2e, not Jest): every return path always constructs a
+   * fresh `new Position(...)`, even the single-sample and non-interpolated edge cases. A snapshot's
+   * `.position` field, once it has round-tripped over a real Socket.IO connection, is a plain
+   * deserialized object with no prototype methods — only the fully-interpolated branch below happened
+   * to already build a real `Position`; every other branch was quietly handing back a `.position`-
+   * shaped object with no working `distanceTo()`. Jest's own fixtures construct `Position` instances
+   * directly, so this never surfaced there — only against the real server did a caller relying on
+   * `distanceTo()` (range indication) crash.
    * @param playerId - which participant to interpolate
    * @param now - the current render timestamp in milliseconds
    * @returns an interpolated Position for display
@@ -41,7 +49,8 @@ export class InterpolationBuffer {
     }
 
     if (this.samples.length === 1) {
-      return this.findPosition(this.samples[0], playerId) ?? new Position(0, 0);
+      const only = this.findPosition(this.samples[0], playerId);
+      return only ? new Position(only.x, only.y) : new Position(0, 0);
     }
 
     const TICK_INTERVAL_MS = 50; // 20Hz server tick rate
@@ -75,9 +84,9 @@ export class InterpolationBuffer {
     const pPrev = this.findPosition(prev, playerId);
     const pNext = this.findPosition(next, playerId);
 
-    if (!pPrev) return pNext ?? new Position(0, 0);
-    if (!pNext) return pPrev;
-    if (span <= 0) return pNext;
+    if (!pPrev) return pNext ? new Position(pNext.x, pNext.y) : new Position(0, 0);
+    if (!pNext) return new Position(pPrev.x, pPrev.y);
+    if (span <= 0) return new Position(pNext.x, pNext.y);
 
     const t = Math.max(0, Math.min(1, (now - tPrev) / span));
     return new Position(
