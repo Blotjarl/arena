@@ -230,7 +230,11 @@ manually testing the locally-deployed app surfaced three more rounds after that:
 (prompt 6), then — after actually playing a real match — no arena wall boundaries, both players spawning
 on top of each other, and an arena too small/plain to read at a glance (prompts 7-8), then a real usability
 gap in ability feedback (prompt 9): the server's silent-ignore-on-out-of-range behavior (R4.2, correct and
-unchanged) was indistinguishable from a broken button with zero client-side range indication.
+unchanged) was indistinguishable from a broken button with zero client-side range indication. Manual play
+after prompt 9 surfaced a real regression (prompt 10: both players rendering stacked at the arena's
+top-left corner on first paint — `matchStart` events never reached the rendering buffer, only `matchState`
+ticks did) plus two new feature requests (prompts 11-12: a 1.5x wider arena and real, server-authoritative
+obstacles).
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -243,6 +247,9 @@ unchanged) was indistinguishable from a broken button with zero client-side rang
 | 7 | `11_server_2_arena-boundaries.md` | **Marshall** | none | [x] |
 | 8 | `11_client_3_arena-visuals-and-wasd-input.md` | **Raj** | #7 (needs the real `ARENA_WIDTH`/`ARENA_HEIGHT` export) | [x] |
 | 9 | `11_client_4_ability-feedback-and-larger-arena.md` | **Raj** | #8 (needs `toRenderPixels`/`ARENA_RENDER_SIZE_PX`) | [x] |
+| 10 | `11_client_5_fix-initial-render-and-verify-input.md` | **Raj** | none — highest priority, real regression | [ ] |
+| 11 | `11_server_3_wider-arena-and-obstacles.md` | **Marshall** | none (independent of 10) | [ ] |
+| 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
