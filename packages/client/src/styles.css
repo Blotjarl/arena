@@ -499,6 +499,17 @@ button {
   overflow: hidden;
 }
 
+/* Server-authoritative, movement-blocking obstacles (11_client_6) — purely decorative/positional on
+   the client (the server already enforces collision in ParticipantState.move()); this is here so a
+   player can see why their character stopped. Rendered before the markers so a marker sitting flush
+   against an edge still reads on top. */
+.arena-obstacle {
+  background: linear-gradient(160deg, var(--color-bg-card-hover) 0%, var(--color-bg-elevated) 100%);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35), 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
 /* The marker is a ring/glow (whose vs opponent) layered behind a champion-specific pixel sprite
    (which champion) — the sprite's own colors say who, the ring says whose side (see 11_client_3). */
 .marker {
