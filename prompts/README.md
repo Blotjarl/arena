@@ -249,7 +249,7 @@ obstacles).
 | 9 | `11_client_4_ability-feedback-and-larger-arena.md` | **Raj** | #8 (needs `toRenderPixels`/`ARENA_RENDER_SIZE_PX`) | [x] |
 | 10 | `11_client_5_fix-initial-render-and-verify-input.md` | **Raj** | none — highest priority, real regression | [x] |
 | 11 | `11_server_3_wider-arena-and-obstacles.md` | **Marshall** | none (independent of 10) | [x] |
-| 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [ ] |
+| 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [x] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
