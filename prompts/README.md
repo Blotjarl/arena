@@ -235,7 +235,7 @@ locally app surfaced a sixth: the client has never had any visual design pass �
 | 3 | `11_shared_2_e2e-acceptance-test.md` | **Marshall** | #1 (needs a servable client) | [x] |
 | 4 | `11_shared_3_ci-pipeline.md` | **Marshall** | #3 (needs the e2e test to exist) | [x] |
 | 5 | `11_shared_4_reconnection-and-persistence-e2e-coverage.md` | **Marshall** | #3, #4 | [x] |
-| 6 | `11_client_2_visual-design-pass.md` | **Raj** | none (independent — pure CSS/markup, no new functionality) | [ ] |
+| 6 | `11_client_2_visual-design-pass.md` | **Raj** | none (independent — pure CSS/markup, no new functionality) | [x] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
