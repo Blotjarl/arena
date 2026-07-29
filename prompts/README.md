@@ -221,11 +221,12 @@ reconnection has not been manually exercised against a live server).
 
 ## Step 11 — Conduct acceptance tests; fix faults if found
 
-`docs/ProjectProcess.txt` step 11, verbatim. Five prompts — nothing in `packages/` has ever actually been
+`docs/ProjectProcess.txt` step 11, verbatim. Six prompts — nothing in `packages/` has ever actually been
 run together as live processes before this batch; two real gaps were found just designing the first four
 prompts (the client has no build tooling at all, and its socket connection is hardcoded same-origin) and
 were fixed as prerequisites rather than discovered mid-test. A full post-batch audit found two more real
-gaps that prompt 3's own e2e test never covered — prompt 5 closes those.
+gaps that prompt 3's own e2e test never covered — prompt 5 closes those. Manually testing the deployed-
+locally app surfaced a sixth: the client has never had any visual design pass — prompt 6 closes that.
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -234,6 +235,7 @@ gaps that prompt 3's own e2e test never covered — prompt 5 closes those.
 | 3 | `11_shared_2_e2e-acceptance-test.md` | **Marshall** | #1 (needs a servable client) | [x] |
 | 4 | `11_shared_3_ci-pipeline.md` | **Marshall** | #3 (needs the e2e test to exist) | [x] |
 | 5 | `11_shared_4_reconnection-and-persistence-e2e-coverage.md` | **Marshall** | #3, #4 | [x] |
+| 6 | `11_client_2_visual-design-pass.md` | **Raj** | none (independent — pure CSS/markup, no new functionality) | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
