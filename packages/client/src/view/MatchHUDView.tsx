@@ -209,6 +209,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const me = participantA.playerId === identity.playerId ? participantA : participantB;
   const opponent = participantA.playerId === identity.playerId ? participantB : participantA;
   const myChampion = ChampionRoster.getById(me.championId);
+  const opponentChampion = ChampionRoster.getById(opponent.championId);
 
   const now = Date.now();
   const myPosition = interpolation.getInterpolatedPosition(me.playerId, now);
@@ -217,47 +218,76 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const opponentDisconnect = view.getOpponentDisconnect();
 
   return (
-    <div>
+    <div className="screen screen-match-hud">
       {opponentDisconnect && (
-        <p aria-label="disconnect-banner">
+        <p aria-label="disconnect-banner" className="disconnect-banner">
           Opponent disconnected — reconnecting in {opponentDisconnect.gracePeriodSeconds}s
         </p>
       )}
-      <div aria-label="you-hud">
-        <p>
-          You: HP {me.health} / Resource {me.resource}
-        </p>
-        <ul aria-label="you-cooldowns">
-          {Object.entries(me.cooldownsRemaining).map(([abilityId, secondsRemaining]) => (
-            <li key={abilityId}>
-              {abilityId}: {secondsRemaining.toFixed(1)}s
-            </li>
-          ))}
-        </ul>
+      <div className="hud-row">
+        <div aria-label="you-hud" className="hud-panel hud-panel--you">
+          <p className="hud-line">
+            You: HP {me.health} / Resource {me.resource}
+          </p>
+          <div className="bar bar--hp" aria-hidden="true">
+            <div className="bar-fill" style={{ width: `${(me.health / myChampion.maxHealth) * 100}%` }} />
+          </div>
+          <div className="bar bar--resource" aria-hidden="true">
+            <div
+              className="bar-fill"
+              style={{ width: `${(me.resource / myChampion.maxResource) * 100}%` }}
+            />
+          </div>
+          <ul aria-label="you-cooldowns" className="cooldown-list">
+            {Object.entries(me.cooldownsRemaining).map(([abilityId, secondsRemaining]) => (
+              <li key={abilityId} className="cooldown-chip">
+                {abilityId}: {secondsRemaining.toFixed(1)}s
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div aria-label="opponent-hud" className="hud-panel hud-panel--opponent">
+          <p className="hud-line">
+            Opponent: HP {opponent.health} / Resource {opponent.resource}
+          </p>
+          <div className="bar bar--hp" aria-hidden="true">
+            <div
+              className="bar-fill"
+              style={{ width: `${(opponent.health / opponentChampion.maxHealth) * 100}%` }}
+            />
+          </div>
+          <div className="bar bar--resource" aria-hidden="true">
+            <div
+              className="bar-fill"
+              style={{ width: `${(opponent.resource / opponentChampion.maxResource) * 100}%` }}
+            />
+          </div>
+        </div>
       </div>
-      <div aria-label="opponent-hud">
-        <p>
-          Opponent: HP {opponent.health} / Resource {opponent.resource}
-        </p>
-      </div>
-      <div aria-label="arena" style={{ position: 'relative', width: 400, height: 400 }}>
+      <div aria-label="arena" className="arena" style={{ position: 'relative', width: 400, height: 400 }}>
         <div
           aria-label="you-marker"
+          className="marker marker--you"
           style={{ position: 'absolute', left: myPosition.x, top: myPosition.y }}
         />
         <div
           aria-label="opponent-marker"
+          className="marker marker--opponent"
           style={{ position: 'absolute', left: opponentPosition.x, top: opponentPosition.y }}
         />
       </div>
-      <div aria-label="movement-controls">
+      <div aria-label="movement-controls" className="movement-controls">
         {Object.entries(MOVE_DIRECTIONS).map(([label, direction]) => (
-          <button key={label} onClick={() => controller.operation('move', direction)}>
+          <button
+            key={label}
+            onClick={() => controller.operation('move', direction)}
+            className={`btn btn-move btn-move--${label.toLowerCase()}`}
+          >
             Move {label}
           </button>
         ))}
       </div>
-      <div aria-label="ability-controls">
+      <div aria-label="ability-controls" className="ability-controls">
         {myChampion.abilities.map((ability) => {
           // CORRECTION (Step 11): MatchModel.submitAbility treats a request naming no target as
           // self-targeted (see its own doc comment) — that's correct for HEAL (self-heal kits) but
@@ -267,6 +297,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
           // keep the previous no-target (self) behavior.
           const isOffensive =
             ability.effectType === EffectType.DAMAGE || ability.effectType === EffectType.CROWD_CONTROL;
+          const onCooldown = Boolean(me.cooldownsRemaining[ability.id]);
           return (
             <button
               key={ability.id}
@@ -276,6 +307,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
                   ...(isOffensive ? { targetPlayerId: opponent.playerId } : {}),
                 })
               }
+              className={`btn btn-ability ${onCooldown ? 'btn-ability--cooldown' : ''}`}
             >
               {ability.name}
             </button>

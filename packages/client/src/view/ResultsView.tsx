@@ -134,13 +134,19 @@ export function ResultsScreen(props: { view: ResultsView }): JSX.Element {
 
   const myTeam = queue.matchPayload?.team ?? null;
   const outcome = result.winningTeam === null ? 'Draw' : result.winningTeam === myTeam ? 'Victory' : 'Defeat';
+  const outcomeClass =
+    outcome === 'Victory' ? 'results-outcome--victory' : outcome === 'Defeat' ? 'results-outcome--defeat' : 'results-outcome--draw';
 
   return (
-    <div>
-      <h2>{outcome}</h2>
-      <p>Reason: {END_REASON_LABELS[result.reason]}</p>
-      <p>Duration: {(result.durationMs / 1000).toFixed(1)}s</p>
-      <button onClick={() => controller.operation('returnToQueue')}>Return to Queue</button>
+    <div className="screen screen-results">
+      <div className="card results-card">
+        <h2 className={`results-outcome ${outcomeClass}`}>{outcome}</h2>
+        <p className="results-reason">Reason: {END_REASON_LABELS[result.reason]}</p>
+        <p className="results-duration">Duration: {(result.durationMs / 1000).toFixed(1)}s</p>
+        <button onClick={() => controller.operation('returnToQueue')} className="btn btn-primary btn-large btn-return">
+          Return to Queue
+        </button>
+      </div>
     </div>
   );
 }
