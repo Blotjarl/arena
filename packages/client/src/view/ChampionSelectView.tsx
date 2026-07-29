@@ -161,32 +161,58 @@ export function ChampionSelectScreen(props: { view: ChampionSelectView }): JSX.E
       : null;
   const bothSelected = match.championSelection?.bothSelected ?? false;
 
+  const maxRosterHealth = roster.reduce((max, c) => Math.max(max, c.maxHealth), 1);
+
   return (
-    <div>
-      <p>Selection window: {secondsLeft}s</p>
-      <p>You: {identity.username}</p>
-      <p>Opponent: {opponentUsername}</p>
-      {mySelection && <p>You selected: {mySelection.championId}</p>}
-      {bothSelected && <p>Both players ready</p>}
-      <ul aria-label="champion-roster">
-        {roster.map((champion) => (
-          <li key={champion.id}>
-            <span>
-              {champion.name} — {champion.role} (HP {champion.maxHealth})
-            </span>
-            <ul>
-              {champion.abilities.map((ability) => (
-                <li key={ability.id}>{ability.name}</li>
-              ))}
-            </ul>
-            <button
-              onClick={() => controller.operation('selectChampion', { championId: champion.id })}
-              disabled={mySelection !== null}
-            >
-              Select {champion.name}
-            </button>
-          </li>
-        ))}
+    <div className="screen screen-champion-select">
+      <header className="select-header">
+        <p className={`countdown ${secondsLeft <= 10 ? 'countdown--urgent' : ''}`}>
+          Selection window: {secondsLeft}s
+        </p>
+        <div className="players-row">
+          <p>You: {identity.username}</p>
+          <p>Opponent: {opponentUsername}</p>
+        </div>
+        {mySelection && <p className="my-selection">You selected: {mySelection.championId}</p>}
+        {bothSelected && <p className="both-ready">Both players ready</p>}
+      </header>
+      <ul aria-label="champion-roster" className="champion-roster">
+        {roster.map((champion) => {
+          const isMine = mySelection?.championId === champion.id;
+          return (
+            <li key={champion.id} className={`champion-card champion-${champion.id} ${isMine ? 'champion-card--selected' : ''}`}>
+              <span className="champion-name-row">
+                {champion.name} — {champion.role}
+              </span>
+              <span className="stat-readout" aria-hidden="true">
+                {champion.maxHealth} HP
+              </span>
+              <div className="bar bar--stat" aria-hidden="true">
+                <div
+                  className="bar-fill"
+                  style={{ width: `${(champion.maxHealth / maxRosterHealth) * 100}%` }}
+                />
+              </div>
+              <ul className="ability-list">
+                {champion.abilities.map((ability) => (
+                  <li key={ability.id} className="ability-chip">
+                    <span className="ability-name">{ability.name}</span>
+                    <span className="ability-meta" aria-hidden="true">
+                      {ability.cooldownSeconds}s CD
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => controller.operation('selectChampion', { championId: champion.id })}
+                disabled={mySelection !== null}
+                className="btn btn-select"
+              >
+                Select {champion.name}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

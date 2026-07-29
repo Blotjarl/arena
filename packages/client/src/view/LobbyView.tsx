@@ -143,32 +143,52 @@ export function LobbyScreen(props: { view: LobbyView }): JSX.Element {
 
   if (identity.username === null) {
     return (
-      <form onSubmit={handleSubmit} aria-label="identify-form">
-        <label htmlFor="username">Username</label>
-        <input id="username" name="username" type="text" maxLength={24} />
-        <button type="submit">Continue</button>
-        {error && <p role="alert">{error}</p>}
+      <form onSubmit={handleSubmit} aria-label="identify-form" className="screen screen-lobby">
+        <div className="card">
+          <h1 className="brand-title">Arena</h1>
+          <div>
+            <label htmlFor="username" className="field-label">Username</label>
+            <input id="username" name="username" type="text" maxLength={24} className="text-input" />
+          </div>
+          <button type="submit" className="btn btn-primary btn-large">Continue</button>
+          {error && <p role="alert" className="alert-error">{error}</p>}
+        </div>
       </form>
     );
   }
 
   if (queue.status === 'idle') {
     return (
-      <div>
-        <p>Welcome, {identity.username}</p>
-        <button onClick={() => controller.operation('joinQueue')}>Find Match</button>
+      <div className="screen screen-lobby">
+        <div className="card">
+          <p className="welcome-text">Welcome, {identity.username}</p>
+          <button onClick={() => controller.operation('joinQueue')} className="btn btn-primary btn-large">
+            Find Match
+          </button>
+        </div>
       </div>
     );
   }
 
   if (queue.status === 'queued') {
     return (
-      <div>
-        <p>Position in queue: {queue.position}</p>
-        <button onClick={() => controller.operation('cancelQueue')}>Cancel</button>
+      <div className="screen screen-lobby">
+        <div className="card">
+          <div className="queue-spinner" aria-hidden="true" />
+          <p className="queue-status">Position in queue: {queue.position}</p>
+          <button onClick={() => controller.operation('cancelQueue')} className="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
       </div>
     );
   }
 
-  return <p>Match found! Opponent: {queue.matchPayload?.opponentUsername}</p>;
+  return (
+    <div className="screen screen-lobby">
+      <div className="card">
+        <p className="match-found-text">Match found! Opponent: {queue.matchPayload?.opponentUsername}</p>
+      </div>
+    </div>
+  );
 }
