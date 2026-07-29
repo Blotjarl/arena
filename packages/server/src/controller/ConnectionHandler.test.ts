@@ -140,6 +140,39 @@ describe('ConnectionHandler', () => {
     });
   });
 
+  describe('disconnect while identified but not yet matched (CORRECTION, Step 11)', () => {
+    it('cancels the player\'s queue entry so it is not left orphaned for a later tryPairNext() to pair against a dead socket', () => {
+      const { socket, handlers } = makeFakeSocket();
+      const identify = { operation: jest.fn() } as unknown as PlayerIdentifyController;
+      const matchmaking = { operation: jest.fn() } as unknown as MatchmakingController;
+      const conn = new ConnectionHandler(socket, { identify, matchmaking });
+      conn.register();
+      handlers.get('identify')!({ playerId: 'p1', username: 'Alice' });
+
+      handlers.get('disconnect')!();
+
+      expect(matchmaking.operation).toHaveBeenCalledWith('queue:cancel', {
+        player: expect.objectContaining({ id: 'p1', username: 'Alice' }),
+      });
+    });
+
+    it('swallows NotQueuedError rather than throwing (e.g. disconnecting between identify and queue:join)', () => {
+      const { socket, handlers, emit } = makeFakeSocket();
+      const identify = { operation: jest.fn() } as unknown as PlayerIdentifyController;
+      const matchmaking = {
+        operation: jest.fn(() => {
+          throw new NotQueuedError('p1');
+        }),
+      } as unknown as MatchmakingController;
+      const conn = new ConnectionHandler(socket, { identify, matchmaking });
+      conn.register();
+      handlers.get('identify')!({ playerId: 'p1', username: 'Alice' });
+
+      expect(() => handlers.get('disconnect')!()).not.toThrow();
+      expect(emit).not.toHaveBeenCalledWith('error', expect.anything());
+    });
+  });
+
   describe('bindMatch and match-scoped dispatch', () => {
     function identifiedConnection() {
       const { socket, handlers, emit } = makeFakeSocket();

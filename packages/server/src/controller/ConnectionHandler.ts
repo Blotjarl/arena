@@ -144,8 +144,23 @@ export class ConnectionHandler {
     });
 
     this.socket.on('disconnect', () => {
-      if (!this.identified || !this.player || !this.disconnect) return;
-      this.disconnect.operation('disconnect', { playerId: this.player.id });
+      if (!this.identified || !this.player) return;
+      if (this.disconnect) {
+        this.disconnect.operation('disconnect', { playerId: this.player.id });
+        return;
+      }
+      // CORRECTION (Step 11): a player who disconnects while merely queued (identified, never paired
+      // into a match) previously left an orphaned QueueEntry behind forever — MatchmakingQueue has no
+      // other cleanup path for this, so a later tryPairNext() could pair a live player against a
+      // socket that no longer exists, silently stranding them at Champion Select until R3.4's 30s
+      // timeout. NotQueuedError (e.g. disconnecting between identify and queue:join, or after an
+      // explicit queue:cancel) just means there was nothing to clean up — not worth surfacing, since
+      // the socket is already gone and has nowhere to receive an error emission anyway.
+      try {
+        this.controllers.matchmaking.operation(SOCKET_EVENTS.QUEUE_CANCEL, { player: this.player });
+      } catch {
+        // NotQueuedError: nothing was queued for this player.
+      }
     });
   }
 }

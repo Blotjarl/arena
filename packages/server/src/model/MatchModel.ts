@@ -226,6 +226,14 @@ export class MatchModel extends AbstractModel {
     for (const p of this.participants) {
       const pending = this.pendingMoves.get(p.playerId);
       if (pending) {
+        // CORRECTION (Step 11): previously left in pendingMoves after being applied, so a single
+        // submitMove() call moved the participant on every subsequent tick forever, not just the next
+        // one — found by real end-to-end play: MatchHUDScreen's movement buttons are plain discrete
+        // onClick handlers (no press/hold, no "stop" control that could ever send {dx:0,dy:0}), so one
+        // accidental click on a movement button left that player walking in a straight line,
+        // uncontrollably, for the rest of the match. Consumed here so each submitMove() input is
+        // applied exactly once, matching the discrete-click UI that actually exists.
+        this.pendingMoves.delete(p.playerId);
         try {
           p.move(pending, deltaSeconds, now);
         } catch {
