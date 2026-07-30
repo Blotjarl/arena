@@ -65,4 +65,23 @@ export class ClientMatchModel extends AbstractModel {
     this.result = payload;
     this.notifyChanged(new ModelEvent(this, 'matchEnd', payload));
   }
+
+  /**
+   * REGRESSION FIX: clears every match-specific field back to its initial null value. This same
+   * model instance is reused across a connection's whole session, not recreated per match — without
+   * this, a returning player's second match:found left the first match's `result` and
+   * `championSelection` in place, which permanently stuck AppRouter on ResultsScreen (it checks
+   * `matchModel.result !== null` before anything else) and pre-disabled every "Select {champion}"
+   * button on the new Champion Select screen (`disabled={mySelection !== null}`). Called by
+   * SocketConnectionController's match:found handler, before ClientQueueModel.setMatched() for the
+   * new match.
+   */
+  reset(): void {
+    this.matchId = null;
+    this.phase = null;
+    this.latestState = null;
+    this.result = null;
+    this.championSelection = null;
+    this.notifyChanged(new ModelEvent(this, 'matchReset', null));
+  }
 }

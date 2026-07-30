@@ -94,6 +94,28 @@ describe('SocketConnectionController', () => {
       expect(models.queue.matchPayload).toBe(payload);
     });
 
+    // REGRESSION: a second match:found (a returning player queuing again after their first match
+    // ended) previously left ClientMatchModel's `result`/`championSelection` from the first match in
+    // place — permanently stuck on ResultsScreen and pre-disabled every champion-select button on the
+    // new match. match:found must reset ClientMatchModel before the new match's own events arrive.
+    it('CRITICAL CHECKPOINT: match:found resets ClientMatchModel, clearing a previous match\'s leftover result and championSelection', () => {
+      const { socket, handlers } = makeFakeSocket();
+      const models = makeModels();
+      new SocketConnectionController(socket, models);
+      handlers.get('champion:selected')!({ matchId: 'm1', playerId: 'p1', championId: 'korr', bothSelected: true });
+      handlers.get('match:end')!({ matchId: 'm1', reason: EndReason.ELIMINATION, winningTeam: Team.A, durationMs: 1000 });
+      expect(models.match.result).not.toBeNull();
+      expect(models.match.championSelection).not.toBeNull();
+
+      handlers.get('match:found')!({ matchId: 'm2', team: Team.B, opponentUsername: 'Carol', roster: [] });
+
+      expect(models.match.result).toBeNull();
+      expect(models.match.championSelection).toBeNull();
+      expect(models.match.matchId).toBeNull();
+      expect(models.match.phase).toBeNull();
+      expect(models.queue.status).toBe('matched');
+    });
+
     it('routes champion:selected to ClientMatchModel.applyChampionSelected', () => {
       const { socket, handlers } = makeFakeSocket();
       const models = makeModels();
