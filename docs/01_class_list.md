@@ -590,6 +590,17 @@ that clears once the matching `match:player_reconnected` arrives. `socket` is op
 unset, in which case the banner never appears) so every pre-existing call site that has no reason to
 exercise it — most unit tests — is unaffected; `ClientMain.tsx` passes the real socket.
 
+**Step 11 correction (`11_client_8`) — `ChampionSprite` extracted to its own module**: the pixel-art sprite
+renderer (`CHAMPION_SPRITES`, `SPRITE_CELL_PX`, `SPRITE_PIXEL_COLORS`, `ChampionSprite`) previously lived as
+a private implementation detail of `MatchHUDView.tsx`. Moved to `client/src/view/ChampionSprite.tsx` and
+exported, since `ChampionSelectView.tsx` now also renders it (one portrait per roster card — that screen
+previously had no champion sprite/portrait at all, only a text/stat block). `MatchHUDView.tsx` imports it
+rather than defining it locally; both call sites pass `championId`, and `MatchHUDView`'s two in-arena
+markers additionally pass `animated` for a subtle idle-bob CSS animation that Champion Select's roster
+cards intentionally omit (so cards stay still and easy to compare while choosing). Not a `View`/`Model`/
+`Controller` in the MVC sense — a plain shared rendering helper, same category as the undocumented `*Screen`
+components noted above, so it gets a prose note here rather than a table row of its own.
+
 ### 6d. Entry point
 
 | Class | Operations |

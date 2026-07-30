@@ -336,6 +336,15 @@ button {
   --champion-accent: var(--color-rin);
 }
 
+/* Champion Select previously had no visual identity beyond a name/stat block (11_client_8 Scope A.3) —
+   reuses the same ChampionSprite the match HUD renders (extracted to its own module, Scope A.1), just
+   without the --idle class, so cards stay still and easy to compare while choosing. */
+.champion-portrait {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
 .champion-name-row {
   display: block;
   font-size: var(--font-size-md);
@@ -485,9 +494,20 @@ button {
 
 .arena {
   /* Width/height are set inline from React (MatchHUDScreen's arenaRenderSizePx), so the arena's
-     scaling formula (toRenderPixels) always matches what's actually on screen — see 11_client_4. */
+     scaling formula (toRenderPixels) always matches what's actually on screen — see 11_client_4.
+     CORRECTION (11_client_8 Scope C.1): layers a darkening edge vignette and a faint mottled hatch on
+     top of the original diagonal stripe (kept as the base layer) so the floor reads as worn dungeon
+     stone rather than a flat repeating pattern — three static gradients, no per-frame cost. */
   max-width: 100%;
-  background: repeating-linear-gradient(
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.4) 100%),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.025),
+      rgba(255, 255, 255, 0.025) 2px,
+      transparent 2px,
+      transparent 26px
+    ),
+    repeating-linear-gradient(
       45deg,
       var(--color-bg-elevated),
       var(--color-bg-elevated) 10px,
@@ -502,12 +522,23 @@ button {
 /* Server-authoritative, movement-blocking obstacles (11_client_6) — purely decorative/positional on
    the client (the server already enforces collision in ParticipantState.move()); this is here so a
    player can see why their character stopped. Rendered before the markers so a marker sitting flush
-   against an edge still reads on top. */
+   against an edge still reads on top.
+   CORRECTION (11_client_8 Scope C.2): chipped-corner clip-path + inset highlight/shadow reads as
+   cracked rubble/pillar stone instead of a flat gradient card — one shared texture across all three
+   real obstacles (they're plain rectangles positioned/sized differently, not individually authored
+   shapes), static (no animation), so this stays cheap during real-time combat. */
 .arena-obstacle {
-  background: linear-gradient(160deg, var(--color-bg-card-hover) 0%, var(--color-bg-elevated) 100%);
+  background: linear-gradient(
+    160deg,
+    var(--color-bg-card-hover) 0%,
+    var(--color-bg-elevated) 60%,
+    var(--color-bg-card) 100%
+  );
   border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35), 0 4px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35), inset 3px 3px 0 rgba(0, 0, 0, 0.22),
+    inset -3px -3px 0 rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.35);
+  clip-path: polygon(0% 8%, 6% 0%, 94% 0%, 100% 6%, 100% 92%, 95% 100%, 8% 100%, 0% 96%);
 }
 
 /* The marker is a ring/glow (whose vs opponent) layered behind a champion-specific pixel sprite
@@ -535,6 +566,23 @@ button {
 .champion-sprite {
   display: block;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+}
+
+/* Subtle idle motion during combat only (11_client_8 Scope A.4) — transform-only, cheap per this
+   file's own performance note. Champion Select's roster sprites render without the --idle class so
+   cards stay still, easier to compare side by side while choosing. */
+.champion-sprite--idle {
+  animation: champion-idle-bob 2.2s ease-in-out infinite;
+}
+
+@keyframes champion-idle-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 /* Shown while hovering/focusing an ability button (11_client_4) — reach preview before committing. */
@@ -605,6 +653,40 @@ button {
     transform: translate(-50%, -50%) scale(1.9);
     opacity: 0;
   }
+}
+
+/* Effect-type shape/color variation (11_client_8 Scope B.3) — purely additive on top of the
+   kind/isMine classes above; --dx/--dy and the cast-travel/cast-pulse keyframes are untouched, so the
+   e2e-critical selector contract (11_client_2) still holds. Higher specificity (two classes each) than
+   the base .cast-effect--projectile/--pulse rules above, so these safely win regardless of source order. */
+.cast-effect--projectile.cast-effect--damage {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.cast-effect--projectile.cast-effect--cc {
+  clip-path: polygon(
+    50% 0%,
+    78% 22%,
+    100% 55%,
+    62% 68%,
+    74% 100%,
+    40% 82%,
+    12% 100%,
+    22% 60%,
+    0% 38%,
+    32% 30%
+  );
+}
+
+.cast-effect--projectile.cast-effect--positioning {
+  width: 18px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.cast-effect--pulse.cast-effect--heal {
+  background: radial-gradient(circle, rgba(76, 175, 110, 0.35) 0%, rgba(76, 175, 110, 0) 70%);
+  border-color: var(--color-success);
 }
 
 .damage-popup {
@@ -724,6 +806,27 @@ button {
 
 .ability-icon {
   color: var(--color-accent);
+}
+
+/* Color-differentiated by effect type (11_client_8 Scope B.2) — these modifier classes already existed
+   on the markup since 11_client_4 but had no rules of their own, so every icon rendered the same gold
+   regardless of type. Damage/heal/warning read off the palette's existing danger/success/warning
+   triad; positioning (no obviously "correct" existing color) uses --color-you, since repositioning is
+   about this player's own mobility. */
+.ability-icon--damage {
+  color: var(--color-danger);
+}
+
+.ability-icon--heal {
+  color: var(--color-success);
+}
+
+.ability-icon--cc {
+  color: var(--color-warning);
+}
+
+.ability-icon--positioning {
+  color: var(--color-you);
 }
 
 .btn-ability--cooldown {

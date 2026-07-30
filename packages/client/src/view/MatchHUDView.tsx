@@ -22,6 +22,7 @@ import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientMatchModel } from '../model/ClientMatchModel';
 import { MatchController } from '../controller/MatchController';
 import { InterpolationBuffer } from '../model/InterpolationBuffer';
+import { ChampionSprite } from './ChampionSprite';
 
 /** Directional presets for the movement controls, in dx/dy form (R4.1). */
 const MOVE_DIRECTIONS: Record<string, { dx: number; dy: number }> = {
@@ -117,118 +118,34 @@ function isSkillshotType(effectType: EffectType): boolean {
   return effectType !== EffectType.HEAL;
 }
 
-/**
- * Small hand-built pixel grids, one per champion, dark-fantasy silhouettes matching each
- * champion's established identity: Korr (bruiser) wide/bulky, Vex (mage) slender/hooded/robed,
- * Rin (duelist) lean with an angular blade accent. Chars: '.' transparent, 'O' outline, 'B' body
- * (the champion's own accent color), 'E' eye, 'A' blade/highlight accent.
- */
-const CHAMPION_SPRITES: Record<string, readonly string[]> = {
-  korr: [
-    '...OOOOO...',
-    '..OBBBBBO..',
-    '..OBEOEBO..',
-    '..OBBBBBO..',
-    '.OOBBBBBOO.',
-    'OBBBBBBBBBO',
-    'OBBBBBBBBBO',
-    'OBBBBBBBBBO',
-    'OBBBBBBBBBO',
-    '.OBBBBBBBO.',
-    '.OBB...BBO.',
-    '.OB.....BO.',
-    '.OO.....OO.',
-  ],
-  vex: [
-    '.....O.....',
-    '....OOO....',
-    '...OBBBO...',
-    '...OBEBO...',
-    '...OBBBO...',
-    '....OBO....',
-    '...OBBBO...',
-    '..OBBBBBO..',
-    '..OBBBBBO..',
-    '.OBBBBBBBO.',
-    '.OBBBBBBBO.',
-    'OBBBBBBBBBO',
-    'OB.......BO',
-  ],
-  rin: [
-    '...OOOOO...',
-    '..OBBBBBO..',
-    '..OBEOEBO..',
-    '..OBBBBBO..',
-    '...OBBBO...',
-    '..OBBBBBO..',
-    '.OBBBBBBOA.',
-    '..OBBBBBOA.',
-    '..OBBBBBBO.',
-    '..OB.O.BO..',
-    '..OB...BO..',
-    '..OO...OO..',
-  ],
-};
-
-/** Pixel-art cell size, in real px, for each sprite grid unit. */
-const SPRITE_CELL_PX = 4;
-
-const SPRITE_PIXEL_COLORS: Record<string, string> = {
-  O: 'var(--color-border-strong)',
-  B: 'var(--champion-accent)',
-  E: 'var(--color-text)',
-  A: 'var(--color-text-muted)',
-};
-
-/** Renders one champion's inline-SVG pixel sprite. A genuinely blocky look, no image assets. */
-function ChampionSprite(props: { championId: string }): JSX.Element {
-  const grid = CHAMPION_SPRITES[props.championId] ?? CHAMPION_SPRITES.korr;
-  const cols = Math.max(...grid.map((row) => row.length));
-  const rows = grid.length;
-  return (
-    <svg
-      className={`champion-sprite champion-${props.championId}`}
-      width={cols * SPRITE_CELL_PX}
-      height={rows * SPRITE_CELL_PX}
-      viewBox={`0 0 ${cols} ${rows}`}
-      shapeRendering="crispEdges"
-      aria-hidden="true"
-    >
-      {grid.flatMap((row, y) =>
-        row.split('').map((cell, x) => {
-          const fill = SPRITE_PIXEL_COLORS[cell];
-          if (!fill) return null;
-          return <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={fill} />;
-        }),
-      )}
-    </svg>
-  );
+/** The four `.ability-icon--*` CSS modifier classes, one per EffectType (see styles.css Scope B.2). */
+function effectTypeModifier(effectType: EffectType): string {
+  switch (effectType) {
+    case EffectType.DAMAGE:
+      return 'damage';
+    case EffectType.HEAL:
+      return 'heal';
+    case EffectType.CROWD_CONTROL:
+      return 'cc';
+    case EffectType.POSITIONING:
+      return 'positioning';
+  }
 }
 
 /**
- * Small inline-SVG glyphs distinguishing effect type at a glance (11_client_4) — reused across all
- * three champions' kits, since this is about effect-type legibility, not per-ability uniqueness.
- * Always rendered inside an aria-hidden wrapper (see AbilityButton below), so these never affect an
- * ability button's accessible name.
+ * Fallback glyph content per EffectType — 11_client_4's original four icons, used for any ability.id
+ * not covered by ABILITY_ICON_GLYPHS below (defensive; the fixed ten-ability roster should never
+ * actually trigger this).
  */
-function AbilityIcon(props: { effectType: EffectType }): JSX.Element {
-  const common = { width: 14, height: 14, viewBox: '0 0 24 24' } as const;
-  switch (props.effectType) {
+function effectTypeFallbackGlyph(effectType: EffectType): JSX.Element {
+  switch (effectType) {
     case EffectType.DAMAGE:
-      return (
-        <svg {...common} className="ability-icon ability-icon--damage">
-          <path d="M13 2 3 14h6l-2 8 10-12h-6l2-8Z" fill="currentColor" />
-        </svg>
-      );
+      return <path d="M13 2 3 14h6l-2 8 10-12h-6l2-8Z" fill="currentColor" />;
     case EffectType.HEAL:
-      return (
-        <svg {...common} className="ability-icon ability-icon--heal">
-          <path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7Z" fill="currentColor" />
-        </svg>
-      );
+      return <path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7Z" fill="currentColor" />;
     case EffectType.CROWD_CONTROL:
       return (
-        <svg {...common} className="ability-icon ability-icon--cc">
+        <>
           <circle cx="12" cy="12" r="3.5" fill="currentColor" />
           <path
             d="M12 2v4M12 18v4M2 12h4M18 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"
@@ -236,22 +153,135 @@ function AbilityIcon(props: { effectType: EffectType }): JSX.Element {
             strokeWidth="2"
             strokeLinecap="round"
           />
-        </svg>
+        </>
       );
     case EffectType.POSITIONING:
       return (
-        <svg {...common} className="ability-icon ability-icon--positioning">
-          <path
-            d="M3 12h13M12 6l7 6-7 6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <path
+          d="M3 12h13M12 6l7 6-7 6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       );
   }
+}
+
+/**
+ * Per-ability glyph content (11_client_8 Scope B.1), matched to each ability's real flavor rather than
+ * just its EffectType — e.g. Crushing Blow (a warhammer) and Rending Strike (claw marks) read
+ * differently even though both are DAMAGE. Keyed by Ability.id (ChampionRoster.ts is the source of
+ * truth for the ten real ids); AbilityIcon below falls back to effectTypeFallbackGlyph for anything
+ * not listed here.
+ */
+const ABILITY_ICON_GLYPHS: Record<string, JSX.Element> = {
+  'crushing-blow': (
+    <>
+      <rect x="3" y="3" width="11" height="7" rx="1.5" fill="currentColor" />
+      <line x1="8" y1="10" x2="8" y2="21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <path
+        d="M16 13l3 3M20 11l2 2M17 18l3 1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  'shockwave-slam': (
+    <>
+      <path d="M2 20a10 6 0 0 1 20 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M6 20a6 3.5 0 0 1 12 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <circle cx="12" cy="20" r="1.6" fill="currentColor" />
+    </>
+  ),
+  'iron-skin': (
+    <>
+      <path
+        d="M12 2 20 5v6c0 6-3.5 9.5-8 11-4.5-1.5-8-5-8-11V5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M12 9v6M9 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  'bulwark-charge': (
+    <>
+      <path
+        d="M2 12h10M6 7l6 5-6 5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="14" y="5" width="8" height="14" rx="2" fill="currentColor" opacity="0.85" />
+    </>
+  ),
+  'arcane-bolt': <path d="M13 2 3 14h6l-2 8 10-12h-6l2-8Z" fill="currentColor" />,
+  'frost-lance': (
+    <path
+      d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  ),
+  'phase-step': (
+    <path
+      d="M12 4a8 8 0 1 0 7.6 10.6M19 4v5h-5"
+      stroke="currentColor"
+      strokeWidth="2"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'rending-strike': (
+    <path
+      d="M4 4l6 16M10 3l6 16M16 4l4 14"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      fill="none"
+    />
+  ),
+  'vital-siphon': (
+    <path
+      d="M12 21s-7-4.4-7-10a4.5 4.5 0 0 1 7-3.7A4.5 4.5 0 0 1 19 11c0 5.6-7 10-7 10Z"
+      fill="currentColor"
+    />
+  ),
+  'swift-reposition': (
+    <>
+      <path
+        d="M3 12h13M12 6l7 6-7 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M1 8h4M1 16h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+    </>
+  ),
+};
+
+/**
+ * Small inline-SVG glyph for one ability, one per `ability.id` (11_client_8; originally one per
+ * EffectType only, 11_client_4). Always rendered inside an aria-hidden wrapper (see AbilityButton
+ * below), so these never affect an ability button's accessible name — that stays `ability.name`.
+ */
+function AbilityIcon(props: { abilityId: string; effectType: EffectType }): JSX.Element {
+  const common = { width: 14, height: 14, viewBox: '0 0 24 24' } as const;
+  return (
+    <svg {...common} className={`ability-icon ability-icon--${effectTypeModifier(props.effectType)}`}>
+      {ABILITY_ICON_GLYPHS[props.abilityId] ?? effectTypeFallbackGlyph(props.effectType)}
+    </svg>
+  );
 }
 
 /** One in-flight cast animation: a traveling projectile (offensive) or a self-pulse (self-targeted). */
@@ -261,6 +291,9 @@ interface CastEffectVisual {
   isMine: boolean;
   from: { x: number; y: number };
   to: { x: number; y: number };
+  /** Drives the additive `cast-effect--{modifier}` shape/color class (11_client_8 Scope B.3) — layered
+   *  on top of, not replacing, the existing kind/isMine classes and --dx/--dy mechanism. */
+  effectType: EffectType;
 }
 
 /** One in-flight floating damage-number popup. */
@@ -629,9 +662,15 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
             const to = recordedAim
               ? toRenderPixels(recordedAim, arenaRenderSizePx)
               : toRenderPixels(target.position, arenaRenderSizePx);
-            spawnCastEffect({ kind: 'projectile', isMine, from: casterPixel, to });
+            spawnCastEffect({ kind: 'projectile', isMine, from: casterPixel, to, effectType: ability.effectType });
           } else {
-            spawnCastEffect({ kind: 'pulse', isMine, from: casterPixel, to: casterPixel });
+            spawnCastEffect({
+              kind: 'pulse',
+              isMine,
+              from: casterPixel,
+              to: casterPixel,
+              effectType: ability.effectType,
+            });
           }
         }
 
@@ -783,14 +822,14 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
           className={`marker marker--you champion-${me.championId}`}
           style={{ position: 'absolute', left: myPixel.x, top: myPixel.y }}
         >
-          <ChampionSprite championId={me.championId} />
+          <ChampionSprite championId={me.championId} animated />
         </div>
         <div
           aria-label="opponent-marker"
           className={`marker marker--opponent champion-${opponent.championId}`}
           style={{ position: 'absolute', left: opponentPixel.x, top: opponentPixel.y }}
         >
-          <ChampionSprite championId={opponent.championId} />
+          <ChampionSprite championId={opponent.championId} animated />
         </div>
         {castEffects.map((effect) => (
           <div
@@ -798,7 +837,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
             aria-hidden="true"
             className={`cast-effect cast-effect--${effect.kind} ${
               effect.isMine ? 'cast-effect--mine' : 'cast-effect--opponent'
-            }`}
+            } cast-effect--${effectTypeModifier(effect.effectType)}`}
             style={
               {
                 left: effect.from.x,
@@ -869,7 +908,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
             >
               <span className="ability-visual" aria-hidden="true">
                 <span className="ability-hotkey">{index + 1}</span>
-                <AbilityIcon effectType={ability.effectType} />
+                <AbilityIcon abilityId={ability.id} effectType={ability.effectType} />
               </span>
               {ability.name}
             </button>
