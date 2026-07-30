@@ -239,7 +239,10 @@ obstacles). After that shipped and was played again, a further round of gameplay
 most abilities instead of always auto-hitting the opponent, obstacles blocking abilities (deliberately
 deferred by prompt 11 as a later prompt), and ability hover tooltips — written as a single cross-package
 document since one person (the flagship agent) is executing it directly rather than delegating across the
-team, unlike every prior prompt in this project.
+team, unlike every prior prompt in this project. Separately, prompt 14 (`11_client_7`) implements the SRS
+§3.2.8 leaderboard's client half — the api-side `GET /leaderboard`/`GET /leaderboard/champions` endpoints
+(R8.1–R8.3) were already fully built and tested back in Steps 9-10 but had zero client consumers; no backend
+changes needed.
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -256,6 +259,7 @@ team, unlike every prior prompt in this project.
 | 11 | `11_server_3_wider-arena-and-obstacles.md` | **Marshall** | none (independent of 10) | [x] |
 | 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [x] |
 | 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [x] |
+| 14 | `11_client_7_leaderboard-screen.md` | **flagship agent** | none (backend already complete; client-only) | [ ] not yet executed — awaiting Marshall's go-ahead |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
