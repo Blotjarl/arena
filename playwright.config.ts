@@ -1,5 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import { SERVER_PORT } from './e2e/global-setup';
+import { SERVER_PORT, API_PORT } from './e2e/global-setup';
 
 /** Distinct from Vite's 5173+ auto-picked local-dev ports, so this suite never collides with a manually-run instance. */
 const CLIENT_PORT = 5273;
@@ -34,6 +34,11 @@ export default defineConfig({
     timeout: 60_000,
     env: {
       VITE_SERVER_URL: `http://localhost:${SERVER_PORT}`,
+      // CORRECTION (11_client_7): the client's new LeaderboardController fetches the api directly over
+      // REST (not through ServerMain/Socket.IO) -- without this, the e2e-launched client would fall back
+      // to VITE_API_URL's unset default (localhost:4000), which nothing in this suite's own isolated
+      // Postgres/ApiMain/ServerMain stack (global-setup.ts's real API_PORT, 4100) actually listens on.
+      VITE_API_URL: `http://localhost:${API_PORT}`,
     },
   },
 });

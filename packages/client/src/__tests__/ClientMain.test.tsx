@@ -80,6 +80,56 @@ describe('ClientMain.main', () => {
     expect(root.querySelector('ul[aria-label="champion-roster"]')).not.toBeNull();
   });
 
+  describe('leaderboard (11_client_7)', () => {
+    const originalFetch = global.fetch;
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+    });
+
+    it('CRITICAL CHECKPOINT: clicking View Leaderboard from the Lobby fetches and renders real leaderboard data, through the real wiring end to end', async () => {
+      const entries = [{ username: 'Raj', wins: 2, losses: 1, draws: 0, gamesPlayed: 3, winRate: 2 / 3 }];
+      const championWinRates = [{ championId: 'vex', gamesPlayed: 5, winRate: 0.6 }];
+      global.fetch = jest.fn((url: string) => {
+        const body = url.endsWith('/leaderboard/champions') ? championWinRates : entries;
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(body) } as Response);
+      }) as unknown as typeof fetch;
+
+      const { socket } = makeFakeSocket();
+      act(() => {
+        ClientMain.main(() => socket);
+      });
+      const root = document.getElementById('root')!;
+
+      // Identify first — "View Leaderboard" only exists on the Lobby's idle-state branch.
+      act(() => {
+        fireEvent.change(root.querySelector('#username')!, { target: { value: 'Raj' } });
+        fireEvent.click(root.querySelector('button[type="submit"]')!);
+      });
+
+      await act(async () => {
+        fireEvent.click(Array.from(root.querySelectorAll('button')).find((b) => b.textContent === 'View Leaderboard')!);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      const entriesList = root.querySelector('ul[aria-label="leaderboard-entries"]');
+      expect(entriesList).not.toBeNull();
+      expect(entriesList!.textContent).toContain('Raj');
+      expect(entriesList!.textContent).toContain('66.7%'); // 2/3 -> 66.7%
+
+      const championList = root.querySelector('ul[aria-label="champion-win-rates"]');
+      expect(championList!.textContent).toContain('Vex'); // resolved from raw id 'vex'
+
+      // Back returns to the screen the phase-based routing would otherwise show (still Lobby, idle).
+      act(() => {
+        fireEvent.click(Array.from(root.querySelectorAll('button')).find((b) => b.textContent === 'Back')!);
+      });
+      expect(root.querySelector('[aria-label="leaderboard"]')).toBeNull();
+      expect(root.querySelector('button')?.textContent).toBe('Find Match');
+    });
+  });
+
   it('CRITICAL CHECKPOINT (regression): after a match ends, a second match:found routes back to a usable Champion Select screen, not a stuck Results screen', () => {
     const { socket, handlers } = makeFakeSocket();
     act(() => {

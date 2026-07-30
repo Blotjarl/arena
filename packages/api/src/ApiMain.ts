@@ -40,6 +40,25 @@ export class ApiMain {
     const app = express();
     app.use(express.json());
 
+    // CORRECTION (11_client_7): a real integration gap found by end-to-end testing, not present in the
+    // original design — every public GET route here (`/leaderboard`, `/leaderboard/champions`,
+    // `/players/:id/matches`) is meant to be fetched directly by the browser client (master context §2.3:
+    // "Client <-> API: ordinary HTTP/REST"), but nothing ever actually did that until `LeaderboardController`
+    // (the client's first direct REST consumer) — every prior verification of this api either used
+    // Playwright's own server-side `request` fixture or a raw Jest/supertest call, neither of which is
+    // subject to a browser's CORS policy the way a real `fetch()` from a page served on a different origin
+    // is. Public data, no cookies/credentials involved, so a permissive `*` origin is appropriate here.
+    app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type');
+      if (req.method === 'OPTIONS') {
+        res.sendStatus(204);
+        return;
+      }
+      next();
+    });
+
     // Internal, server-to-api routes — not exposed to players. See InternalMatchController's deployment
     // note: restricting real network access to these two routes is a deployment concern, not enforced here.
     app.post('/internal/matches/begin', (req, res) => {

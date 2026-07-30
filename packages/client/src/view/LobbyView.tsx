@@ -114,8 +114,8 @@ export class LobbyView implements View, ModelListener {
  * check surfaced as a validation message here is a UX precheck only; the server is the sole authority
  * (see LobbyController.operation's own doc comment) and this screen must not imply otherwise.
  */
-export function LobbyScreen(props: { view: LobbyView }): JSX.Element {
-  const { view } = props;
+export function LobbyScreen(props: { view: LobbyView; onViewLeaderboard?: () => void }): JSX.Element {
+  const { view, onViewLeaderboard } = props;
   const [, forceRender] = useReducer((n: number) => n + 1, 0);
   const [error, setError] = useState<string | null>(null);
 
@@ -165,6 +165,11 @@ export function LobbyScreen(props: { view: LobbyView }): JSX.Element {
           <button onClick={() => controller.operation('joinQueue')} className="btn btn-primary btn-large">
             Find Match
           </button>
+          {onViewLeaderboard && (
+            <button onClick={onViewLeaderboard} className="btn btn-secondary">
+              View Leaderboard
+            </button>
+          )}
         </div>
       </div>
     );

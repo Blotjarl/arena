@@ -60,6 +60,25 @@ describe('ApiMain', () => {
       });
       expect(endRes.status).toBe(400);
     });
+
+    it('CRITICAL CHECKPOINT (11_client_7): responds with CORS headers, so a browser-origin client can actually fetch the public routes', async () => {
+      process.env.PORT = '41235';
+      process.env.DATABASE_URL = 'postgresql://arena:arena@localhost:55432/arena_test';
+      await ApiMain.main();
+
+      const res = await fetch('http://localhost:41235/leaderboard');
+      expect(res.headers.get('access-control-allow-origin')).toBe('*');
+    });
+
+    it('answers a CORS preflight OPTIONS request with 204 and the same headers, not a 404', async () => {
+      process.env.PORT = '41236';
+      process.env.DATABASE_URL = 'postgresql://arena:arena@localhost:55432/arena_test';
+      await ApiMain.main();
+
+      const res = await fetch('http://localhost:41236/leaderboard', { method: 'OPTIONS' });
+      expect(res.status).toBe(204);
+      expect(res.headers.get('access-control-allow-origin')).toBe('*');
+    });
   });
 
   describe('stop', () => {

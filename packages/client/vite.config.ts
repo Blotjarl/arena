@@ -8,6 +8,11 @@ import react from '@vitejs/plugin-react';
  * that ts-jest can transform the same sources for Jest — switching the whole workspace to an ESM
  * target would require reworking Jest for ESM too (out of scope here, see ClientMain.tsx). A plain
  * `define`d identifier needs no such restriction and typechecks under either module target.
+ *
+ * CORRECTION (11_client_7): `__API_URL__`/`VITE_API_URL` is the same pattern, for the api's REST base
+ * URL (LeaderboardController, the client's first direct REST consumer — everything else goes through
+ * `__SERVER_URL__`'s Socket.IO connection). `4000` is the api's own real default port
+ * (`packages/api/src/ApiMain.ts`: `process.env.PORT ?? 4000`).
  */
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -15,6 +20,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       __SERVER_URL__: JSON.stringify(env.VITE_SERVER_URL || 'http://localhost:3001'),
+      __API_URL__: JSON.stringify(env.VITE_API_URL || 'http://localhost:4000'),
     },
     // @arena/shared is an npm workspace package built as CommonJS (tsconfig.base.json's `module:
     // CommonJS`, chosen so ts-jest can transform the same sources across every package — see
