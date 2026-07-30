@@ -16,8 +16,8 @@ import { ParticipantState } from './ParticipantState';
 
 function makeChampion(): Champion {
   return new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 10, 200, [
-    new Ability('bolt', 'Bolt', 5, 20, 500, EffectType.DAMAGE, 30),
-    new Ability('cheap', 'Cheap Poke', 0.5, 5, 500, EffectType.DAMAGE, 5),
+    new Ability('bolt', 'Bolt', 5, 20, 500, EffectType.DAMAGE, 30, 'A bolt.'),
+    new Ability('cheap', 'Cheap Poke', 0.5, 5, 500, EffectType.DAMAGE, 5, 'A cheap poke.'),
   ]);
 }
 

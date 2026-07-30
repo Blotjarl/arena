@@ -72,12 +72,14 @@ used by matchmaking and persistence alike.)*
 | `EndReason` | enum | `ELIMINATION`, `TIME_LIMIT`, `DISCONNECT_FORFEIT`, `SELECTION_TIMEOUT` (R5.3, R-DB3) | — |
 | `MatchResult` | enum | `WIN`, `LOSS`, `DRAW` (R-DB3) | — |
 | `EffectType` | enum | `DAMAGE`, `HEAL`, `CROWD_CONTROL`, `POSITIONING` (SRS 1.4 definitions) | — |
-| `ARENA_WIDTH`, `ARENA_HEIGHT` | `const number` (`Arena.ts`, Step 11) | `600` x `400` (Step 11 correction below) — the arena's game-logic coordinate bounds, not pixels | — |
+| `ARENA_WIDTH`, `ARENA_HEIGHT` | `const number` (`Arena.ts`, Step 11) | `720` x `480` (Step 11 corrections below) — the arena's game-logic coordinate bounds, not pixels | — |
 | `ArenaObstacle` | interface (`Arena.ts`, Step 11) | `x: number`; `y: number`; `width: number`; `height: number` | — |
-| `ARENA_OBSTACLES` | `const readonly ArenaObstacle[]` (`Arena.ts`, Step 11) | 3 fixed rectangles in the arena's middle third, mirrored left-right (Step 11 correction below) | — |
+| `ARENA_OBSTACLES` | `const readonly ArenaObstacle[]` (`Arena.ts`, Step 11) | 3 fixed rectangles in the arena's middle third, mirrored left-right (Step 11 corrections below) | — |
+| `SKILLSHOT_HIT_RADIUS` | `const number` (`Arena.ts`, Step 11) | `40` — tunable aim-forgiveness radius for skillshot hit resolution (Step 11 correction below) | — |
 | `isWithinObstacle` | free function (`Arena.ts`, Step 11) | — | `(x: number, y: number): boolean` — true if the point falls within (or on the boundary of) any `ARENA_OBSTACLES` rectangle |
+| `segmentCrossesObstacle` | free function (`Arena.ts`, Step 11) | — | `(x1, y1, x2, y2: number): boolean` — true if the line segment crosses any `ARENA_OBSTACLES` rectangle (Liang–Barsky clipping); used to block ability line-of-sight (Step 11 correction below) |
 | `Position` | class | `x: number`; `y: number` | `constructor(x: number, y: number)`; `distanceTo(other: Position): number` |
-| `Ability` | class | `id: string`; `name: string`; `cooldownSeconds: number`; `resourceCost: number`; `range: number`; `effectType: EffectType`; `magnitude: number` | `constructor(id, name, cooldownSeconds, resourceCost, range, effectType, magnitude)` |
+| `Ability` | class | `id: string`; `name: string`; `cooldownSeconds: number`; `resourceCost: number`; `range: number`; `effectType: EffectType`; `magnitude: number`; `description: string` (Step 11 correction below) | `constructor(id, name, cooldownSeconds, resourceCost, range, effectType, magnitude, description)` |
 | `Champion` | class | `id: ChampionId`; `name: string`; `role: string`; `maxHealth: number`; `maxResource: number`; `resourceRegenRate: number`; `moveSpeed: number`; `abilities: Ability[]` | `constructor(...)`; `getAbility(abilityId: string): Ability` — **throws** `InvalidChampionSelectionError` if not found |
 | `ChampionRoster` | class | `private static readonly champions: Champion[]` (Korr, Vex, Rin — SRS Appendix B) | `static getAll(): Champion[]`; `static getById(id: ChampionId): Champion` — **throws** `InvalidChampionSelectionError` |
 | `Player` | class | `id: PlayerId`; `username: string`; `createdAt: Date` | `constructor(id, username, createdAt)` |
@@ -133,6 +135,25 @@ the divergence from the AI-use-plan table's literal package name is understood a
 > rather than allowed and corrected after the fact — a simple reject-the-whole-move approach, not an
 > axis-separated "slide along the obstacle" response. This does not change `move()`'s signature or its
 > thrown exceptions; a blocked move is silent, matching the existing pattern for other movement no-ops.
+
+> **Step 11 correction (`11_cross_1`)**: `ARENA_WIDTH`/`ARENA_HEIGHT` widened a further 20% (`600`x`400` →
+> `720`x`480`), preserving the same 1.5:1 ratio. New diagonal `√(720² + 480²) ≈ 865.3` — Arcane Bolt's `600`
+> range reaches proportionally less of it than before, restating the same "welcome consequence, not a
+> regression" conclusion `11_server_3` already reached once. Sprint-across time at the new width: Korr
+> (180 moveSpeed) 4.0s, Rin (200) 3.6s, Vex (220) 3.27s — still a reasonable few seconds. `ARENA_OBSTACLES`
+> rescaled by the same 1.2x factor, keeping the layout proportionally identical (still mirrored around the
+> new center `x = 360`, still self-mirrored top block); the two (now-wider) spawns `(50, 240)` and
+> `(670, 240)` remain well clear of every obstacle (196 units to the nearest edge, more clearance than
+> before, not less).
+>
+> The same prompt adds `segmentCrossesObstacle(x1, y1, x2, y2)` (Liang–Barsky segment-vs-rectangle
+> clipping) and reverses `11_server_3`'s "movement only" scope decision — obstacles now block ability
+> line-of-sight too (§5a, `MatchModel.submitAbility`'s new skillshot targeting, described below), the
+> follow-up `11_server_3` explicitly anticipated. Also adds `SKILLSHOT_HIT_RADIUS` (`40`), the tunable
+> aim-forgiveness radius the same skillshot targeting uses.
+>
+> Also adds a `description: string` field to `Ability` (row above) — flavor text shown as a hover tooltip
+> in the client (Champion Select and the match HUD), purely cosmetic, never read by any game-logic code.
 
 ---
 

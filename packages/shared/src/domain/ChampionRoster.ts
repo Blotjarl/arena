@@ -23,20 +23,50 @@ import { InvalidChampionSelectionError } from '../exceptions/InvalidChampionSele
 export class ChampionRoster {
   private static readonly champions: Champion[] = [
     new Champion('korr', 'Korr', 'Bruiser / Control', 180, 100, 8, 180, [
-      new Ability('crushing-blow', 'Crushing Blow', 2, 10, 75, EffectType.DAMAGE, 18),
-      new Ability('shockwave-slam', 'Shockwave Slam', 12, 30, 150, EffectType.CROWD_CONTROL, 1.5),
-      new Ability('iron-skin', 'Iron Skin', 15, 30, 0, EffectType.HEAL, 25),
-      new Ability('bulwark-charge', 'Bulwark Charge', 8, 20, 400, EffectType.POSITIONING, 0),
+      new Ability(
+        'crushing-blow', 'Crushing Blow', 2, 10, 75, EffectType.DAMAGE, 18,
+        "A brutal overhead strike — cheap and quick, the bedrock of Korr's attrition game.",
+      ),
+      new Ability(
+        'shockwave-slam', 'Shockwave Slam', 12, 30, 150, EffectType.CROWD_CONTROL, 1.5,
+        'Slams the ground in a short-range shockwave, staggering anyone caught in its arc.',
+      ),
+      new Ability(
+        'iron-skin', 'Iron Skin', 15, 30, 0, EffectType.HEAL, 25,
+        "Hardens Korr's hide, mending wounds at the cost of a long cooldown.",
+      ),
+      new Ability(
+        'bulwark-charge', 'Bulwark Charge', 8, 20, 400, EffectType.POSITIONING, 0,
+        'A shoulder-first charge that closes distance fast, shield raised.',
+      ),
     ]),
     new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 12, 220, [
-      new Ability('arcane-bolt', 'Arcane Bolt', 4, 35, 600, EffectType.DAMAGE, 32),
-      new Ability('frost-lance', 'Frost Lance', 10, 30, 500, EffectType.CROWD_CONTROL, 2),
-      new Ability('phase-step', 'Phase Step', 9, 25, 300, EffectType.POSITIONING, 0),
+      new Ability(
+        'arcane-bolt', 'Arcane Bolt', 4, 35, 600, EffectType.DAMAGE, 32,
+        "Vex's signature burst — the longest-ranged, hardest-hitting bolt in the roster, at a steep resource cost.",
+      ),
+      new Ability(
+        'frost-lance', 'Frost Lance', 10, 30, 500, EffectType.CROWD_CONTROL, 2,
+        'A lance of frost that freezes its target in place on impact.',
+      ),
+      new Ability(
+        'phase-step', 'Phase Step', 9, 25, 300, EffectType.POSITIONING, 0,
+        'A short blink through the space between spaces, putting distance between Vex and danger.',
+      ),
     ]),
     new Champion('rin', 'Rin', 'Sustain Duelist', 130, 100, 10, 200, [
-      new Ability('rending-strike', 'Rending Strike', 3, 15, 100, EffectType.DAMAGE, 22),
-      new Ability('vital-siphon', 'Vital Siphon', 9, 25, 100, EffectType.HEAL, 18),
-      new Ability('swift-reposition', 'Swift Reposition', 7, 15, 350, EffectType.POSITIONING, 0),
+      new Ability(
+        'rending-strike', 'Rending Strike', 3, 15, 100, EffectType.DAMAGE, 22,
+        "A quick, precise cut — Rin's bread-and-butter damage at close range.",
+      ),
+      new Ability(
+        'vital-siphon', 'Vital Siphon', 9, 25, 100, EffectType.HEAL, 18,
+        "Draws vitality through a melee strike, mending Rin's own wounds.",
+      ),
+      new Ability(
+        'swift-reposition', 'Swift Reposition', 7, 15, 350, EffectType.POSITIONING, 0,
+        'A burst of speed that repositions Rin instantly along her chosen line.',
+      ),
     ]),
   ];
 

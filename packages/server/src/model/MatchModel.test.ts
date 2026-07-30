@@ -21,13 +21,13 @@ import {
 import { MatchModel } from './MatchModel';
 
 const SPAWN_P1_X = 50; // must match MatchModel's SPAWN_WALL_MARGIN
-const SPAWN_P2_X = 550; // must match MatchModel's ARENA_WIDTH - SPAWN_WALL_MARGIN (CORRECTION 11_server_3: ARENA_WIDTH is now 600)
+const SPAWN_P2_X = 670; // must match MatchModel's ARENA_WIDTH - SPAWN_WALL_MARGIN (CORRECTION 11_cross_1: ARENA_WIDTH is now 720)
 
 const VEX = new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 10, 200, [
-  new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30),
-  new Ability('heal', 'Self Mend', 8, 30, 0, EffectType.HEAL, 15),
-  new Ability('root', 'Frost Lance', 6, 25, 400, EffectType.CROWD_CONTROL, 1.5),
-  new Ability('blink', 'Phase Step', 10, 20, 300, EffectType.POSITIONING, 0),
+  new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30, 'A burst of arcane energy.'),
+  new Ability('heal', 'Self Mend', 8, 30, 0, EffectType.HEAL, 15, 'A self-heal.'),
+  new Ability('root', 'Frost Lance', 6, 25, 400, EffectType.CROWD_CONTROL, 1.5, 'Freezes the target.'),
+  new Ability('blink', 'Phase Step', 10, 20, 300, EffectType.POSITIONING, 0, 'A short blink.'),
 ]);
 
 function makePlayers(): [Player, Player] {
