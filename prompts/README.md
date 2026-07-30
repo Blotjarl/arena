@@ -263,7 +263,7 @@ rather than adding a new gameplay feature.
 | 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [x] |
 | 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [x] |
 | 14 | `11_client_7_leaderboard-screen.md` | **flagship agent** | none (backend already complete; client-only) | [x] |
-| 15 | `11_client_8_visual-overhaul.md` | **flagship agent** | none (client-only, purely presentational) | [ ] |
+| 15 | `11_client_8_visual-overhaul.md` | **flagship agent** | none (client-only, purely presentational) | [x] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
