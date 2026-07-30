@@ -216,6 +216,44 @@ describe('ParticipantState', () => {
       expect(() => p.move({ dx: 1, dy: 0 }, 0.5, 2000)).toThrow(ActorIncapacitatedError);
     });
 
+    describe('CORRECTION (11_cross_1): diagonal movement is normalized, not faster than cardinal', () => {
+      it('a diagonal move covers the same distance over the same duration as a cardinal move (not sqrt(2)x faster)', () => {
+        const cardinal = makeParticipant(); // moveSpeed 200
+        cardinal.move({ dx: 1, dy: 0 }, 1, 1000); // 200 * 1 = 200
+        const diagonal = makeParticipant();
+        diagonal.move({ dx: 1, dy: 1 }, 1, 1000); // unnormalized magnitude sqrt(2) -- must not be faster
+        const cardinalDistance = cardinal.position.distanceTo(new Position(0, 0));
+        const diagonalDistance = diagonal.position.distanceTo(new Position(0, 0));
+        expect(diagonalDistance).toBeCloseTo(cardinalDistance, 5);
+        expect(diagonalDistance).toBeCloseTo(200, 5);
+      });
+
+      it('a diagonal move actually moves diagonally (both axes advance equally, not just one)', () => {
+        const p = makeParticipant();
+        p.move({ dx: 1, dy: 1 }, 1, 1000);
+        expect(p.position.x).toBeCloseTo(p.position.y, 5);
+        expect(p.position.x).toBeCloseTo(200 / Math.SQRT2, 5);
+      });
+
+      it('CRITICAL: an inflated-magnitude direction vector (a hypothetical speed-hacking client) is normalized to the same distance as a unit vector, not scaled up', () => {
+        const honest = makeParticipant();
+        honest.move({ dx: 1, dy: 0 }, 1, 1000);
+        const cheating = makeParticipant();
+        cheating.move({ dx: 10, dy: 0 }, 1, 1000); // a client claiming 10x magnitude
+        expect(cheating.position.x).toBeCloseTo(honest.position.x, 5);
+      });
+
+      it('a zero-magnitude direction ({dx:0, dy:0}) does not move the participant, throw, or produce NaN', () => {
+        const p = makeParticipant();
+        p.position = new Position(300, 200);
+        expect(() => p.move({ dx: 0, dy: 0 }, 1, 1000)).not.toThrow();
+        expect(p.position.x).toBe(300);
+        expect(p.position.y).toBe(200);
+        expect(Number.isNaN(p.position.x)).toBe(false);
+        expect(Number.isNaN(p.position.y)).toBe(false);
+      });
+    });
+
     describe('CORRECTION (Step 11): arena wall clamping', () => {
       it('a normal movement well within bounds is completely unaffected by the clamp', () => {
         const p = makeParticipant(); // moveSpeed 200

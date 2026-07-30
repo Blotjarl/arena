@@ -158,7 +158,15 @@ export class ParticipantState {
    * pre-move position for this tick, the same way an out-of-bounds position is prevented rather than
    * allowed and corrected after the fact. Obstacles block movement only; ability range/targeting is
    * unaffected (see `docs/01_class_list.md` §2).
-   * @param direction - raw movement input for this tick; scaled by champion move speed, not pre-normalized
+   * CORRECTION (Step 11, 11_cross_1): `direction` is now normalized to a unit vector *here*, server-side,
+   * before being scaled by speed — previously an unnormalized diagonal input like `{dx:-1,dy:-1}`
+   * (magnitude `√2`) moved ~41% faster than a cardinal direction, and nothing stopped a modified client
+   * from sending an arbitrarily large magnitude for an outright speed hack. Normalizing here, rather than
+   * trusting the client to send a pre-normalized vector, is the only way this is actually enforced
+   * (master context §1.1 — server is sole source of truth). A zero-magnitude input (no keys held, or two
+   * opposite directions canceling client-side) is a guarded no-op, not a division by zero.
+   * @param direction - raw movement input for this tick; normalized to a unit vector before being scaled
+   *   by champion move speed — the caller does not need to (and should not) pre-normalize it
    * @param deltaSeconds - elapsed simulation time since the previous tick
    * @param now - current simulation time, for incapacitation comparison
    * @throws {ActorIncapacitatedError} if this participant is dead or crowd-controlled
@@ -167,9 +175,13 @@ export class ParticipantState {
     if (this.isIncapacitated(now)) {
       throw new ActorIncapacitatedError(this.playerId, this.isAlive() ? 'crowd-controlled' : 'dead');
     }
+    const magnitude = Math.hypot(direction.dx, direction.dy);
+    if (magnitude === 0) return;
+    const unitDx = direction.dx / magnitude;
+    const unitDy = direction.dy / magnitude;
     const speed = this.champion?.moveSpeed ?? 0;
-    const newX = this.position.x + direction.dx * speed * deltaSeconds;
-    const newY = this.position.y + direction.dy * speed * deltaSeconds;
+    const newX = this.position.x + unitDx * speed * deltaSeconds;
+    const newY = this.position.y + unitDy * speed * deltaSeconds;
     const clampedX = Math.max(0, Math.min(ARENA_WIDTH, newX));
     const clampedY = Math.max(0, Math.min(ARENA_HEIGHT, newY));
     if (isWithinObstacle(clampedX, clampedY)) return;

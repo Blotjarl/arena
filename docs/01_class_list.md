@@ -270,12 +270,14 @@ pattern.
 
 **Step 10 correction**: `MatchModel.participants` is `private`, not the plain attribute this table originally
 implied, and the class carries two further undocumented private attributes (`tickCount`, `pendingMoves`) —
-now added to the row above. Also, `submitAbility`'s real parameter is the narrower inline
+now added to the row above. Also, `submitAbility`'s real parameter was the narrower inline
 `{ abilityId: string; targetPlayerId?: string }`, not the full shared `AbilityUseRequest` this table
-originally sketched — the implementation never reads `AbilityUseRequest.targetPosition` at all. See this
-prompt's closing summary for why that specific gap is flagged as a real (not just documentation) issue: it
-makes any `POSITIONING`-effect ability invoked without a `targetPlayerId` (i.e. every self-directed
-reposition, such as Vex's Phase Step) resolve its own target to itself and therefore move nowhere.
+originally sketched — the implementation never read `AbilityUseRequest.targetPosition` at all. See this
+prompt's closing summary for why that specific gap was flagged as a real (not just documentation) issue: it
+made any `POSITIONING`-effect ability invoked without a `targetPlayerId` (i.e. every self-directed
+reposition, such as Vex's Phase Step) resolve its own target to itself and therefore move nowhere. **Fixed
+for real in the Step 11 (`11_cross_1`) correction below** — `submitAbility` now takes and reads
+`targetPosition` too.
 
 > **Step 11 correction — real bug found by end-to-end acceptance testing**: `tick()`'s implementation had
 > silently diverged from this table's own `pendingMoves` description above ("applied once per `tick()`") —
@@ -299,6 +301,25 @@ reposition, such as Vex's Phase Step) resolve its own target to itself and there
 > `(ARENA_WIDTH - SPAWN_WALL_MARGIN, ARENA_HEIGHT / 2)`) instead of leaving both at `ParticipantState`'s own
 > default `Position(0, 0)` — previously both participants spawned stacked on top of each other. Neither
 > change alters `ParticipantState`'s or `MatchModel`'s constructor signature.
+
+> **Step 11 correction (`11_cross_1`)**: `ParticipantState.move()`'s `direction` vector is now normalized to
+> unit length *inside* `move()` itself, before being scaled by speed — previously an unnormalized diagonal
+> input like `{dx:-1,dy:-1}` (magnitude `√2`) moved ~41% faster than a cardinal direction, and nothing
+> stopped a client from sending an arbitrarily large magnitude for an outright speed hack. Normalizing
+> server-side (not trusting the client to pre-normalize) is the only way this is actually enforced (master
+> context §1.1). A zero-magnitude input is a guarded no-op, not a division-by-zero.
+>
+> Separately, `MatchModel.submitAbility` (§5a) is substantially reworked: `HEAL` stays self-targeted and
+> instant, but `DAMAGE`, `CROWD_CONTROL`, and `POSITIONING` are now all "skillshots" resolved from
+> `AbilityUseRequest.targetPosition` (the shared contract type already had this field — see §3's Step 10
+> correction — but nothing ever populated or read it until now) instead of `targetPlayerId`. For
+> `DAMAGE`/`CROWD_CONTROL`, a hit requires three independent checks against the *real* opponent — in range,
+> aim-aligned within `SKILLSHOT_HIT_RADIUS` of the cast ray, and unobstructed line of sight
+> (`segmentCrossesObstacle`, §2) — any miss still consumes cooldown/resource, a deliberate "whiffed cast".
+> **This finally fixes the `POSITIONING`-is-a-no-op bug this table flagged back at the Step 10 correction
+> above**: giving `POSITIONING` abilities a real aimed destination (`caster.position + direction *
+> ability.range`, wall-clamped, rejected outright if the path crosses an obstacle) means Bulwark Charge,
+> Phase Step, and Swift Reposition actually move the caster for the first time since they were added.
 
 > **Step 10 correction (`10_server_10`)**: `MatchmakingQueue.join()`'s own doc comment always said it
 > throws `AlreadyQueuedError` "if the player is already queued or already in an active match" (R2.2), but
