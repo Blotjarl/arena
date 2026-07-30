@@ -98,4 +98,39 @@ describe('ClientMatchModel', () => {
       expect(m.result).toBe(payload);
     });
   });
+
+  describe('reset()', () => {
+    // REGRESSION: a returning player's second match reused this same ClientMatchModel instance with
+    // no way to clear the first match's leftover state. `result` staying non-null permanently stuck
+    // AppRouter on ResultsScreen (it checks `matchModel.result !== null` before anything else), and
+    // `championSelection` staying non-null pre-disabled every "Select {champion}" button on the new
+    // match's Champion Select screen (`disabled={mySelection !== null}`) — both silently blocked ever
+    // getting into a second game. See SocketConnectionController's match:found handler, which now
+    // calls this before ClientQueueModel.setMatched() for the new match.
+    it('clears every match-specific field back to its initial null value', () => {
+      const m = new ClientMatchModel();
+      m.applyChampionSelected({ matchId: 'match-1', playerId: 'p1', championId: 'korr', bothSelected: true });
+      m.applyMatchStart({ matchId: 'match-1', initialState: makeState() });
+      m.applyMatchState(makeState('match-1', 2));
+      m.applyMatchEnd({ matchId: 'match-1', reason: EndReason.ELIMINATION, winningTeam: Team.A, durationMs: 5000 });
+
+      m.reset();
+
+      expect(m.matchId).toBeNull();
+      expect(m.phase).toBeNull();
+      expect(m.latestState).toBeNull();
+      expect(m.result).toBeNull();
+      expect(m.championSelection).toBeNull();
+    });
+
+    it('notifies listeners so views depending on this model re-render', () => {
+      const m = new ClientMatchModel();
+      const listener = { modelChanged: jest.fn() };
+      m.addModelListener(listener);
+
+      m.reset();
+
+      expect(listener.modelChanged).toHaveBeenCalled();
+    });
+  });
 });

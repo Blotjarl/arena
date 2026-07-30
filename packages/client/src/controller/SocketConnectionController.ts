@@ -73,6 +73,11 @@ export class SocketConnectionController {
       this.models.queue.setCancelled();
     });
     this.socket.on(SOCKET_EVENTS.MATCH_FOUND, (payload: MatchFoundPayload) => {
+      // REGRESSION FIX: this same ClientMatchModel instance is reused for a returning player's next
+      // match (never recreated per-match) — reset it here, before applying the new match's own
+      // events, so the previous match's result/championSelection/phase can never leak into the new
+      // one. See ClientMatchModel.reset() for the full explanation of what broke without this.
+      this.models.match.reset();
       this.models.queue.setMatched(payload);
     });
     this.socket.on(SOCKET_EVENTS.CHAMPION_SELECTED, (payload: ChampionSelectedPayload) => {
