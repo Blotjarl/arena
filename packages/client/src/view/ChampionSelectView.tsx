@@ -195,7 +195,7 @@ export function ChampionSelectScreen(props: { view: ChampionSelectView }): JSX.E
               </div>
               <ul className="ability-list">
                 {champion.abilities.map((ability) => (
-                  <li key={ability.id} className="ability-chip">
+                  <li key={ability.id} className="ability-chip" title={ability.description}>
                     <span className="ability-name">{ability.name}</span>
                     <span className="ability-meta" aria-hidden="true">
                       {ability.cooldownSeconds}s CD

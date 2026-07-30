@@ -104,31 +104,7 @@ describe('MatchHUDScreen', () => {
     expect(screen.getByText('arcane-bolt: 2.3s')).toBeTruthy();
   });
 
-  it('renders one ability button per ability of my selected champion, and clicking a DAMAGE ability forwards useAbility targeting the opponent', () => {
-    const identity = new ClientIdentityModel();
-    identity.playerId = 'p1';
-    const controller = makeMockController();
-    const match = new ClientMatchModel();
-    match.applyMatchState({
-      matchId: 'm1',
-      tick: 1,
-      participants: [makeParticipant('p1', { championId: 'vex' }), makeParticipant('p2')],
-    });
-    const view = new MatchHUDView(identity, match, controller);
-
-    render(<MatchHUDScreen view={view} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
-
-    // CORRECTION (Step 11): MatchModel.submitAbility treats a request naming no target as
-    // self-targeted — a DAMAGE ability fired with no target would land on the caster, never the
-    // opponent, so the button must explicitly supply the opponent's playerId as the target.
-    expect(controller.operation).toHaveBeenCalledWith('useAbility', {
-      abilityId: 'arcane-bolt',
-      targetPlayerId: 'p2',
-    });
-  });
-
-  it('clicking a self-targeted (HEAL/POSITIONING) ability forwards useAbility with no target', () => {
+  it('clicking a self-targeted HEAL ability forwards useAbility immediately, with no target and no aiming', () => {
     const identity = new ClientIdentityModel();
     identity.playerId = 'p1';
     const controller = makeMockController();
@@ -144,6 +120,139 @@ describe('MatchHUDScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Vital Siphon' }));
 
     expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'vital-siphon' });
+  });
+
+  describe('skillshot aim-then-click (11_cross_1: DAMAGE/CROWD_CONTROL/POSITIONING all require aiming)', () => {
+    /** computeArenaRenderSizePx() reads window size once at mount — fix it to a known, round value so
+     *  the click -> arena-space math below is exactly hand-verifiable, not dependent on jsdom's default
+     *  viewport. Restored after each test so this doesn't bleed into other test files/suites. */
+    const ORIGINAL_INNER_WIDTH = window.innerWidth;
+    const ORIGINAL_INNER_HEIGHT = window.innerHeight;
+
+    beforeEach(() => {
+      // 1200x1200 forces the width-capped branch: min(1200*0.85, 1200*0.85*1.5, 900) = 900 -> height 600.
+      Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: 1200, writable: true, configurable: true });
+    });
+
+    afterEach(() => {
+      Object.defineProperty(window, 'innerWidth', { value: ORIGINAL_INNER_WIDTH, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: ORIGINAL_INNER_HEIGHT, writable: true, configurable: true });
+    });
+
+    function renderVex(controller: MatchController & { operation: jest.Mock }) {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'vex' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      render(<MatchHUDScreen view={view} />);
+    }
+
+    it('clicking a DAMAGE ability does not cast immediately — it enters aim mode', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
+
+      expect(controller.operation).not.toHaveBeenCalled();
+      expect(screen.getByRole('button', { name: 'Arcane Bolt' }).className).toContain('btn-ability--aiming');
+    });
+
+    it('CRITICAL CHECKPOINT: clicking an arena point while aiming casts with the real, converted game-space targetPosition', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
+      // arenaRenderSizePx is {width:900, height:600} (see beforeEach); jsdom's default
+      // getBoundingClientRect is all-zero, so clicking at (450, 300) is exactly the arena's center.
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+
+      expect(controller.operation).toHaveBeenCalledWith('useAbility', {
+        abilityId: 'arcane-bolt',
+        targetPosition: { x: 360, y: 240 }, // (450/900)*720, (300/600)*480 -- the arena's real center
+      });
+    });
+
+    it('a POSITIONING ability also requires aiming now (fixes the pre-existing no-op bug end to end)', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Phase Step' }));
+      expect(controller.operation).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 900, clientY: 0 });
+      expect(controller.operation).toHaveBeenCalledWith('useAbility', {
+        abilityId: 'phase-step',
+        targetPosition: { x: 720, y: 0 },
+      });
+    });
+
+    it('clicking the same ability again while already aiming it cancels aim mode (no cast on a later arena click)', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' })); // toggle off
+      expect(screen.getByRole('button', { name: 'Arcane Bolt' }).className).not.toContain('btn-ability--aiming');
+
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+      expect(controller.operation).not.toHaveBeenCalled();
+    });
+
+    it('clicking a different ability while aiming switches aim to the new one (silently cancels the old aim)', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Frost Lance' }));
+      expect(screen.getByRole('button', { name: 'Arcane Bolt' }).className).not.toContain('btn-ability--aiming');
+      expect(screen.getByRole('button', { name: 'Frost Lance' }).className).toContain('btn-ability--aiming');
+
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+      expect(controller.operation).toHaveBeenCalledWith(
+        'useAbility',
+        expect.objectContaining({ abilityId: 'frost-lance' }),
+      );
+      expect(controller.operation).not.toHaveBeenCalledWith(
+        'useAbility',
+        expect.objectContaining({ abilityId: 'arcane-bolt' }),
+      );
+    });
+
+    it('pressing Escape while aiming cancels aim mode', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.getByRole('button', { name: 'Arcane Bolt' }).className).not.toContain('btn-ability--aiming');
+
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+      expect(controller.operation).not.toHaveBeenCalled();
+    });
+
+    it('clicking the arena while nothing is being aimed does nothing', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+
+      expect(controller.operation).not.toHaveBeenCalled();
+    });
+
+    it('every ability button exposes its description as a hover tooltip (title attribute)', () => {
+      const controller = makeMockController();
+      renderVex(controller);
+
+      const button = screen.getByRole('button', { name: 'Arcane Bolt' });
+      expect(button.getAttribute('title')).toMatch(/burst/i);
+      expect(button.getAttribute('title')?.length).toBeGreaterThan(0);
+    });
   });
 
   it('movement buttons forward move with the corresponding direction', () => {
@@ -162,6 +271,283 @@ describe('MatchHUDScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Move Up' }));
 
     expect(controller.operation).toHaveBeenCalledWith('move', { dx: 0, dy: -1 });
+  });
+
+  describe('number-key ability hotkeys 1-4 (11_client_4; skillshot toggle 11_cross_1)', () => {
+    function renderVexForHotkeys(controller: MatchController & { operation: jest.Mock }) {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'vex' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      render(<MatchHUDScreen view={view} />);
+    }
+
+    it('pressing "1" (Arcane Bolt, DAMAGE) toggles aim mode rather than casting directly', () => {
+      const controller = makeMockController();
+      renderVexForHotkeys(controller);
+
+      fireEvent.keyDown(window, { key: '1' });
+
+      expect(controller.operation).not.toHaveBeenCalled();
+      expect(screen.getByRole('button', { name: 'Arcane Bolt' }).className).toContain('btn-ability--aiming');
+    });
+
+    it('pressing the same hotkey again cancels aim mode (toggle off)', () => {
+      const controller = makeMockController();
+      renderVexForHotkeys(controller);
+
+      fireEvent.keyDown(window, { key: '1' });
+      fireEvent.keyDown(window, { key: '1' });
+
+      expect(screen.getByRole('button', { name: 'Arcane Bolt' }).className).not.toContain('btn-ability--aiming');
+    });
+
+    it('a hotkey for an unmapped slot (no 4th ability on this champion) is a no-op', () => {
+      const controller = makeMockController();
+      renderVexForHotkeys(controller); // Vex has only 3 abilities
+
+      expect(() => fireEvent.keyDown(window, { key: '4' })).not.toThrow();
+      expect(controller.operation).not.toHaveBeenCalled();
+    });
+
+    it('pressing the hotkey for a HEAL ability casts immediately, same as clicking it', () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const controller = makeMockController();
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'rin' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      render(<MatchHUDScreen view={view} />);
+
+      fireEvent.keyDown(window, { key: '2' }); // Rin's abilities: [rending-strike, vital-siphon, swift-reposition]
+
+      expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'vital-siphon' });
+    });
+  });
+
+  describe('WASD hold-to-move — diagonal merge (11_cross_1)', () => {
+    // REGRESSION: previously dispatched one 'move' call per held key, and MatchController's own 50ms
+    // throttle silently dropped all but the first within the same tick — holding two keys together
+    // never actually moved diagonally, only in whichever direction happened to iterate first.
+    function renderMovable(controller: MatchController & { operation: jest.Mock }) {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1'), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      render(<MatchHUDScreen view={view} />);
+    }
+
+    function lastMoveCall(controller: { operation: jest.Mock }): { dx: number; dy: number } | undefined {
+      const calls = controller.operation.mock.calls.filter(([action]: [string]) => action === 'move');
+      return calls.length > 0 ? calls[calls.length - 1][1] : undefined;
+    }
+
+    it('CRITICAL CHECKPOINT: holding W then D dispatches a single merged diagonal vector, not just one axis', () => {
+      const controller = makeMockController();
+      renderMovable(controller);
+
+      fireEvent.keyDown(window, { key: 'w' });
+      fireEvent.keyDown(window, { key: 'd' });
+
+      expect(lastMoveCall(controller)).toEqual({ dx: 1, dy: -1 });
+    });
+
+    it('releasing one of two held keys returns to the remaining single-axis direction on the next tick', () => {
+      jest.useFakeTimers();
+      const controller = makeMockController();
+      renderMovable(controller);
+
+      fireEvent.keyDown(window, { key: 'w' });
+      fireEvent.keyDown(window, { key: 'd' });
+      fireEvent.keyUp(window, { key: 'd' });
+      controller.operation.mockClear();
+
+      act(() => {
+        jest.advanceTimersByTime(50); // MOVE_REPEAT_INTERVAL_MS
+      });
+
+      expect(lastMoveCall(controller)).toEqual({ dx: 0, dy: -1 });
+      jest.useRealTimers();
+    });
+
+    it('opposite keys held together (W+S) cancel to a zero vector — no move is dispatched', () => {
+      const controller = makeMockController();
+      renderMovable(controller);
+
+      fireEvent.keyDown(window, { key: 'w' });
+      controller.operation.mockClear();
+      fireEvent.keyDown(window, { key: 's' });
+
+      expect(controller.operation).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cast-effect feedback (11_client_4; isMine/recordedAim retargeting 11_cross_1)', () => {
+    // These exercise the tick-diff effect that detects "an ability was just used" from a cooldown
+    // transition between two consecutive match:state snapshots — previously untested by anything in this
+    // file (only manually verified in a real browser per 11_client_4's own process), and now materially
+    // more complex after 11_cross_1 added the isMine/recordedAim branching this specifically covers.
+
+    it('CRITICAL CHECKPOINT: my own DAMAGE skillshot spawns a projectile toward my recorded aim point, not blindly toward the opponent', () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const controller = makeMockController();
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'vex' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      const { container } = render(<MatchHUDScreen view={view} />);
+
+      // Aim and cast for real, through the actual UI flow, so a real aim point gets recorded.
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+
+      // Simulate the server broadcasting the resulting cooldown transition on the next tick.
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'vex', cooldownsRemaining: { 'arcane-bolt': 4 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+
+      const effect = container.querySelector('.cast-effect--projectile.cast-effect--mine') as HTMLElement | null;
+      expect(effect).not.toBeNull();
+      // aimed at the arena's center (game units 360,240, per the click -> arena-space math verified
+      // elsewhere in this file) -- from p1's own rendered position (10,20, from makeParticipant).
+      expect(effect!.style.getPropertyValue('--dx')).not.toBe('0px');
+    });
+
+    it('a POSITIONING skillshot also spawns a projectile-style effect (previously bucketed as a self-pulse, before it was a real aimed ability)', () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const controller = makeMockController();
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'vex' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      const { container } = render(<MatchHUDScreen view={view} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Phase Step' }));
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 900, clientY: 0 });
+
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'vex', cooldownsRemaining: { 'phase-step': 9 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+
+      expect(container.querySelector('.cast-effect--projectile.cast-effect--mine')).not.toBeNull();
+    });
+
+    it("the opponent's cast (no aim info available to this client) still animates toward their real target — this client", () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'vex' }), makeParticipant('p2', { championId: 'vex' })],
+      });
+      const view = new MatchHUDView(identity, match, makeMockController());
+      const { container } = render(<MatchHUDScreen view={view} />);
+
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'vex' }),
+            makeParticipant('p2', { championId: 'vex', cooldownsRemaining: { 'arcane-bolt': 4 } }),
+          ],
+        });
+      });
+
+      const effect = container.querySelector(
+        '.cast-effect--projectile:not(.cast-effect--mine)',
+      ) as HTMLElement | null;
+      expect(effect).not.toBeNull();
+    });
+
+    it("a HEAL cast still animates as a self-pulse at the caster's own position, not a projectile", () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'rin' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, makeMockController());
+      const { container } = render(<MatchHUDScreen view={view} />);
+
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'rin', cooldownsRemaining: { 'vital-siphon': 9 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+
+      expect(container.querySelector('.cast-effect--pulse.cast-effect--mine')).not.toBeNull();
+      expect(container.querySelector('.cast-effect--projectile')).toBeNull();
+    });
+
+    it('a health drop between two snapshots spawns a floating damage-number popup', () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { health: 85 }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, makeMockController());
+      const { container } = render(<MatchHUDScreen view={view} />);
+
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [makeParticipant('p1', { health: 55 }), makeParticipant('p2')],
+        });
+      });
+
+      const popup = container.querySelector('.damage-popup');
+      expect(popup).not.toBeNull();
+      expect(popup!.textContent).toBe('-30');
+    });
   });
 
   it('CRITICAL CHECKPOINT: a match:state update pushed after mount re-renders in place via the real notifyChanged pipeline', () => {

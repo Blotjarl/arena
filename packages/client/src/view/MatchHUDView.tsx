@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, MouseEvent as ReactMouseEvent } from 'react';
 import type { Socket } from 'socket.io-client';
 import {
   View,
@@ -16,6 +16,7 @@ import {
   ARENA_WIDTH,
   ARENA_HEIGHT,
   ARENA_OBSTACLES,
+  Position,
 } from '@arena/shared';
 import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientMatchModel } from '../model/ClientMatchModel';
@@ -91,6 +92,29 @@ function toRenderPixels(
     x: (position.x / ARENA_WIDTH) * arenaRenderSizePx.width,
     y: (position.y / ARENA_HEIGHT) * arenaRenderSizePx.height,
   };
+}
+
+/**
+ * Inverse of `toRenderPixels()` (11_cross_1) — converts a click's pixel coordinates, already relative
+ * to the `arena` element's own top-left corner (not the viewport), back into arena-space game units.
+ * Used to resolve a skillshot's aim point: the player clicks a point on screen, this recovers the real
+ * `Position` `MatchModel.submitAbility` needs.
+ */
+function toGamePosition(pixel: { x: number; y: number }, arenaRenderSizePx: ArenaRenderSize): Position {
+  return new Position(
+    (pixel.x / arenaRenderSizePx.width) * ARENA_WIDTH,
+    (pixel.y / arenaRenderSizePx.height) * ARENA_HEIGHT,
+  );
+}
+
+/**
+ * Every effect type except `HEAL` is a skillshot as of Step 11 (`11_cross_1`) — it requires the player
+ * to aim (press the ability, then click a point in the arena) rather than auto-targeting the opponent.
+ * `HEAL` stays a single click, self-targeted, instant — see `MatchModel.submitAbility`'s own doc comment
+ * for the full server-side resolution this mirrors.
+ */
+function isSkillshotType(effectType: EffectType): boolean {
+  return effectType !== EffectType.HEAL;
 }
 
 /**
@@ -421,17 +445,27 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const [, forceRender] = useReducer((n: number) => n + 1, 0);
   const [arenaRenderSizePx, setArenaRenderSizePx] = useState(computeArenaRenderSizePx);
   const [hoveredAbilityId, setHoveredAbilityId] = useState<string | null>(null);
+  // Skillshot aim-then-click state (11_cross_1): non-null while the player has pressed a skillshot-type
+  // ability (button click or hotkey) and is waiting for their next click inside the arena to aim it.
+  const [aimingAbilityId, setAimingAbilityId] = useState<string | null>(null);
   const [castEffects, setCastEffects] = useState<CastEffectVisual[]>([]);
   const [damagePopups, setDamagePopups] = useState<DamagePopupVisual[]>([]);
 
   const prevStateRef = useRef<MatchStatePayload | null>(null);
   const nextEffectIdRef = useRef(0);
   const pendingTimeoutsRef = useRef<Set<number>>(new Set());
+  /** This player's most recent aim point per ability id (11_cross_1) — the cast-effect detection loop
+   *  below only sees server tick snapshots (no aim info), so a locally-known aim point is recorded here
+   *  at cast time and consumed once that ability's cooldown transition is observed, so a cast effect can
+   *  travel toward where this player actually clicked rather than always toward the opponent. */
+  const lastAimPointRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   /** Kept fresh every render (not just inside an effect) so the hotkey listener below, which only
-   *  re-subscribes when `controller` changes, always dispatches against the current ability list and
-   *  opponent — the same "ref holds the latest closure data" pattern InterpolationBuffer's own caller
-   *  (this component) already leans on for `now`. */
-  const hotkeyContextRef = useRef<{ abilities: Ability[]; opponentPlayerId: string } | null>(null);
+   *  re-subscribes when `controller` changes, always dispatches against the current ability list — the
+   *  same "ref holds the latest closure data" pattern InterpolationBuffer's own caller (this component)
+   *  already leans on for `now`. CORRECTION (11_cross_1): no longer carries `opponentPlayerId` — hotkeys
+   *  toggle aim mode now instead of dispatching a targeted cast directly, so there's nothing left here
+   *  that needs it. */
+  const hotkeyContextRef = useRef<{ abilities: Ability[] } | null>(null);
 
   useEffect(() => {
     view.bindUpdateCallback(() => forceRender());
@@ -479,20 +513,39 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   // exact same controller.operation('move', direction) call those buttons already make. Held keys
   // are re-dispatched on a fixed interval, cleaned up on unmount, matching the project's existing
   // discipline around listener/timer cleanup (see this view's own doc comments elsewhere).
+  //
+  // CORRECTION (11_cross_1): previously dispatched one 'move' call per held key, every interval tick —
+  // MatchController's own 50ms throttle then silently dropped all but the first of those calls within
+  // the same tick, so holding e.g. W+A together only ever moved in whichever direction happened to
+  // iterate first in the Set, never diagonally. Now computes a single MERGED direction from every
+  // currently-held key each tick (opposite keys, e.g. W+S, correctly cancel to 0 on that axis) and
+  // dispatches at most one 'move' call per tick. Deliberately NOT normalized here — ParticipantState.move()
+  // now normalizes server-side (11_cross_1), so sending the raw per-axis-summed vector is correct and
+  // keeps this client dumb about game-affecting math (master context §1.1).
   useEffect(() => {
     const heldKeys = new Set<string>();
 
-    const dispatchHeldMoves = (): void => {
+    const computeMergedDirection = (): { dx: number; dy: number } => {
+      let dx = 0;
+      let dy = 0;
       heldKeys.forEach((key) => {
-        controller.operation('move', WASD_DIRECTIONS[key]);
+        dx += WASD_DIRECTIONS[key].dx;
+        dy += WASD_DIRECTIONS[key].dy;
       });
+      return { dx, dy };
+    };
+
+    const dispatchMergedMove = (): void => {
+      const direction = computeMergedDirection();
+      if (direction.dx === 0 && direction.dy === 0) return; // no keys held, or opposites canceled -- skip
+      controller.operation('move', direction);
     };
 
     const handleKeyDown = (event: KeyboardEvent): void => {
       const key = event.key.toLowerCase();
       if (!(key in WASD_DIRECTIONS) || heldKeys.has(key)) return;
       heldKeys.add(key);
-      controller.operation('move', WASD_DIRECTIONS[key]);
+      dispatchMergedMove();
     };
 
     const handleKeyUp = (event: KeyboardEvent): void => {
@@ -501,7 +554,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    const intervalId = window.setInterval(dispatchHeldMoves, MOVE_REPEAT_INTERVAL_MS);
+    const intervalId = window.setInterval(dispatchMergedMove, MOVE_REPEAT_INTERVAL_MS);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -511,23 +564,30 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   }, [controller]);
 
   // Number-key hotkeys 1-4 (11_client_4): single-press-per-keydown, unlike WASD's hold-to-repeat, so
-  // no repeat interval is needed. Reuses the exact same controller.operation('useAbility', ...) call
-  // (including the DAMAGE/CROWD_CONTROL opponent-targeting correction) that the ability buttons make,
-  // via hotkeyContextRef so this effect never needs to re-subscribe as match state changes.
+  // no repeat interval is needed. Uses hotkeyContextRef so this effect never needs to re-subscribe as
+  // match state changes.
+  // CORRECTION (11_cross_1): HEAL still casts immediately (self-targeted, no aim needed). Every other
+  // effect type now toggles aim mode instead of casting directly — pressing the same ability's hotkey
+  // again while already aiming it cancels; pressing a different ability's hotkey switches to aiming that
+  // one instead (silently cancels the old aim, no cast). The actual cast happens from the arena's own
+  // onClick handler below, once the player clicks where to aim.
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setAimingAbilityId(null);
+        return;
+      }
       const index = ABILITY_HOTKEYS.indexOf(event.key);
       if (index === -1) return;
       const context = hotkeyContextRef.current;
       if (!context) return;
       const ability = context.abilities[index];
       if (!ability) return;
-      const isOffensive =
-        ability.effectType === EffectType.DAMAGE || ability.effectType === EffectType.CROWD_CONTROL;
-      controller.operation('useAbility', {
-        abilityId: ability.id,
-        ...(isOffensive ? { targetPlayerId: context.opponentPlayerId } : {}),
-      });
+      if (!isSkillshotType(ability.effectType)) {
+        controller.operation('useAbility', { abilityId: ability.id });
+        return;
+      }
+      setAimingAbilityId((current) => (current === ability.id ? null : ability.id));
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -556,15 +616,20 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
           const currentCooldown = participant.cooldownsRemaining[ability.id] ?? 0;
           if (prevCooldown > 0 || currentCooldown <= 0) continue;
 
-          const isOffensive =
-            ability.effectType === EffectType.DAMAGE || ability.effectType === EffectType.CROWD_CONTROL;
-          if (isOffensive && target) {
-            spawnCastEffect({
-              kind: 'projectile',
-              isMine,
-              from: casterPixel,
-              to: toRenderPixels(target.position, arenaRenderSizePx),
-            });
+          // CORRECTION (11_cross_1): every non-HEAL ability is now an aimed skillshot, including
+          // POSITIONING (previously bucketed into the self-pulse branch below). For this player's own
+          // cast, animate toward the real aim point recorded at click time (lastAimPointRef) rather than
+          // always toward the opponent's position — a skillshot that misses should still visibly fly off
+          // in the direction it was actually aimed, not silently do nothing. The opponent's own casts have
+          // no aim info available to this client, so they still fall back to animating toward `target`
+          // (in a 1v1 game, "the other participant" is always the only plausible aim target to show).
+          if (isSkillshotType(ability.effectType) && target) {
+            const recordedAim = isMine ? lastAimPointRef.current.get(ability.id) : undefined;
+            if (recordedAim) lastAimPointRef.current.delete(ability.id);
+            const to = recordedAim
+              ? toRenderPixels(recordedAim, arenaRenderSizePx)
+              : toRenderPixels(target.position, arenaRenderSizePx);
+            spawnCastEffect({ kind: 'projectile', isMine, from: casterPixel, to });
           } else {
             spawnCastEffect({ kind: 'pulse', isMine, from: casterPixel, to: casterPixel });
           }
@@ -593,7 +658,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const myChampion = ChampionRoster.getById(me.championId);
   const opponentChampion = ChampionRoster.getById(opponent.championId);
 
-  hotkeyContextRef.current = { abilities: myChampion.abilities, opponentPlayerId: opponent.playerId };
+  hotkeyContextRef.current = { abilities: myChampion.abilities };
 
   const now = Date.now();
   const myPosition = interpolation.getInterpolatedPosition(me.playerId, now);
@@ -602,15 +667,33 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const opponentPixel = toRenderPixels(opponentPosition, arenaRenderSizePx);
 
   const hoveredAbility = myChampion.abilities.find((a) => a.id === hoveredAbilityId);
-  const showRangeRing =
-    hoveredAbility &&
-    (hoveredAbility.effectType === EffectType.DAMAGE || hoveredAbility.effectType === EffectType.CROWD_CONTROL);
+  const aimingAbility = myChampion.abilities.find((a) => a.id === aimingAbilityId);
+  // CORRECTION (11_cross_1): shows while aiming too (not just hovering), and now covers POSITIONING as
+  // well as DAMAGE/CROWD_CONTROL — every skillshot type has a meaningful "how far does this reach" range
+  // worth visualizing. Aiming takes priority over a stale hover from before the ability was pressed.
+  const displayedRangeAbility = aimingAbility ?? hoveredAbility;
+  const showRangeRing = displayedRangeAbility && isSkillshotType(displayedRangeAbility.effectType);
   // Px-per-game-unit is identical on both axes (ARENA_WIDTH:ARENA_HEIGHT ratio is preserved exactly by
   // computeArenaRenderSizePx), so scaling this game-space radius by the width axis alone still yields a
   // geometrically correct circle.
-  const rangeRingRadiusPx = hoveredAbility ? (hoveredAbility.range / ARENA_WIDTH) * arenaRenderSizePx.width : 0;
+  const rangeRingRadiusPx = displayedRangeAbility
+    ? (displayedRangeAbility.range / ARENA_WIDTH) * arenaRenderSizePx.width
+    : 0;
 
   const opponentDisconnect = view.getOpponentDisconnect();
+
+  // Skillshot aim-click (11_cross_1): the next click inside the arena while aiming resolves the cast.
+  // Coordinates are read relative to the arena element's own bounding box (not the viewport) since
+  // toRenderPixels()/every marker position here is already relative to that same origin.
+  const handleArenaClick = (event: ReactMouseEvent<HTMLDivElement>): void => {
+    if (!aimingAbilityId) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickPixel = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const targetPosition = toGamePosition(clickPixel, arenaRenderSizePx);
+    lastAimPointRef.current.set(aimingAbilityId, { x: targetPosition.x, y: targetPosition.y });
+    controller.operation('useAbility', { abilityId: aimingAbilityId, targetPosition });
+    setAimingAbilityId(null);
+  };
 
   return (
     <div className="screen screen-match-hud">
@@ -661,8 +744,9 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
       </div>
       <div
         aria-label="arena"
-        className="arena"
+        className={`arena ${aimingAbilityId ? 'arena--aiming' : ''}`}
         style={{ position: 'relative', width: arenaRenderSizePx.width, height: arenaRenderSizePx.height }}
+        onClick={handleArenaClick}
       >
         {ARENA_OBSTACLES.map((obstacle, index) => {
           const topLeft = toRenderPixels(obstacle, arenaRenderSizePx);
@@ -749,15 +833,16 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
       </div>
       <div aria-label="ability-controls" className="ability-controls">
         {myChampion.abilities.map((ability, index) => {
-          // CORRECTION (Step 11): MatchModel.submitAbility treats a request naming no target as
-          // self-targeted (see its own doc comment) — that's correct for HEAL (self-heal kits) but
-          // means an offensive ability fired with no target here would land on the caster, never the
-          // opponent. In this 1v1 game the opponent is the only sensible target for a DAMAGE or
-          // CROWD_CONTROL ability, so those two effect types explicitly target them; HEAL/POSITIONING
-          // keep the previous no-target (self) behavior.
+          // CORRECTION (11_cross_1): HEAL still casts immediately on click (self-targeted, no aim
+          // needed). Every other effect type (DAMAGE, CROWD_CONTROL, POSITIONING) now toggles aim mode
+          // instead — clicking the same ability again while already aiming it cancels; clicking a
+          // different ability switches aim to that one. The real cast happens from the arena's onClick
+          // handler once the player clicks where to aim. See MatchModel.submitAbility's own doc comment
+          // for the server-side resolution this mirrors.
           const isOffensive =
             ability.effectType === EffectType.DAMAGE || ability.effectType === EffectType.CROWD_CONTROL;
           const onCooldown = Boolean(me.cooldownsRemaining[ability.id]);
+          const isAiming = aimingAbilityId === ability.id;
           // Range indication (11_client_4): the server already silently ignores an out-of-range cast
           // (R4.2, deliberate) — the client previously gave zero indication of why, so an out-of-range
           // click looked identical to a broken button. Only meaningful for opponent-targeted abilities;
@@ -766,19 +851,21 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
           return (
             <button
               key={ability.id}
-              onClick={() =>
-                controller.operation('useAbility', {
-                  abilityId: ability.id,
-                  ...(isOffensive ? { targetPlayerId: opponent.playerId } : {}),
-                })
-              }
+              onClick={() => {
+                if (!isSkillshotType(ability.effectType)) {
+                  controller.operation('useAbility', { abilityId: ability.id });
+                  return;
+                }
+                setAimingAbilityId((current) => (current === ability.id ? null : ability.id));
+              }}
               onMouseEnter={() => setHoveredAbilityId(ability.id)}
               onMouseLeave={() => setHoveredAbilityId((current) => (current === ability.id ? null : current))}
               onFocus={() => setHoveredAbilityId(ability.id)}
               onBlur={() => setHoveredAbilityId((current) => (current === ability.id ? null : current))}
+              title={ability.description}
               className={`btn btn-ability ${onCooldown ? 'btn-ability--cooldown' : ''} ${
                 outOfRange ? 'btn-ability--out-of-range' : ''
-              }`}
+              } ${isAiming ? 'btn-ability--aiming' : ''}`}
             >
               <span className="ability-visual" aria-hidden="true">
                 <span className="ability-hotkey">{index + 1}</span>

@@ -741,6 +741,21 @@ button {
   color: var(--color-text-muted);
 }
 
+/* Skillshot aim mode (11_cross_1) — the ability currently waiting for an arena click to aim it reads as
+   visibly "pressed", distinct from hover/cooldown/out-of-range, so pressing an ability never looks like
+   nothing happened (the exact gap 11_client_4 already fixed once for casting in general). */
+.btn-ability--aiming {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-hover);
+  box-shadow: 0 0 0 2px var(--color-accent-soft);
+}
+
+/* While a skillshot is being aimed, the arena itself should read as "waiting for a click" (11_cross_1). */
+.arena--aiming {
+  cursor: crosshair;
+}
+
 /* ---------- Results ---------- */
 
 .screen-results {
