@@ -19,6 +19,7 @@ import {
   ARENA_HEIGHT,
   SKILLSHOT_HIT_RADIUS,
   segmentCrossesObstacle,
+  distanceFromSegment,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
 
@@ -27,6 +28,25 @@ const MATCH_TIME_LIMIT_MS = 5 * 60_000;
 const DISCONNECT_GRACE_PERIOD_MS = 30_000;
 /** Distance kept from the arena's side walls when placing each participant's spawn (Step 11). */
 const SPAWN_WALL_MARGIN = 50;
+
+/**
+ * Aim-alignment tolerance for Shockwave Slam specifically (Step 11, `11_cross_2` Scope E1) — wider than
+ * the shared `SKILLSHOT_HIT_RADIUS` because its own description ("staggering anyone caught in its arc")
+ * is explicitly an area effect, not a precision point-and-click hit like every other skillshot. A
+ * one-off special case (`ability.id === 'shockwave-slam'`, not a new field on the shared `Ability`
+ * class) — one ability needs this today; see the prompt for why a general per-ability hit-radius field
+ * would be a bigger, unjustified change for a one-off need. A tunable balance number, same spirit as
+ * `SKILLSHOT_HIT_RADIUS` itself — adjust by how it actually feels to play.
+ */
+const SHOCKWAVE_SLAM_HIT_RADIUS = 90;
+
+/**
+ * Collision radius / stagger duration for Bulwark Charge's opponent-facing "shoulder-first charge,
+ * shield raised" (Step 11, `11_cross_2` Scope E2) — reuses `SKILLSHOT_HIT_RADIUS` as a reasonable
+ * existing "how close counts as a hit" tolerance rather than inventing an unrelated number from scratch.
+ */
+const BULWARK_CHARGE_STAGGER_RADIUS = SKILLSHOT_HIT_RADIUS;
+const BULWARK_CHARGE_STAGGER_DURATION_MS = 750;
 
 /**
  * One instance of gameplay, champion selection through a win condition — the authoritative source of
@@ -164,19 +184,37 @@ export class MatchModel extends AbstractModel {
    * every `POSITIONING` ability a same-position no-op (the client never sent `targetPlayerId` for them —
    * see the class-list correction for this prompt for the full history of that bug).
    *
-   * For `DAMAGE`/`CROWD_CONTROL`: the aim direction is computed from caster to `targetPosition`, then the
-   * *actual* opponent (not the clicked point) is checked against three independent conditions, all
-   * required for a hit — range (`distanceTo(opponent) <= ability.range`, unchanged from before), aim
-   * alignment (the opponent's perpendicular distance from the cast ray is within `SKILLSHOT_HIT_RADIUS`),
-   * and line of sight (`segmentCrossesObstacle` between caster and opponent). A miss on any of these still
-   * consumes the ability's cooldown/resource via `useAbility()` — a real "whiffed cast", not a bug.
+   * CORRECTION (Step 11, 11_cross_2): `HEAL` is no longer uniformly self-targeted/instant — it now
+   * branches on `ability.range`. `range === 0` (Iron Skin only) keeps the exact behavior above; `range >
+   * 0` (Vital Siphon only, currently) is an aimed drain, resolved through the same gates as
+   * `DAMAGE`/`CROWD_CONTROL` below, applying both damage to the opponent and healing to the caster on a
+   * hit — see Scope E4 for why this was a real, previously-unread piece of data (Vital Siphon's `range`
+   * was already nonzero and simply never consulted).
+   *
+   * For `DAMAGE`/`CROWD_CONTROL`/ranged-`HEAL`: the aim direction is computed from caster to
+   * `targetPosition`, then the *actual* opponent (not the clicked point) is checked against four
+   * independent conditions, all required for a hit — range (`distanceTo(opponent) <= ability.range`,
+   * unchanged from before), forward-facing (the opponent must be on the same side of the caster as the
+   * aim direction, not merely colinear with the infinite line through it — CORRECTION, 11_cross_2 Scope
+   * A: previously missing, so a click aimed *away* from the opponent could still register a hit if they
+   * happened to be behind the caster along the same line), aim alignment (the opponent's perpendicular
+   * distance from the cast ray is within the hit radius — `SKILLSHOT_HIT_RADIUS` for every ability except
+   * Shockwave Slam, which uses its own wider `SHOCKWAVE_SLAM_HIT_RADIUS`, Scope E1), and line of sight
+   * (`segmentCrossesObstacle` between caster and opponent). A miss on any of these still consumes the
+   * ability's cooldown/resource via `useAbility()` — a real "whiffed cast", not a bug.
    *
    * For `POSITIONING`: the destination is `caster.position + direction * ability.range`, wall-clamped
    * exactly like regular movement; if the straight path to that destination crosses an obstacle, the whole
    * cast is rejected (caster does not move, cooldown/resource are still consumed) rather than attempting a
-   * partial teleport.
+   * partial teleport — except Phase Step (Scope E3), a magical teleport "through the space between
+   * spaces" rather than a physical dash, which is exempt from the obstacle check (still wall-clamped to
+   * the arena bounds, a hard world boundary rather than an "obstacle" in the same sense). Bulwark Charge
+   * (Scope E2) additionally staggers the opponent (a short `applyCrowdControl`) if its travel path passes
+   * within `BULWARK_CHARGE_STAGGER_RADIUS` of them — "shoulder-first... shield raised" is more than a
+   * pure escape, unlike Phase Step/Swift Reposition.
    * @param playerId - the acting player
-   * @param req - the ability id and, for every effect type except `HEAL`, the aimed `targetPosition`
+   * @param req - the ability id and, for every effect type except self-targeted `HEAL`, the aimed
+   *   `targetPosition`
    * @throws {InvalidMatchPhaseError} if the match is not currently ACTIVE
    *
    * All per-ability validation failures — unknown ability, cooldown, insufficient resource, incapacitation,
@@ -194,7 +232,9 @@ export class MatchModel extends AbstractModel {
 
     const now = Date.now();
 
-    if (ability.effectType === EffectType.HEAL) {
+    // Self-targeted, instant, no aim -- Iron Skin only (the sole HEAL ability with range 0). A HEAL
+    // ability with range > 0 (Vital Siphon) falls through to the aimed path below instead.
+    if (ability.effectType === EffectType.HEAL && ability.range === 0) {
       try {
         caster.useAbility(ability, now);
       } catch (err) {
@@ -205,7 +245,7 @@ export class MatchModel extends AbstractModel {
       return;
     }
 
-    // DAMAGE / CROWD_CONTROL / POSITIONING all require an aimed direction.
+    // DAMAGE / CROWD_CONTROL / POSITIONING / ranged-HEAL (Vital Siphon) all require an aimed direction.
     if (!req.targetPosition) return;
     const dx = req.targetPosition.x - caster.position.x;
     const dy = req.targetPosition.y - caster.position.y;
@@ -226,20 +266,52 @@ export class MatchModel extends AbstractModel {
       const rawY = caster.position.y + dirY * ability.range;
       const destX = Math.max(0, Math.min(ARENA_WIDTH, rawX));
       const destY = Math.max(0, Math.min(ARENA_HEIGHT, rawY));
-      if (segmentCrossesObstacle(caster.position.x, caster.position.y, destX, destY)) return;
+      // Phase Step ignores obstacles in its path (a teleport, not a physical dash); every other
+      // POSITIONING ability is still blocked by them, same as before.
+      const blockedByObstacle =
+        ability.id !== 'phase-step' &&
+        segmentCrossesObstacle(caster.position.x, caster.position.y, destX, destY);
+      if (blockedByObstacle) return;
+
+      const origin = caster.position;
       caster.position = new Position(destX, destY);
+
+      // Bulwark Charge: a charge whose travel path passes close enough to the opponent staggers them,
+      // on top of the reposition itself.
+      if (ability.id === 'bulwark-charge') {
+        const opponent = this.opponentOf(caster);
+        const clearance = distanceFromSegment(
+          origin.x,
+          origin.y,
+          destX,
+          destY,
+          opponent.position.x,
+          opponent.position.y,
+        );
+        if (clearance <= BULWARK_CHARGE_STAGGER_RADIUS) {
+          opponent.applyCrowdControl(BULWARK_CHARGE_STAGGER_DURATION_MS, now);
+        }
+      }
       return;
     }
 
-    // DAMAGE / CROWD_CONTROL: resolve against the real opponent, not the clicked point.
+    // DAMAGE / CROWD_CONTROL / ranged-HEAL: resolve against the real opponent, not the clicked point.
     const opponent = this.opponentOf(caster);
     const distance = caster.position.distanceTo(opponent.position);
     if (distance > ability.range) return;
 
     const ox = opponent.position.x - caster.position.x;
     const oy = opponent.position.y - caster.position.y;
+
+    // The opponent must be in front of the caster relative to the aim direction, not merely colinear
+    // with the infinite line through it -- otherwise a click aimed away from the opponent could still
+    // register as a hit if they happened to be behind the caster along the same line.
+    const forwardDot = ox * dirX + oy * dirY;
+    if (forwardDot < 0) return;
+
+    const hitRadius = ability.id === 'shockwave-slam' ? SHOCKWAVE_SLAM_HIT_RADIUS : SKILLSHOT_HIT_RADIUS;
     const perpendicularDistance = Math.abs(ox * dirY - oy * dirX);
-    if (perpendicularDistance > SKILLSHOT_HIT_RADIUS) return;
+    if (perpendicularDistance > hitRadius) return;
 
     if (segmentCrossesObstacle(caster.position.x, caster.position.y, opponent.position.x, opponent.position.y)) {
       return;
@@ -251,6 +323,11 @@ export class MatchModel extends AbstractModel {
         break;
       case EffectType.CROWD_CONTROL:
         opponent.applyCrowdControl(ability.magnitude * 1000, now);
+        break;
+      case EffectType.HEAL:
+        // Vital Siphon: "draws vitality through a melee strike" -- a real drain, not a plain self-heal.
+        opponent.applyDamage(ability.magnitude);
+        caster.applyHeal(ability.magnitude);
         break;
     }
   }
