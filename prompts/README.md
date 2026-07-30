@@ -245,7 +245,16 @@ team, unlike every prior prompt in this project. Separately, prompt 14 (`11_clie
 changes needed. Prompt 15 (`11_client_8`) deepens the established dark-fantasy pixel-art direction itself
 — more detailed champion sprites (now shared with Champion Select, previously sprite-less), per-ability
 (not just per-effect-type) icons with real color differentiation, and textured arena floor/obstacles —
-rather than adding a new gameplay feature.
+rather than adding a new gameplay feature. Prompt 16 (`11_cross_2`) followed a request that abilities feel
+genuinely unique and that skillshots never visually extend past their own range: reading the real
+`MatchModel.submitAbility` for it surfaced two real correctness gaps (cast-effect visuals travel to the
+raw click point rather than being clamped to `ability.range`; aim resolution has no forward-facing check,
+so a colinear-behind-the-caster opponent could still be hit), plus confirmed every ability resolves through
+100% generic effect-type-only logic today — the prompt adds per-ability projectile speed/shape and four
+flavor-grounded unique mechanics (Shockwave Slam's wider AoE, Bulwark Charge's collision stagger, Phase
+Step's obstacle-ignoring teleport, and Vital Siphon's aimed lifesteal-drain, the last of which deliberately
+changes existing test-asserted behavior — see the prompt's own closing requirement) — another single
+cross-package document executed directly, per `11_cross_1`'s precedent.
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -264,6 +273,7 @@ rather than adding a new gameplay feature.
 | 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [x] |
 | 14 | `11_client_7_leaderboard-screen.md` | **flagship agent** | none (backend already complete; client-only) | [x] |
 | 15 | `11_client_8_visual-overhaul.md` | **flagship agent** | none (client-only, purely presentational) | [x] |
+| 16 | `11_cross_2_ability-range-and-uniqueness.md` | **flagship agent** | #13 (`11_cross_1`, same skillshot aim system), #15 (`11_client_8`, same per-ability cast-effect pattern) | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
