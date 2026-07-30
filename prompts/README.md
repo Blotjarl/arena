@@ -242,7 +242,10 @@ document since one person (the flagship agent) is executing it directly rather t
 team, unlike every prior prompt in this project. Separately, prompt 14 (`11_client_7`) implements the SRS
 §3.2.8 leaderboard's client half — the api-side `GET /leaderboard`/`GET /leaderboard/champions` endpoints
 (R8.1–R8.3) were already fully built and tested back in Steps 9-10 but had zero client consumers; no backend
-changes needed.
+changes needed. Prompt 15 (`11_client_8`) deepens the established dark-fantasy pixel-art direction itself
+— more detailed champion sprites (now shared with Champion Select, previously sprite-less), per-ability
+(not just per-effect-type) icons with real color differentiation, and textured arena floor/obstacles —
+rather than adding a new gameplay feature.
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -260,6 +263,7 @@ changes needed.
 | 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [x] |
 | 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [x] |
 | 14 | `11_client_7_leaderboard-screen.md` | **flagship agent** | none (backend already complete; client-only) | [x] |
+| 15 | `11_client_8_visual-overhaul.md` | **flagship agent** | none (client-only, purely presentational) | [ ] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
