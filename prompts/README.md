@@ -273,7 +273,7 @@ cross-package document executed directly, per `11_cross_1`'s precedent.
 | 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [x] |
 | 14 | `11_client_7_leaderboard-screen.md` | **flagship agent** | none (backend already complete; client-only) | [x] |
 | 15 | `11_client_8_visual-overhaul.md` | **flagship agent** | none (client-only, purely presentational) | [x] |
-| 16 | `11_cross_2_ability-range-and-uniqueness.md` | **flagship agent** | #13 (`11_cross_1`, same skillshot aim system), #15 (`11_client_8`, same per-ability cast-effect pattern) | [ ] |
+| 16 | `11_cross_2_ability-range-and-uniqueness.md` | **flagship agent** | #13 (`11_cross_1`, same skillshot aim system), #15 (`11_client_8`, same per-ability cast-effect pattern) | [x] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
