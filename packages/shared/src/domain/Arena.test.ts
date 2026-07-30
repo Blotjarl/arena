@@ -5,6 +5,7 @@ import {
   SKILLSHOT_HIT_RADIUS,
   isWithinObstacle,
   segmentCrossesObstacle,
+  distanceFromSegment,
 } from './Arena';
 
 describe('Arena', () => {
@@ -117,6 +118,33 @@ describe('Arena', () => {
       expect(() => segmentCrossesObstacle(o.x + 5, o.y + 5, o.x + 5, o.y + 5)).not.toThrow();
       expect(segmentCrossesObstacle(o.x + 5, o.y + 5, o.x + 5, o.y + 5)).toBe(true);
       expect(segmentCrossesObstacle(0, 0, 0, 0)).toBe(false);
+    });
+  });
+
+  describe('distanceFromSegment (11_cross_2 — first used by Bulwark Charge\'s collision stagger check)', () => {
+    it('zero for a point exactly on the segment', () => {
+      expect(distanceFromSegment(0, 0, 100, 0, 50, 0)).toBeCloseTo(0, 5);
+    });
+
+    it('the perpendicular distance for a point whose closest approach falls within the segment', () => {
+      expect(distanceFromSegment(0, 0, 100, 0, 50, 30)).toBeCloseTo(30, 5);
+    });
+
+    it('clamps to the nearer endpoint when the point\'s projection falls beyond the segment, rather than extrapolating past it', () => {
+      // Closest point on the infinite line through (0,0)-(100,0) to (150,40) would be (150,0), off the
+      // segment entirely -- the real closest point is the endpoint (100,0).
+      expect(distanceFromSegment(0, 0, 100, 0, 150, 40)).toBeCloseTo(Math.hypot(50, 40), 5);
+      expect(distanceFromSegment(0, 0, 100, 0, -30, 40)).toBeCloseTo(Math.hypot(30, 40), 5);
+    });
+
+    it('a degenerate zero-length segment (both points equal) does not throw and is decided by direct point distance', () => {
+      expect(() => distanceFromSegment(10, 10, 10, 10, 13, 14)).not.toThrow();
+      expect(distanceFromSegment(10, 10, 10, 10, 13, 14)).toBeCloseTo(5, 5); // 3-4-5 triangle
+    });
+
+    it('works for a diagonal segment, not just axis-aligned ones', () => {
+      // Segment (0,0)-(10,10); point (10,0) -- closest point on the segment is its exact midpoint (5,5).
+      expect(distanceFromSegment(0, 0, 10, 10, 10, 0)).toBeCloseTo(Math.hypot(5, 5), 5);
     });
   });
 });

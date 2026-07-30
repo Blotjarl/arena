@@ -114,3 +114,30 @@ function segmentCrossesRect(x1: number, y1: number, x2: number, y2: number, rect
 export function segmentCrossesObstacle(x1: number, y1: number, x2: number, y2: number): boolean {
   return ARENA_OBSTACLES.some((o) => segmentCrossesRect(x1, y1, x2, y2, o));
 }
+
+/**
+ * Shortest distance from point `(px,py)` to the segment `(x1,y1)`-`(x2,y2)` — standard clamped vector
+ * projection: find how far along the segment (as a fraction `t`) the point's projection falls, clamp
+ * that fraction to `[0, 1]` (so the closest point is never extrapolated past either endpoint), then
+ * measure the straight-line distance to that clamped point. A genuinely reusable geometric primitive
+ * (Step 11, `11_cross_2`) — first used by `MatchModel.submitAbility`'s Bulwark Charge collision check
+ * ("does this charge's travel path pass close enough to the opponent to stagger them"), unlike
+ * `SKILLSHOT_HIT_RADIUS`/obstacle rectangles above, which are specific game-balance/layout data rather
+ * than general-purpose math.
+ * @param x1 - x of one endpoint of the segment
+ * @param y1 - y of that same endpoint
+ * @param x2 - x of the other endpoint
+ * @param y2 - y of that other endpoint
+ * @param px - x of the point to measure distance from
+ * @param py - y of that same point
+ * @returns the shortest distance from `(px,py)` to any point on the segment
+ */
+export function distanceFromSegment(x1: number, y1: number, x2: number, y2: number, px: number, py: number): number {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const lengthSquared = dx * dx + dy * dy;
+  const t = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
+  const closestX = x1 + t * dx;
+  const closestY = y1 + t * dy;
+  return Math.hypot(px - closestX, py - closestY);
+}
