@@ -104,7 +104,11 @@ describe('MatchHUDScreen', () => {
     expect(screen.getByText('arcane-bolt: 2.3s')).toBeTruthy();
   });
 
-  it('clicking a self-targeted HEAL ability forwards useAbility immediately, with no target and no aiming', () => {
+  it('clicking a self-targeted HEAL ability (range 0) forwards useAbility immediately, with no target and no aiming', () => {
+    // CORRECTION (11_cross_2 Scope E4): this test previously used Rin's Vital Siphon, before it became a
+    // ranged (range 100), aimed drain -- see the 'clicking Vital Siphon' test below in the skillshot
+    // aim-then-click describe block for its new behavior. Iron Skin (Korr, range 0) is now the one
+    // genuinely still-instant/self-targeted HEAL ability this test covers.
     const identity = new ClientIdentityModel();
     identity.playerId = 'p1';
     const controller = makeMockController();
@@ -112,14 +116,14 @@ describe('MatchHUDScreen', () => {
     match.applyMatchState({
       matchId: 'm1',
       tick: 1,
-      participants: [makeParticipant('p1', { championId: 'rin' }), makeParticipant('p2')],
+      participants: [makeParticipant('p1', { championId: 'korr' }), makeParticipant('p2')],
     });
     const view = new MatchHUDView(identity, match, controller);
 
     render(<MatchHUDScreen view={view} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Vital Siphon' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Iron Skin' }));
 
-    expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'vital-siphon' });
+    expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'iron-skin' });
   });
 
   describe('skillshot aim-then-click (11_cross_1: DAMAGE/CROWD_CONTROL/POSITIONING all require aiming)', () => {
@@ -359,7 +363,27 @@ describe('MatchHUDScreen', () => {
       expect(controller.operation).not.toHaveBeenCalled();
     });
 
-    it('pressing the hotkey for a HEAL ability casts immediately, same as clicking it', () => {
+    it('pressing the hotkey for a self-targeted HEAL ability (range 0) casts immediately, same as clicking it', () => {
+      // CORRECTION (11_cross_2 Scope E4): previously used Rin's Vital Siphon hotkey -- see the
+      // 'pressing the hotkey for Vital Siphon toggles aim mode' test below for its new behavior.
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const controller = makeMockController();
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'korr' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      render(<MatchHUDScreen view={view} />);
+
+      fireEvent.keyDown(window, { key: '3' }); // Korr's abilities: [crushing-blow, shockwave-slam, iron-skin, bulwark-charge]
+
+      expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'iron-skin' });
+    });
+
+    it('pressing the hotkey for Vital Siphon (a ranged HEAL) toggles aim mode instead of casting immediately', () => {
       const identity = new ClientIdentityModel();
       identity.playerId = 'p1';
       const controller = makeMockController();
@@ -374,7 +398,8 @@ describe('MatchHUDScreen', () => {
 
       fireEvent.keyDown(window, { key: '2' }); // Rin's abilities: [rending-strike, vital-siphon, swift-reposition]
 
-      expect(controller.operation).toHaveBeenCalledWith('useAbility', { abilityId: 'vital-siphon' });
+      expect(controller.operation).not.toHaveBeenCalled();
+      expect(screen.getByRole('button', { name: 'Vital Siphon' }).className).toContain('btn-ability--aiming');
     });
   });
 
@@ -541,17 +566,52 @@ describe('MatchHUDScreen', () => {
       expect(effect).not.toBeNull();
     });
 
-    it("a HEAL cast still animates as a self-pulse at the caster's own position, not a projectile", () => {
+    it("a self-targeted HEAL cast (range 0) still animates as a self-pulse at the caster's own position, not a projectile", () => {
+      // CORRECTION (11_cross_2 Scope E4): previously used Rin's Vital Siphon -- now a ranged, aimed
+      // drain (projectile-kind), not a self-pulse. Iron Skin (Korr, range 0) is the genuinely-still-
+      // self-targeted HEAL this test now covers; see the 'Vital Siphon cooldown transition spawns a
+      // projectile' test below for its new cast-effect behavior.
       const identity = new ClientIdentityModel();
       identity.playerId = 'p1';
       const match = new ClientMatchModel();
       match.applyMatchState({
         matchId: 'm1',
         tick: 1,
-        participants: [makeParticipant('p1', { championId: 'rin' }), makeParticipant('p2')],
+        participants: [makeParticipant('p1', { championId: 'korr' }), makeParticipant('p2')],
       });
       const view = new MatchHUDView(identity, match, makeMockController());
       const { container } = render(<MatchHUDScreen view={view} />);
+
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'korr', cooldownsRemaining: { 'iron-skin': 15 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+
+      expect(container.querySelector('.cast-effect--pulse.cast-effect--mine')).not.toBeNull();
+      expect(container.querySelector('.cast-effect--projectile')).toBeNull();
+    });
+
+    it("CORRECTION (11_cross_2 Scope E4): Vital Siphon (a ranged HEAL) spawns a projectile-kind cast effect on its own cooldown transition, not a self-pulse", () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const controller = makeMockController();
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'rin' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      const { container } = render(<MatchHUDScreen view={view} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Vital Siphon' }));
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
 
       act(() => {
         match.applyMatchState({
@@ -564,8 +624,158 @@ describe('MatchHUDScreen', () => {
         });
       });
 
-      expect(container.querySelector('.cast-effect--pulse.cast-effect--mine')).not.toBeNull();
-      expect(container.querySelector('.cast-effect--projectile')).toBeNull();
+      expect(container.querySelector('.cast-effect--projectile.cast-effect--mine')).not.toBeNull();
+      expect(container.querySelector('.cast-effect--pulse')).toBeNull();
+    });
+
+    it("CORRECTION (11_cross_2 Scope B): a short-range DAMAGE skillshot's cast-effect travel is clamped to the ability's own range, not the raw click distance", () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const controller = makeMockController();
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'korr' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, controller);
+      const { container } = render(<MatchHUDScreen view={view} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Crushing Blow' }));
+      // Far corner of the arena -- well past Crushing Blow's real 75-unit range.
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 900, clientY: 600 });
+
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'korr', cooldownsRemaining: { 'crushing-blow': 2 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+
+      const effect = container.querySelector('.cast-effect--projectile.cast-effect--mine') as HTMLElement;
+      const dx = parseFloat(effect.style.getPropertyValue('--dx'));
+      const dy = parseFloat(effect.style.getPropertyValue('--dy'));
+      const travelPx = Math.hypot(dx, dy);
+      // 75 game-units (Crushing Blow's real range) * 1.25 px/unit (900px arena / 720 game units) = 93.75px
+      // -- vs. the raw click's real distance, well over 1000px, if it had traveled unclamped.
+      expect(travelPx).toBeGreaterThan(50);
+      expect(travelPx).toBeLessThan(150);
+    });
+
+    it('CORRECTION (11_cross_2 Scope C): projectile travel duration varies by ability, not a fixed constant', () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'korr' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, makeMockController());
+      const { container, unmount } = render(<MatchHUDScreen view={view} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Crushing Blow' }));
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'korr', cooldownsRemaining: { 'crushing-blow': 2 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+      const crushingBlowEffect = container.querySelector('.cast-effect--projectile.cast-effect--mine') as HTMLElement;
+      const crushingBlowMs = parseFloat(crushingBlowEffect.style.getPropertyValue('--travel-ms'));
+      unmount();
+
+      const identity2 = new ClientIdentityModel();
+      identity2.playerId = 'p1';
+      const match2 = new ClientMatchModel();
+      match2.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'vex' }), makeParticipant('p2')],
+      });
+      const view2 = new MatchHUDView(identity2, match2, makeMockController());
+      const { container: container2 } = render(<MatchHUDScreen view={view2} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Arcane Bolt' }));
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+      act(() => {
+        match2.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'vex', cooldownsRemaining: { 'arcane-bolt': 4 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+      const arcaneBoltEffect = container2.querySelector('.cast-effect--projectile.cast-effect--mine') as HTMLElement;
+      const arcaneBoltMs = parseFloat(arcaneBoltEffect.style.getPropertyValue('--travel-ms'));
+
+      expect(crushingBlowMs).toBeLessThan(arcaneBoltMs);
+    });
+
+    it('CORRECTION (11_cross_2 Scope D): two different DAMAGE abilities (Crushing Blow vs Rending Strike) produce different additive cast-effect classes', () => {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'korr' }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, makeMockController());
+      const { container, unmount } = render(<MatchHUDScreen view={view} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Crushing Blow' }));
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+      act(() => {
+        match.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'korr', cooldownsRemaining: { 'crushing-blow': 2 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+      const crushingBlowClass = (container.querySelector('.cast-effect--projectile.cast-effect--mine') as HTMLElement)
+        .className;
+      unmount();
+
+      const identity2 = new ClientIdentityModel();
+      identity2.playerId = 'p1';
+      const match2 = new ClientMatchModel();
+      match2.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId: 'rin' }), makeParticipant('p2')],
+      });
+      const view2 = new MatchHUDView(identity2, match2, makeMockController());
+      const { container: container2 } = render(<MatchHUDScreen view={view2} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Rending Strike' }));
+      fireEvent.click(screen.getByLabelText('arena'), { clientX: 450, clientY: 300 });
+      act(() => {
+        match2.applyMatchState({
+          matchId: 'm1',
+          tick: 2,
+          participants: [
+            makeParticipant('p1', { championId: 'rin', cooldownsRemaining: { 'rending-strike': 3 } }),
+            makeParticipant('p2'),
+          ],
+        });
+      });
+      const rendingStrikeClass = (container2.querySelector('.cast-effect--projectile.cast-effect--mine') as HTMLElement)
+        .className;
+
+      expect(crushingBlowClass).toContain('cast-effect--crushing-blow');
+      expect(rendingStrikeClass).toContain('cast-effect--rending-strike');
+      expect(crushingBlowClass).not.toBe(rendingStrikeClass);
     });
 
     it('a health drop between two snapshots spawns a floating damage-number popup', () => {
