@@ -255,6 +255,50 @@ describe('MatchHUDScreen', () => {
     });
   });
 
+  describe('per-ability icons (11_client_8 Scope B.1/B.2)', () => {
+    function renderChampion(championId: string) {
+      const identity = new ClientIdentityModel();
+      identity.playerId = 'p1';
+      const match = new ClientMatchModel();
+      match.applyMatchState({
+        matchId: 'm1',
+        tick: 1,
+        participants: [makeParticipant('p1', { championId }), makeParticipant('p2')],
+      });
+      const view = new MatchHUDView(identity, match, makeMockController());
+      return render(<MatchHUDScreen view={view} />);
+    }
+
+    it('renders visibly distinct icon markup for two different DAMAGE abilities (Crushing Blow vs Rending Strike) — proving per-ability icons exist, not just per-effect-type', () => {
+      const { unmount } = renderChampion('korr');
+      const crushingBlowIcon = screen.getByRole('button', { name: 'Crushing Blow' }).querySelector('svg.ability-icon');
+      const crushingBlowMarkup = crushingBlowIcon?.innerHTML;
+      unmount();
+
+      renderChampion('rin');
+      const rendingStrikeIcon = screen.getByRole('button', { name: 'Rending Strike' }).querySelector('svg.ability-icon');
+      const rendingStrikeMarkup = rendingStrikeIcon?.innerHTML;
+
+      expect(crushingBlowMarkup).toBeTruthy();
+      expect(rendingStrikeMarkup).toBeTruthy();
+      expect(crushingBlowMarkup).not.toBe(rendingStrikeMarkup);
+    });
+
+    it('color-codes each icon by effect type via the ability-icon--* modifier classes (previously present in markup but unstyled)', () => {
+      renderChampion('korr');
+
+      const crushingBlow = screen.getByRole('button', { name: 'Crushing Blow' }).querySelector('svg.ability-icon');
+      const shockwaveSlam = screen.getByRole('button', { name: 'Shockwave Slam' }).querySelector('svg.ability-icon');
+      const ironSkin = screen.getByRole('button', { name: 'Iron Skin' }).querySelector('svg.ability-icon');
+      const bulwarkCharge = screen.getByRole('button', { name: 'Bulwark Charge' }).querySelector('svg.ability-icon');
+
+      expect(crushingBlow?.getAttribute('class')).toContain('ability-icon--damage');
+      expect(shockwaveSlam?.getAttribute('class')).toContain('ability-icon--cc');
+      expect(ironSkin?.getAttribute('class')).toContain('ability-icon--heal');
+      expect(bulwarkCharge?.getAttribute('class')).toContain('ability-icon--positioning');
+    });
+  });
+
   it('movement buttons forward move with the corresponding direction', () => {
     const identity = new ClientIdentityModel();
     identity.playerId = 'p1';

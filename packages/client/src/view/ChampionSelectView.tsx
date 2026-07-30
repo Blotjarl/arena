@@ -4,6 +4,7 @@ import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientMatchModel } from '../model/ClientMatchModel';
 import { ClientQueueModel } from '../model/ClientQueueModel';
 import { ChampionSelectController } from '../controller/ChampionSelectController';
+import { ChampionSprite } from './ChampionSprite';
 
 /** Selection window length in seconds — mirrors R3.4; a local UX countdown only, not authoritative. */
 const SELECTION_WINDOW_SECONDS = 30;
@@ -181,6 +182,9 @@ export function ChampionSelectScreen(props: { view: ChampionSelectView }): JSX.E
           const isMine = mySelection?.championId === champion.id;
           return (
             <li key={champion.id} className={`champion-card champion-${champion.id} ${isMine ? 'champion-card--selected' : ''}`}>
+              <div className="champion-portrait">
+                <ChampionSprite championId={champion.id} />
+              </div>
               <span className="champion-name-row">
                 {champion.name} — {champion.role}
               </span>

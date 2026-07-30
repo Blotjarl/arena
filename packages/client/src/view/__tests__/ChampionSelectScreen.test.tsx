@@ -109,6 +109,16 @@ describe('ChampionSelectScreen', () => {
     expect(screen.getByText('Both players ready')).toBeTruthy();
   });
 
+  it('renders a ChampionSprite for each roster entry (11_client_8 Scope A.3 — Champion Select previously had no sprite/portrait at all)', () => {
+    const identity = new ClientIdentityModel();
+    identity.identify('Raj');
+    const view = new ChampionSelectView(identity, new ClientMatchModel(), makeQueueWithRoster(), makeMockController());
+
+    const { container } = render(<ChampionSelectScreen view={view} />);
+
+    expect(container.querySelectorAll('.champion-portrait svg.champion-sprite')).toHaveLength(makeRoster().length);
+  });
+
   it('CRITICAL CHECKPOINT: the local countdown ticks down once per second and never goes below zero', () => {
     const identity = new ClientIdentityModel();
     identity.identify('Raj');
