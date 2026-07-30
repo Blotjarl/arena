@@ -28,6 +28,12 @@ const VEX = new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 10, 200, [
   new Ability('heal', 'Self Mend', 8, 30, 0, EffectType.HEAL, 15, 'A self-heal.'),
   new Ability('root', 'Frost Lance', 6, 25, 400, EffectType.CROWD_CONTROL, 1.5, 'Freezes the target.'),
   new Ability('blink', 'Phase Step', 10, 20, 300, EffectType.POSITIONING, 0, 'A short blink.'),
+  // Real ability ids (11_cross_2 Scope E) -- MatchModel.submitAbility special-cases these four exact
+  // ids, so the fixture needs abilities carrying them, distinct from the generic 'root'/'blink' above.
+  new Ability('shockwave-slam', 'Shockwave Slam', 12, 30, 150, EffectType.CROWD_CONTROL, 1.5, 'An arc-shaped shockwave.'),
+  new Ability('bulwark-charge', 'Bulwark Charge', 8, 20, 300, EffectType.POSITIONING, 0, 'A shoulder-first charge.'),
+  new Ability('phase-step', 'Phase Step', 9, 25, 300, EffectType.POSITIONING, 0, 'A teleport between spaces.'),
+  new Ability('vital-siphon', 'Vital Siphon', 9, 25, 100, EffectType.HEAL, 18, 'A draining melee strike.'),
 ]);
 
 function makePlayers(): [Player, Player] {
@@ -249,6 +255,19 @@ describe('MatchModel', () => {
       expect(p2.health).toBe(85); // unaffected -- aimed away, not a range failure
     });
 
+    it('CORRECTION (11_cross_2 Scope A): silently ignores a skillshot aimed away from the opponent even when they are colinear-behind the caster', () => {
+      // REGRESSION: the aim-alignment check only ever measured perpendicular distance from the infinite
+      // line through the caster along the aim direction -- with no forward-facing check, a click aimed
+      // completely away from the opponent still registered as a hit whenever they happened to be behind
+      // the caster along that same line. p2 here sits directly WEST of p1; p1 aims EAST (away from p2).
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      setPositions(match, new Position(300, CLEAR_Y), new Position(150, CLEAR_Y));
+      match.submitAbility('p1', { abilityId: 'bolt', targetPosition: new Position(400, CLEAR_Y) }); // aim east; p2 is west
+      const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+      expect(p2.health).toBe(85); // unaffected -- behind the aim direction, not merely off to the side
+    });
+
     it('silently ignores a skillshot whose line of sight to the opponent is blocked by an obstacle', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
@@ -341,6 +360,120 @@ describe('MatchModel', () => {
     it('throws InvalidMatchPhaseError before the match is ACTIVE', () => {
       const match = new MatchModel('m1', makePlayers());
       expect(() => match.submitAbility('p1', { abilityId: 'bolt' })).toThrow(InvalidMatchPhaseError);
+    });
+
+    describe('per-ability unique mechanics (11_cross_2 Scope E)', () => {
+      it('E1: Shockwave Slam uses a wider aim-alignment radius than the shared default', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        // 60 units perpendicular off-axis: beyond SKILLSHOT_HIT_RADIUS (40) but within Shockwave Slam's
+        // own SHOCKWAVE_SLAM_HIT_RADIUS (90). distance ~78, well within its 150 range.
+        setPositions(match, new Position(300, CLEAR_Y), new Position(350, CLEAR_Y + 60));
+        match.submitAbility('p1', { abilityId: 'shockwave-slam', targetPosition: new Position(400, CLEAR_Y) });
+        const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+        expect(p2.crowdControlled).toBe(true);
+      });
+
+      it('E1: the same 60-unit-off-axis geometry misses under the shared default radius (proves the widening is real, not a no-op)', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(300, CLEAR_Y), new Position(350, CLEAR_Y + 60));
+        match.submitAbility('p1', { abilityId: 'root', targetPosition: new Position(400, CLEAR_Y) }); // generic CROWD_CONTROL, default radius
+        const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+        expect(p2.crowdControlled).toBe(false);
+      });
+
+      it('E2: Bulwark Charge staggers the opponent when its travel path passes close enough to them', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        // p1's charge travels (300,CLEAR_Y) -> (600,CLEAR_Y); p2 sits 20 units off that line, within the
+        // stagger radius (SKILLSHOT_HIT_RADIUS, 40).
+        setPositions(match, new Position(300, CLEAR_Y), new Position(450, CLEAR_Y + 20));
+        match.submitAbility('p1', { abilityId: 'bulwark-charge', targetPosition: new Position(400, CLEAR_Y) });
+        const state = match.snapshot();
+        const p1 = state.participants.find((p) => p.playerId === 'p1')!;
+        const p2 = state.participants.find((p) => p.playerId === 'p2')!;
+        expect(p1.position.x).toBeCloseTo(600, 5); // still travels the full 300 range -- the stagger is additive
+        expect(p2.crowdControlled).toBe(true);
+      });
+
+      it('E2: Bulwark Charge does not stagger an opponent far from its travel path', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(300, CLEAR_Y), new Position(450, CLEAR_Y + 200)); // far off the charge's line
+        match.submitAbility('p1', { abilityId: 'bulwark-charge', targetPosition: new Position(400, CLEAR_Y) });
+        const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+        expect(p2.crowdControlled).toBe(false);
+      });
+
+      it('E2: a different POSITIONING ability passing just as close to the opponent does not stagger them (only Bulwark Charge does)', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(300, CLEAR_Y), new Position(450, CLEAR_Y + 20));
+        match.submitAbility('p1', { abilityId: 'blink', targetPosition: new Position(400, CLEAR_Y) }); // same geometry, generic POSITIONING ability
+        const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+        expect(p2.crowdControlled).toBe(false);
+      });
+
+      it('E3: Phase Step ignores obstacles in its path, unlike other POSITIONING abilities', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        // Same geometry as the existing "rejects the whole cast... crosses an obstacle" test above
+        // (blink, from (200,216) through the left pillar) -- Phase Step must succeed where blink didn't.
+        setPositions(match, new Position(200, 216), new Position(150, CLEAR_Y));
+        match.submitAbility('p1', { abilityId: 'phase-step', targetPosition: new Position(250, 216) });
+        const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+        expect(p1.position.x).toBeCloseTo(500, 5); // 200 + phase-step's 300 range -- succeeded despite the obstacle
+        expect(p1.position.y).toBeCloseTo(216, 5);
+      });
+
+      it('E4: Vital Siphon drains -- damages the opponent AND heals the caster on a hit', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(50, CLEAR_Y), new Position(120, CLEAR_Y)); // distance 70, vital-siphon's range 100
+        match.submitAbility('p2', { abilityId: 'bolt', targetPosition: new Position(50, CLEAR_Y) }); // p1: 85 -> 55, so the heal is visible
+        match.submitAbility('p1', { abilityId: 'vital-siphon', targetPosition: new Position(120, CLEAR_Y) }); // aimed exactly at p2
+        const state = match.snapshot();
+        const p1 = state.participants.find((p) => p.playerId === 'p1')!;
+        const p2 = state.participants.find((p) => p.playerId === 'p2')!;
+        expect(p2.health).toBe(67); // 85 - 18 (vital-siphon's magnitude)
+        expect(p1.health).toBe(73); // 55 + 18
+      });
+
+      it('E4: Vital Siphon whiffs when out of range -- no damage, no heal, cost still consumed', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(50, CLEAR_Y), new Position(300, CLEAR_Y)); // distance 250 > vital-siphon's 100 range
+        match.submitAbility('p1', { abilityId: 'vital-siphon', targetPosition: new Position(300, CLEAR_Y) });
+        const state = match.snapshot();
+        const p1 = state.participants.find((p) => p.playerId === 'p1')!;
+        const p2 = state.participants.find((p) => p.playerId === 'p2')!;
+        expect(p2.health).toBe(85); // unaffected
+        expect(p1.health).toBe(85); // no self-heal either -- a real whiff, not a partial success
+        expect(p1.resource).toBe(75); // 100 - vital-siphon's 25 cost, still consumed
+      });
+
+      it("E4 CRITICAL: Vital Siphon no longer casts as a no-aim instant self-heal -- the old HEAL-branch behavior is genuinely gone for it", () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(50, CLEAR_Y), new Position(120, CLEAR_Y));
+        expect(() => match.submitAbility('p1', { abilityId: 'vital-siphon' })).not.toThrow();
+        const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+        expect(p1.health).toBe(85); // no-op: no targetPosition means no direction to cast in, not a self-heal fallback
+      });
+
+      it('E4: Iron Skin-equivalent (the fixture\'s range-0 "heal") is unaffected -- still instant/self-targeted/no-aim', () => {
+        // Regression coverage for the range===0 branch specifically, now that HEAL resolution branches on
+        // ability.range -- already exercised by the "self-heals when no target is given" test above, but
+        // asserted here explicitly as part of this prompt's own Scope E4 checklist.
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(50, CLEAR_Y), new Position(150, CLEAR_Y));
+        match.submitAbility('p2', { abilityId: 'bolt', targetPosition: new Position(50, CLEAR_Y) }); // p1: 85 -> 55
+        match.submitAbility('p1', { abilityId: 'heal' }); // no target -- still self-targeted, instant
+        const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+        expect(p1.health).toBe(70); // 55 + 15
+      });
     });
   });
 

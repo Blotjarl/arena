@@ -321,6 +321,40 @@ for real in the Step 11 (`11_cross_1`) correction below** — `submitAbility` no
 > ability.range`, wall-clamped, rejected outright if the path crosses an obstacle) means Bulwark Charge,
 > Phase Step, and Swift Reposition actually move the caster for the first time since they were added.
 
+> **Step 11 correction (`11_cross_2`)**: `MatchModel.submitAbility` gains a real correctness fix and four
+> deliberate per-ability special cases, found/designed by reading the resolution logic closely rather than
+> assuming it was already right. **Correctness fix**: the aim-alignment check (`perpendicularDistance`,
+> §5a above) only ever measured distance from the opponent to the *infinite line* through the caster along
+> the aim direction, with no check that the opponent was actually in *front* of the caster — a click aimed
+> completely away from the opponent could still register a hit if they happened to be colinear-behind the
+> caster. Fixed with a forward-facing dot-product check (`forwardDot = ox*dirX + oy*dirY; if (forwardDot <
+> 0) return;`) alongside the existing perpendicular check. **Four per-ability special cases**, each
+> `ability.id === '...'`-gated rather than a new field on the shared `Ability` class (a one-off need, not a
+> general one — see the prompt for the "don't design for hypothetical future requirements" reasoning):
+> Shockwave Slam uses a wider aim-alignment radius (`SHOCKWAVE_SLAM_HIT_RADIUS`, a local constant) than the
+> shared `SKILLSHOT_HIT_RADIUS`, matching its own "arc"-shaped-AoE flavor rather than a precision hit;
+> Bulwark Charge additionally staggers the opponent (`applyCrowdControl`) if its travel path passes within
+> `BULWARK_CHARGE_STAGGER_RADIUS` of them (a new point-to-segment distance helper,
+> `distanceFromSegment` in `packages/shared/src/domain/Arena.ts` — a genuinely reusable primitive, unlike
+> the ability-specific constants, so it lives alongside `segmentCrossesObstacle` rather than in
+> `MatchModel.ts`); Phase Step is exempt from the `POSITIONING` branch's obstacle line-check (still
+> wall-clamped) since it's a magical teleport, not a physical dash like Bulwark Charge/Swift Reposition,
+> which stay blocked. **Vital Siphon** is the largest change: `HEAL` resolution now branches on
+> `ability.range` — `range === 0` (Iron Skin only) keeps the exact prior self-targeted/instant behavior;
+> `range > 0` (Vital Siphon's own `range` was already `100` in `ChampionRoster.ts` and simply never read
+> until now) is an aimed drain resolved through the same range/forward-facing/perpendicular/LOS gates as
+> `DAMAGE`/`CROWD_CONTROL`, applying both `opponent.applyDamage` and `caster.applyHeal` on a hit. This
+> deliberately changes Vital Siphon from a no-aim instant cast to an aimed skillshot — the client's
+> `isSkillshotType`/`targetsOpponent` (`MatchHUDView.tsx`) became range-aware rather than purely
+> effect-type-based to match, and two pre-existing `MatchHUDScreen.test.tsx` tests that asserted the old
+> instant-cast behavior for Vital Siphon were deliberately rewritten (repointed at Iron Skin, the one
+> ability that genuinely still behaves that way) rather than left passing against stale reasoning.
+> Separately, the client's cast-effect visuals (Scope B/C/D of the same prompt) now clamp a skillshot's
+> travel distance to `ability.range` (previously the projectile flew all the way to the raw click point
+> regardless of range — a real, if purely cosmetic, mismatch with the server's actual resolution above),
+> vary travel duration per ability instead of a flat 500ms, and vary shape per `ability.id` for a handful
+> of abilities, mirroring `11_client_8`'s existing per-`ability.id` icon pattern.
+
 > **Step 10 correction (`10_server_10`)**: `MatchmakingQueue.join()`'s own doc comment always said it
 > throws `AlreadyQueuedError` "if the player is already queued or already in an active match" (R2.2), but
 > until this correction the implementation only ever checked `entries` — the queue itself — with no

@@ -605,7 +605,14 @@ button {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  animation: cast-travel 0.5s ease-out forwards;
+  /* CORRECTION (11_cross_2 Scope C): split from the `animation` shorthand so animation-duration can be
+     driven per-cast by the --travel-ms custom property (set inline alongside --dx/--dy) — var() isn't
+     reliably usable inside the shorthand itself. Falls back to the old flat 0.5s if --travel-ms is ever
+     unset. name/timing-function/fill-mode are unchanged. */
+  animation-name: cast-travel;
+  animation-duration: var(--travel-ms, 0.5s);
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
 }
 
 .cast-effect--projectile.cast-effect--mine {
@@ -687,6 +694,44 @@ button {
 .cast-effect--pulse.cast-effect--heal {
   background: radial-gradient(circle, rgba(76, 175, 110, 0.35) 0%, rgba(76, 175, 110, 0) 70%);
   border-color: var(--color-success);
+}
+
+/* Per-ability shape overrides (11_cross_2 Scope D) — layered on top of the EffectType-level shapes just
+   above (11_client_8 Scope B.3), same higher-specificity-wins-regardless-of-order reasoning. Only added
+   where an ability's own flavor makes an obvious, non-contrived distinction from its effect-type
+   sibling(s); deliberately never touch background/color here, so the you-blue/opponent-red mine/opponent
+   distinction (.cast-effect--mine/--opponent) always still shows through. Abilities not listed keep
+   their effect-type default shape. */
+.cast-effect--projectile.cast-effect--crushing-blow {
+  width: 16px;
+  height: 16px;
+}
+
+.cast-effect--projectile.cast-effect--rending-strike {
+  clip-path: none;
+  width: 18px;
+  height: 6px;
+  border-radius: 2px;
+}
+
+.cast-effect--projectile.cast-effect--shockwave-slam {
+  clip-path: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+}
+
+.cast-effect--projectile.cast-effect--frost-lance {
+  clip-path: polygon(50% 0%, 65% 40%, 100% 50%, 65% 60%, 50% 100%, 35% 60%, 0% 50%, 35% 40%);
+  width: 14px;
+  height: 14px;
+}
+
+.cast-effect--projectile.cast-effect--bulwark-charge {
+  clip-path: none;
+  width: 22px;
+  height: 12px;
+  border-radius: 3px;
 }
 
 .damage-popup {

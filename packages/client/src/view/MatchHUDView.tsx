@@ -109,13 +109,96 @@ function toGamePosition(pixel: { x: number; y: number }, arenaRenderSizePx: Aren
 }
 
 /**
- * Every effect type except `HEAL` is a skillshot as of Step 11 (`11_cross_1`) — it requires the player
- * to aim (press the ability, then click a point in the arena) rather than auto-targeting the opponent.
- * `HEAL` stays a single click, self-targeted, instant — see `MatchModel.submitAbility`'s own doc comment
- * for the full server-side resolution this mirrors.
+ * Every effect type except a self-targeted `HEAL` is a skillshot as of Step 11 (`11_cross_1`) — it
+ * requires the player to aim (press the ability, then click a point in the arena) rather than
+ * auto-targeting the opponent.
+ * CORRECTION (11_cross_2): a `HEAL` ability is self-targeted/instant only when its own `range` is 0
+ * (Iron Skin); a `HEAL` ability with `range > 0` (Vital Siphon) is an aimed drain, same as any other
+ * skillshot — see `MatchModel.submitAbility`'s own doc comment for the server-side resolution this
+ * mirrors. Takes the whole `ability` now, not just its `effectType`, since the distinction depends on
+ * `range` too.
  */
-function isSkillshotType(effectType: EffectType): boolean {
-  return effectType !== EffectType.HEAL;
+function isSkillshotType(ability: Ability): boolean {
+  return ability.effectType !== EffectType.HEAL || ability.range > 0;
+}
+
+/**
+ * Whether a cast against this ability requires the opponent to be within range to land at all — drives
+ * both the out-of-range button styling and (via `isSkillshotType` above) aim-mode gating.
+ * CORRECTION (11_cross_2): now also true for a ranged `HEAL` (Vital Siphon) — it genuinely requires the
+ * opponent in range to drain them, unlike a self-targeted `HEAL` or a `POSITIONING` self-move (which
+ * has nothing to do with the opponent's position at all).
+ */
+function targetsOpponent(ability: Ability): boolean {
+  return (
+    ability.effectType === EffectType.DAMAGE ||
+    ability.effectType === EffectType.CROWD_CONTROL ||
+    (ability.effectType === EffectType.HEAL && ability.range > 0)
+  );
+}
+
+/**
+ * Clamps a recorded aim point to at most `ability.range` game-units from the caster, along the same
+ * direction — `POSITIONING` abilities always resolve to exactly `ability.range` (mirroring
+ * `MatchModel.submitAbility`'s own `caster.position + direction * ability.range`); every other skillshot
+ * type is clamped to at most that distance. Purely a visual approximation (Step 11, `11_cross_2` Scope
+ * B) — the server has already decided the real outcome by the time this animation plays (master context
+ * §1.1); this only keeps the cast-effect projectile from visually flying past an ability's own range.
+ */
+function clampAimPoint(
+  casterPosition: { x: number; y: number },
+  aimPoint: { x: number; y: number },
+  ability: Ability,
+): { x: number; y: number } {
+  const dx = aimPoint.x - casterPosition.x;
+  const dy = aimPoint.y - casterPosition.y;
+  const rawDistance = Math.hypot(dx, dy);
+  if (rawDistance === 0) return casterPosition;
+  const clampedDistance =
+    ability.effectType === EffectType.POSITIONING ? ability.range : Math.min(rawDistance, ability.range);
+  const scale = clampedDistance / rawDistance;
+  return { x: casterPosition.x + dx * scale, y: casterPosition.y + dy * scale };
+}
+
+/**
+ * Baseline projectile travel speed, in rendered px/ms (Step 11, `11_cross_2` Scope C) — tuned against
+ * the arena's own render scale (up to 900px wide : 720 game units, see ARENA_RENDER_SIZE_MAX_PX), not
+ * an absolute physical unit.
+ */
+const PROJECTILE_SPEED_PX_PER_MS = 1.6;
+
+/**
+ * Per-ability speed multiplier relative to the baseline above — >1 reads faster, <1 reads slower.
+ * Abilities not listed use 1 (the baseline). Chosen by flavor, not first principles (same spirit as
+ * `SKILLSHOT_HIT_RADIUS`'s own doc comment on the server): Arcane Bolt is Vex's "signature burst," Frost
+ * Lance and Swift Reposition are both explicitly about speed in their own descriptions, so all three
+ * read fast; Crushing Blow and Bulwark Charge are heavy, deliberate hits ("overhead strike,"
+ * "shoulder-first... shield raised") that read slower per unit of distance even though Crushing Blow's
+ * short range means it still resolves quickly in absolute terms; Shockwave Slam is a ground slam, not a
+ * dart, so it also leans slow.
+ */
+const PROJECTILE_SPEED_MULTIPLIER: Record<string, number> = {
+  'arcane-bolt': 1.6,
+  'frost-lance': 1.4,
+  'swift-reposition': 1.5,
+  'crushing-blow': 0.6,
+  'bulwark-charge': 0.55,
+  'shockwave-slam': 0.7,
+};
+
+/** Clamp bounds for a computed travel duration — never instant/unreadable, never sluggish. */
+const MIN_TRAVEL_MS = 90;
+const MAX_TRAVEL_MS = 900;
+
+/**
+ * @returns how long (ms) a cast-effect projectile covering `distancePx` should take to travel, for the
+ * given ability — replaces the old flat `CAST_EFFECT_DURATION_MS` for every projectile-kind cast.
+ */
+function computeTravelDurationMs(distancePx: number, abilityId: string): number {
+  const multiplier = PROJECTILE_SPEED_MULTIPLIER[abilityId] ?? 1;
+  const speed = PROJECTILE_SPEED_PX_PER_MS * multiplier;
+  const raw = distancePx / speed;
+  return Math.max(MIN_TRAVEL_MS, Math.min(MAX_TRAVEL_MS, raw));
 }
 
 /** The four `.ability-icon--*` CSS modifier classes, one per EffectType (see styles.css Scope B.2). */
@@ -294,6 +377,12 @@ interface CastEffectVisual {
   /** Drives the additive `cast-effect--{modifier}` shape/color class (11_client_8 Scope B.3) — layered
    *  on top of, not replacing, the existing kind/isMine classes and --dx/--dy mechanism. */
   effectType: EffectType;
+  /** Drives a further additive `cast-effect--{abilityId}` shape class (11_cross_2 Scope D), layered on
+   *  top of the effectType-level one above. */
+  abilityId: string;
+  /** How long (ms) this cast's travel animation takes — computed per-ability for projectiles (Scope C),
+   *  fixed at CAST_EFFECT_DURATION_MS for a self-pulse (no travel distance to derive a speed from). */
+  durationMs: number;
 }
 
 /** One in-flight floating damage-number popup. */
@@ -525,10 +614,13 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   const spawnCastEffect = (effect: Omit<CastEffectVisual, 'id'>): void => {
     const id = nextEffectIdRef.current++;
     setCastEffects((prev) => [...prev, { ...effect, id }]);
+    // CORRECTION (11_cross_2 Scope C): cleanup now matches each cast's own computed duration, not the
+    // old flat CAST_EFFECT_DURATION_MS, so the effect is removed from state exactly when its animation
+    // finishes rather than early/late.
     const timeoutId = window.setTimeout(() => {
       setCastEffects((prev) => prev.filter((e) => e.id !== id));
       pendingTimeoutsRef.current.delete(timeoutId);
-    }, CAST_EFFECT_DURATION_MS);
+    }, effect.durationMs);
     pendingTimeoutsRef.current.add(timeoutId);
   };
 
@@ -616,7 +708,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
       if (!context) return;
       const ability = context.abilities[index];
       if (!ability) return;
-      if (!isSkillshotType(ability.effectType)) {
+      if (!isSkillshotType(ability)) {
         controller.operation('useAbility', { abilityId: ability.id });
         return;
       }
@@ -656,13 +748,27 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
           // in the direction it was actually aimed, not silently do nothing. The opponent's own casts have
           // no aim info available to this client, so they still fall back to animating toward `target`
           // (in a 1v1 game, "the other participant" is always the only plausible aim target to show).
-          if (isSkillshotType(ability.effectType) && target) {
+          if (isSkillshotType(ability) && target) {
             const recordedAim = isMine ? lastAimPointRef.current.get(ability.id) : undefined;
             if (recordedAim) lastAimPointRef.current.delete(ability.id);
-            const to = recordedAim
-              ? toRenderPixels(recordedAim, arenaRenderSizePx)
-              : toRenderPixels(target.position, arenaRenderSizePx);
-            spawnCastEffect({ kind: 'projectile', isMine, from: casterPixel, to, effectType: ability.effectType });
+            // CORRECTION (11_cross_2 Scope B): this player's own recorded aim point is clamped to the
+            // ability's real range before converting to render pixels, so the projectile never visually
+            // travels farther than the ability could actually reach — previously it flew all the way to
+            // the raw click point regardless of range. The opponent's cast (no aim info available to
+            // this client) still falls back to target.position directly, which is already range-correct
+            // by construction.
+            const toGame = recordedAim ? clampAimPoint(participant.position, recordedAim, ability) : target.position;
+            const to = toRenderPixels(toGame, arenaRenderSizePx);
+            const travelDistancePx = Math.hypot(to.x - casterPixel.x, to.y - casterPixel.y);
+            spawnCastEffect({
+              kind: 'projectile',
+              isMine,
+              from: casterPixel,
+              to,
+              effectType: ability.effectType,
+              abilityId: ability.id,
+              durationMs: computeTravelDurationMs(travelDistancePx, ability.id),
+            });
           } else {
             spawnCastEffect({
               kind: 'pulse',
@@ -670,6 +776,8 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
               from: casterPixel,
               to: casterPixel,
               effectType: ability.effectType,
+              abilityId: ability.id,
+              durationMs: CAST_EFFECT_DURATION_MS,
             });
           }
         }
@@ -711,7 +819,7 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
   // well as DAMAGE/CROWD_CONTROL — every skillshot type has a meaningful "how far does this reach" range
   // worth visualizing. Aiming takes priority over a stale hover from before the ability was pressed.
   const displayedRangeAbility = aimingAbility ?? hoveredAbility;
-  const showRangeRing = displayedRangeAbility && isSkillshotType(displayedRangeAbility.effectType);
+  const showRangeRing = displayedRangeAbility && isSkillshotType(displayedRangeAbility);
   // Px-per-game-unit is identical on both axes (ARENA_WIDTH:ARENA_HEIGHT ratio is preserved exactly by
   // computeArenaRenderSizePx), so scaling this game-space radius by the width axis alone still yields a
   // geometrically correct circle.
@@ -837,13 +945,14 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
             aria-hidden="true"
             className={`cast-effect cast-effect--${effect.kind} ${
               effect.isMine ? 'cast-effect--mine' : 'cast-effect--opponent'
-            } cast-effect--${effectTypeModifier(effect.effectType)}`}
+            } cast-effect--${effectTypeModifier(effect.effectType)} cast-effect--${effect.abilityId}`}
             style={
               {
                 left: effect.from.x,
                 top: effect.from.y,
                 '--dx': `${effect.to.x - effect.from.x}px`,
                 '--dy': `${effect.to.y - effect.from.y}px`,
+                '--travel-ms': `${effect.durationMs}ms`,
               } as CSSProperties
             }
           />
@@ -878,20 +987,20 @@ export function MatchHUDScreen(props: { view: MatchHUDView }): JSX.Element {
           // different ability switches aim to that one. The real cast happens from the arena's onClick
           // handler once the player clicks where to aim. See MatchModel.submitAbility's own doc comment
           // for the server-side resolution this mirrors.
-          const isOffensive =
-            ability.effectType === EffectType.DAMAGE || ability.effectType === EffectType.CROWD_CONTROL;
           const onCooldown = Boolean(me.cooldownsRemaining[ability.id]);
           const isAiming = aimingAbilityId === ability.id;
           // Range indication (11_client_4): the server already silently ignores an out-of-range cast
           // (R4.2, deliberate) — the client previously gave zero indication of why, so an out-of-range
-          // click looked identical to a broken button. Only meaningful for opponent-targeted abilities;
-          // HEAL/POSITIONING are self-targeted and have no "range to opponent" to speak of.
-          const outOfRange = isOffensive && !onCooldown && myPosition.distanceTo(opponentPosition) > ability.range;
+          // click looked identical to a broken button. Only meaningful for opponent-targeted abilities
+          // (CORRECTION, 11_cross_2: now includes a ranged HEAL like Vital Siphon, via targetsOpponent);
+          // a self-targeted HEAL/POSITIONING has no "range to opponent" to speak of.
+          const outOfRange =
+            targetsOpponent(ability) && !onCooldown && myPosition.distanceTo(opponentPosition) > ability.range;
           return (
             <button
               key={ability.id}
               onClick={() => {
-                if (!isSkillshotType(ability.effectType)) {
+                if (!isSkillshotType(ability)) {
                   controller.operation('useAbility', { abilityId: ability.id });
                   return;
                 }
