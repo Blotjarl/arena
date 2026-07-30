@@ -255,7 +255,7 @@ team, unlike every prior prompt in this project.
 | 10 | `11_client_5_fix-initial-render-and-verify-input.md` | **Raj** | none — highest priority, real regression | [x] |
 | 11 | `11_server_3_wider-arena-and-obstacles.md` | **Marshall** | none (independent of 10) | [x] |
 | 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [x] |
-| 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [ ] not yet executed — awaiting Marshall's go-ahead |
+| 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [x] |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
