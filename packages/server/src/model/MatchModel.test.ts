@@ -21,13 +21,13 @@ import {
 import { MatchModel } from './MatchModel';
 
 const SPAWN_P1_X = 50; // must match MatchModel's SPAWN_WALL_MARGIN
-const SPAWN_P2_X = 550; // must match MatchModel's ARENA_WIDTH - SPAWN_WALL_MARGIN (CORRECTION 11_server_3: ARENA_WIDTH is now 600)
+const SPAWN_P2_X = 670; // must match MatchModel's ARENA_WIDTH - SPAWN_WALL_MARGIN (CORRECTION 11_cross_1: ARENA_WIDTH is now 720)
 
 const VEX = new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 10, 200, [
-  new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30),
-  new Ability('heal', 'Self Mend', 8, 30, 0, EffectType.HEAL, 15),
-  new Ability('root', 'Frost Lance', 6, 25, 400, EffectType.CROWD_CONTROL, 1.5),
-  new Ability('blink', 'Phase Step', 10, 20, 300, EffectType.POSITIONING, 0),
+  new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30, 'A burst of arcane energy.'),
+  new Ability('heal', 'Self Mend', 8, 30, 0, EffectType.HEAL, 15, 'A self-heal.'),
+  new Ability('root', 'Frost Lance', 6, 25, 400, EffectType.CROWD_CONTROL, 1.5, 'Freezes the target.'),
+  new Ability('blink', 'Phase Step', 10, 20, 300, EffectType.POSITIONING, 0, 'A short blink.'),
 ]);
 
 function makePlayers(): [Player, Player] {
@@ -203,27 +203,67 @@ describe('MatchModel', () => {
     });
   });
 
-  describe('submitAbility', () => {
-    it('applies damage to an in-range target and consumes cooldown/resource on the caster', () => {
+  describe('submitAbility (CORRECTION, 11_cross_1: skillshot targeting via targetPosition)', () => {
+    // y=400 sits clear of every ARENA_OBSTACLES rectangle (pillars end at y=276, the top block at y=84),
+    // so hit-resolution tests below aren't accidentally affected by line-of-sight blocking -- that gets
+    // its own dedicated tests further down, with deliberately obstacle-crossing positions.
+    const CLEAR_Y = 400;
+
+    function setPositions(match: MatchModel, p1: Position, p2: Position): void {
+      const state = match as unknown as { participants: { playerId: string; position: Position }[] };
+      state.participants.find((p) => p.playerId === 'p1')!.position = p1;
+      state.participants.find((p) => p.playerId === 'p2')!.position = p2;
+    }
+
+    it('applies damage when aimed exactly at an in-range opponent, consuming cooldown/resource on the caster', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
-      match.submitAbility('p1', { abilityId: 'bolt', targetPlayerId: 'p2' });
+      setPositions(match, new Position(50, CLEAR_Y), new Position(350, CLEAR_Y)); // distance 300, bolt range 500
+      match.submitAbility('p1', { abilityId: 'bolt', targetPosition: new Position(350, CLEAR_Y) }); // aimed exactly at p2
       const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
       expect(p2.health).toBe(55); // 85 - 30
+      const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+      expect(p1.resource).toBe(80); // 100 - bolt's 20 cost
+      expect(Object.keys(p1.cooldownsRemaining)).toContain('bolt');
     });
 
-    it('silently ignores an out-of-range target (no effect, no throw)', () => {
+    it('silently ignores a skillshot aimed correctly but out of range (no effect, no throw, cost still consumed)', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
-      // CORRECTION (Step 11): movement is now clamped to the arena, so pushing p2 via submitMove/tick can
-      // no longer reliably exceed bolt's 500-range within a 400x400 arena. Set the target's position
-      // directly instead, to keep this test about range-checking, not the wall clamp (covered separately
-      // in ParticipantState.test.ts).
-      const p2State = (match as unknown as { participants: { playerId: string; position: Position }[] }).participants.find(
-        (p) => p.playerId === 'p2',
-      )!;
-      p2State.position = new Position(p2State.position.x + 1000, p2State.position.y);
-      expect(() => match.submitAbility('p1', { abilityId: 'bolt', targetPlayerId: 'p2' })).not.toThrow();
+      setPositions(match, new Position(50, CLEAR_Y), new Position(650, CLEAR_Y)); // distance 600 > bolt's 500 range
+      expect(() =>
+        match.submitAbility('p1', { abilityId: 'bolt', targetPosition: new Position(650, CLEAR_Y) }),
+      ).not.toThrow();
+      const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+      expect(p2.health).toBe(85); // unaffected -- whiffed
+      const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+      expect(p1.resource).toBe(80); // cost still consumed on a whiffed cast (real skillshot semantics)
+    });
+
+    it('silently ignores a skillshot in range but aimed away from the opponent', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      setPositions(match, new Position(50, CLEAR_Y), new Position(150, CLEAR_Y)); // distance 100, well within range
+      match.submitAbility('p1', { abilityId: 'bolt', targetPosition: new Position(50, CLEAR_Y - 360) }); // aimed north, not east
+      const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+      expect(p2.health).toBe(85); // unaffected -- aimed away, not a range failure
+    });
+
+    it('silently ignores a skillshot whose line of sight to the opponent is blocked by an obstacle', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      // y=216 sits inside the left pillar's y-range [156,276]; x 200->400 crosses its x-range [246,306].
+      setPositions(match, new Position(200, 216), new Position(400, 216));
+      match.submitAbility('p1', { abilityId: 'bolt', targetPosition: new Position(400, 216) }); // aimed exactly at p2, in range
+      const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
+      expect(p2.health).toBe(85); // unaffected -- blocked, despite perfect range and aim
+    });
+
+    it('silently ignores a skillshot with no targetPosition at all (DAMAGE/CROWD_CONTROL/POSITIONING all require aim)', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      setPositions(match, new Position(50, CLEAR_Y), new Position(150, CLEAR_Y));
+      expect(() => match.submitAbility('p1', { abilityId: 'bolt' })).not.toThrow();
       const p2 = match.snapshot().participants.find((p) => p.playerId === 'p2')!;
       expect(p2.health).toBe(85);
     });
@@ -231,14 +271,17 @@ describe('MatchModel', () => {
     it('silently ignores an unknown ability id', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
-      expect(() => match.submitAbility('p1', { abilityId: 'nope', targetPlayerId: 'p2' })).not.toThrow();
+      expect(() =>
+        match.submitAbility('p1', { abilityId: 'nope', targetPosition: new Position(0, 0) }),
+      ).not.toThrow();
     });
 
-    it('self-heals when no target is given', () => {
+    it('self-heals when no target is given (HEAL is unaffected by the skillshot rework)', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
-      match.submitAbility('p2', { abilityId: 'bolt', targetPlayerId: 'p1' }); // p1 takes 30 -> 55
-      match.submitAbility('p1', { abilityId: 'heal' }); // no target -> self
+      setPositions(match, new Position(50, CLEAR_Y), new Position(150, CLEAR_Y));
+      match.submitAbility('p2', { abilityId: 'bolt', targetPosition: new Position(50, CLEAR_Y) }); // p1 takes 30 -> 55
+      match.submitAbility('p1', { abilityId: 'heal' }); // no target -> self, no aiming needed
       const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
       expect(p1.health).toBe(70); // 55 + 15
     });
@@ -246,23 +289,53 @@ describe('MatchModel', () => {
     it('applies crowd control converting magnitude (seconds) to a duration window', () => {
       const match = new MatchModel('m1', makePlayers());
       selectBothChampions(match);
-      // CORRECTION (Step 11, 11_server_3): the widened 600-wide arena puts the two spawns 500 apart, which
-      // now exceeds 'root' (Frost Lance)'s 400 range -- pull p2 within range directly, the same way the
-      // out-of-range test above manipulates position directly to keep this test about CC application, not
-      // spawn-distance geometry.
-      const p1State = (match as unknown as { participants: { playerId: string; position: Position }[] }).participants.find(
-        (p) => p.playerId === 'p1',
-      )!;
-      const p2State = (match as unknown as { participants: { playerId: string; position: Position }[] }).participants.find(
-        (p) => p.playerId === 'p2',
-      )!;
-      p2State.position = new Position(p1State.position.x + 100, p1State.position.y);
-      match.submitAbility('p1', { abilityId: 'root', targetPlayerId: 'p2' });
+      setPositions(match, new Position(50, CLEAR_Y), new Position(150, CLEAR_Y)); // distance 100, root's range 400
+      match.submitAbility('p1', { abilityId: 'root', targetPosition: new Position(150, CLEAR_Y) }); // aimed exactly at p2
       const before = match.snapshot().participants.find((p) => p.playerId === 'p2')!.position;
       match.submitMove('p2', { dx: 1, dy: 0 });
       match.tick(0.5);
       const after = match.snapshot().participants.find((p) => p.playerId === 'p2')!.position;
       expect(after).toEqual(before); // did not move -- crowd-controlled
+    });
+
+    describe('POSITIONING (CORRECTION, 11_cross_1: fixes a real pre-existing bug)', () => {
+      // Previously, submitAbility resolved `target = req.targetPlayerId ? opponent : caster`, and the
+      // client never sent targetPlayerId for POSITIONING abilities -- so `target` was always the caster,
+      // and `caster.position = target.position` was a same-value no-op. Every POSITIONING ability in the
+      // game (Bulwark Charge, Phase Step, Swift Reposition) consumed cooldown and resource and did
+      // literally nothing. These tests are the regression coverage that gap never had.
+
+      it('CRITICAL: actually moves the caster the full ability range in the aimed direction, when the path is clear', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(400, CLEAR_Y), new Position(150, CLEAR_Y));
+        match.submitAbility('p1', { abilityId: 'blink', targetPosition: new Position(500, CLEAR_Y) }); // aim east
+        const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+        expect(p1.position.x).toBeCloseTo(700, 5); // 400 + blink's 300 range, straight east
+        expect(p1.position.y).toBeCloseTo(CLEAR_Y, 5);
+      });
+
+      it('wall-clamps the destination at an arena edge, same as regular movement', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        setPositions(match, new Position(680, CLEAR_Y), new Position(150, CLEAR_Y));
+        match.submitAbility('p1', { abilityId: 'blink', targetPosition: new Position(700, CLEAR_Y) }); // aim east
+        const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+        expect(p1.position.x).toBe(ARENA_WIDTH); // 680 + 300 would overshoot; clamped at the wall
+      });
+
+      it('rejects the whole cast (caster does not move) when the path crosses an obstacle, but cooldown/resource are still consumed', () => {
+        const match = new MatchModel('m1', makePlayers());
+        selectBothChampions(match);
+        // (200,216) -> aimed east for 300 range would land at (500,216), a straight line that crosses the
+        // left pillar (x [246,306], y [156,276]) exactly like the DAMAGE line-of-sight test above.
+        setPositions(match, new Position(200, 216), new Position(150, CLEAR_Y));
+        match.submitAbility('p1', { abilityId: 'blink', targetPosition: new Position(250, 216) });
+        const p1 = match.snapshot().participants.find((p) => p.playerId === 'p1')!;
+        expect(p1.position.x).toBe(200); // rejected outright -- stayed put
+        expect(p1.position.y).toBe(216);
+        expect(p1.resource).toBe(80); // blink's 20 cost still consumed on the whiffed cast
+      });
     });
 
     it('throws InvalidMatchPhaseError before the match is ACTIVE', () => {

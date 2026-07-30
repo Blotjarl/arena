@@ -5,8 +5,8 @@ import { InvalidChampionSelectionError } from '../exceptions/InvalidChampionSele
 
 function makeChampion(): Champion {
   return new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 12, 220, [
-    new Ability('arcane-bolt', 'Arcane Bolt', 4, 35, 600, EffectType.DAMAGE, 32),
-    new Ability('phase-step', 'Phase Step', 9, 25, 300, EffectType.POSITIONING, 0),
+    new Ability('arcane-bolt', 'Arcane Bolt', 4, 35, 600, EffectType.DAMAGE, 32, 'A burst of arcane energy.'),
+    new Ability('phase-step', 'Phase Step', 9, 25, 300, EffectType.POSITIONING, 0, 'A short blink.'),
   ]);
 }
 

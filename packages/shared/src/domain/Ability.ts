@@ -17,5 +17,11 @@ export class Ability {
     public readonly effectType: EffectType,
     /** The effect's strength — damage/heal amount, stun duration, etc., interpreted per `effectType`. */
     public readonly magnitude: number,
+    /**
+     * Short flavor text describing what this ability does, shown as a hover tooltip in both Champion
+     * Select and the match HUD (Step 11, 11_cross_1). Purely descriptive/cosmetic — never read by any
+     * game-logic code, unlike every other field on this class.
+     */
+    public readonly description: string,
   ) {}
 }

@@ -17,6 +17,8 @@ import {
   SelectionWindowExpiredError,
   ARENA_WIDTH,
   ARENA_HEIGHT,
+  SKILLSHOT_HIT_RADIUS,
+  segmentCrossesObstacle,
 } from '@arena/shared';
 import { ParticipantState } from './ParticipantState';
 
@@ -153,21 +155,35 @@ export class MatchModel extends AbstractModel {
   }
 
   /**
-   * Resolves and forwards an ability-use request. Because ParticipantState.useAbility() has no
-   * target-position parameter, this method is where target range is checked (R4.2). A request naming no
-   * target is treated as self-targeted (range always satisfied) — matches self-heal/self-buff kits. Once
-   * ParticipantState.useAbility() succeeds, this method applies the ability's actual effect
-   * (damage/heal/crowd-control/positioning) using ability.effectType/magnitude. POSITIONING is simplified
-   * to "move the caster directly to the target's position" (a charge/leap) — nuanced blink semantics are
-   * out of scope for this pass.
+   * Resolves and forwards an ability-use request (R4.2).
+   *
+   * CORRECTION (Step 11, 11_cross_1): `HEAL` stays self-targeted and instant, no aim needed. Every other
+   * effect type (`DAMAGE`, `CROWD_CONTROL`, `POSITIONING`) is now a skillshot — it requires `req.targetPosition`
+   * (a point in arena-space the caster aimed at) and resolves via direction, not a named target player.
+   * This replaces the old `target = req.targetPlayerId ? opponent : caster` resolution, which silently made
+   * every `POSITIONING` ability a same-position no-op (the client never sent `targetPlayerId` for them —
+   * see the class-list correction for this prompt for the full history of that bug).
+   *
+   * For `DAMAGE`/`CROWD_CONTROL`: the aim direction is computed from caster to `targetPosition`, then the
+   * *actual* opponent (not the clicked point) is checked against three independent conditions, all
+   * required for a hit — range (`distanceTo(opponent) <= ability.range`, unchanged from before), aim
+   * alignment (the opponent's perpendicular distance from the cast ray is within `SKILLSHOT_HIT_RADIUS`),
+   * and line of sight (`segmentCrossesObstacle` between caster and opponent). A miss on any of these still
+   * consumes the ability's cooldown/resource via `useAbility()` — a real "whiffed cast", not a bug.
+   *
+   * For `POSITIONING`: the destination is `caster.position + direction * ability.range`, wall-clamped
+   * exactly like regular movement; if the straight path to that destination crosses an obstacle, the whole
+   * cast is rejected (caster does not move, cooldown/resource are still consumed) rather than attempting a
+   * partial teleport.
    * @param playerId - the acting player
-   * @param req - the ability id and optional target
+   * @param req - the ability id and, for every effect type except `HEAL`, the aimed `targetPosition`
    * @throws {InvalidMatchPhaseError} if the match is not currently ACTIVE
    *
    * All per-ability validation failures — unknown ability, cooldown, insufficient resource, incapacitation,
-   * out-of-range target — are caught internally and silently ignored, per R4's "silently ignores" behavior.
+   * missing aim, out-of-range/misaimed/blocked target — are caught internally and silently ignored, per
+   * R4's "silently ignores" behavior.
    */
-  submitAbility(playerId: string, req: { abilityId: string; targetPlayerId?: string }): void {
+  submitAbility(playerId: string, req: { abilityId: string; targetPlayerId?: string; targetPosition?: Position }): void {
     if (this.phase !== MatchPhase.ACTIVE) {
       throw new InvalidMatchPhaseError(this.id, MatchPhase.ACTIVE, this.phase);
     }
@@ -176,30 +192,65 @@ export class MatchModel extends AbstractModel {
     const ability = caster.champion.abilities.find((a) => a.id === req.abilityId);
     if (!ability) return;
 
-    const target = req.targetPlayerId ? this.findParticipant(req.targetPlayerId) : caster;
-    const distance = caster.position.distanceTo(target.position);
-    if (target !== caster && distance > ability.range) return;
-
     const now = Date.now();
+
+    if (ability.effectType === EffectType.HEAL) {
+      try {
+        caster.useAbility(ability, now);
+      } catch (err) {
+        if (err instanceof ArenaError) return;
+        throw err;
+      }
+      caster.applyHeal(ability.magnitude);
+      return;
+    }
+
+    // DAMAGE / CROWD_CONTROL / POSITIONING all require an aimed direction.
+    if (!req.targetPosition) return;
+    const dx = req.targetPosition.x - caster.position.x;
+    const dy = req.targetPosition.y - caster.position.y;
+    const aimMagnitude = Math.hypot(dx, dy);
+    if (aimMagnitude === 0) return; // aimed exactly at self -- no direction to cast in
+    const dirX = dx / aimMagnitude;
+    const dirY = dy / aimMagnitude;
+
     try {
-      caster.useAbility(ability, now);
+      caster.useAbility(ability, now); // consumes cooldown/resource regardless of hit/miss below
     } catch (err) {
       if (err instanceof ArenaError) return;
       throw err;
     }
 
+    if (ability.effectType === EffectType.POSITIONING) {
+      const rawX = caster.position.x + dirX * ability.range;
+      const rawY = caster.position.y + dirY * ability.range;
+      const destX = Math.max(0, Math.min(ARENA_WIDTH, rawX));
+      const destY = Math.max(0, Math.min(ARENA_HEIGHT, rawY));
+      if (segmentCrossesObstacle(caster.position.x, caster.position.y, destX, destY)) return;
+      caster.position = new Position(destX, destY);
+      return;
+    }
+
+    // DAMAGE / CROWD_CONTROL: resolve against the real opponent, not the clicked point.
+    const opponent = this.opponentOf(caster);
+    const distance = caster.position.distanceTo(opponent.position);
+    if (distance > ability.range) return;
+
+    const ox = opponent.position.x - caster.position.x;
+    const oy = opponent.position.y - caster.position.y;
+    const perpendicularDistance = Math.abs(ox * dirY - oy * dirX);
+    if (perpendicularDistance > SKILLSHOT_HIT_RADIUS) return;
+
+    if (segmentCrossesObstacle(caster.position.x, caster.position.y, opponent.position.x, opponent.position.y)) {
+      return;
+    }
+
     switch (ability.effectType) {
       case EffectType.DAMAGE:
-        target.applyDamage(ability.magnitude);
-        break;
-      case EffectType.HEAL:
-        target.applyHeal(ability.magnitude);
+        opponent.applyDamage(ability.magnitude);
         break;
       case EffectType.CROWD_CONTROL:
-        target.applyCrowdControl(ability.magnitude * 1000, now);
-        break;
-      case EffectType.POSITIONING:
-        caster.position = target.position;
+        opponent.applyCrowdControl(ability.magnitude * 1000, now);
         break;
     }
   }

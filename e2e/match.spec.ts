@@ -28,6 +28,28 @@ async function selectChampion(page: Page, championName: string): Promise<void> {
   await page.getByRole('button', { name: `Select ${championName}` }).click();
 }
 
+async function holdKey(page: Page, key: string, durationMs: number): Promise<void> {
+  await page.keyboard.down(key);
+  await page.waitForTimeout(durationMs);
+  await page.keyboard.up(key);
+}
+
+/**
+ * CORRECTION (11_cross_1): the arena widened to 720 (from 600), putting the two default spawns 620
+ * units apart — Arcane Bolt's 600 range no longer reaches between them at all. Separately, obstacles now
+ * block ability line of sight (not just movement), and the straight line between the two default spawns
+ * passes squarely through both obstacle pillars' y-range regardless of x. Neither gap existed when this
+ * suite was first written. Both players hold 's' (down) first — clearing the pillars' y-band entirely,
+ * so the line between them can never cross an obstacle at any x from here on — then the attacker holds
+ * 'd' (right) to close enough of the remaining x-distance to come back within range. Real WASD input,
+ * not a symbolic single click — this is genuinely what real play now requires post-11_cross_1, not just
+ * a workaround to make the test pass.
+ */
+async function moveIntoRangeAndClearSight(attacker: Page, defender: Page): Promise<void> {
+  await Promise.all([holdKey(attacker, 's', 500), holdKey(defender, 's', 500)]);
+  await holdKey(attacker, 'd', 600);
+}
+
 const arcaneBoltCooldown = (page: Page) =>
   page.locator('ul[aria-label="you-cooldowns"] li', { hasText: 'arcane-bolt' });
 
@@ -38,9 +60,17 @@ const arcaneBoltCooldown = (page: Page) =>
  * reason), which would silently re-fire while genuinely still on cooldown (the server just ignores an
  * on-cooldown ability use, R4.2) and never land a second hit. Waiting for the cooldown to *appear*
  * first proves the server actually processed this cast before we wait for it to clear.
+ *
+ * CORRECTION (11_cross_1): Arcane Bolt (DAMAGE) is now a skillshot — clicking the ability button alone
+ * only enters aim mode, it no longer casts by itself. The real cast now needs a second click inside the
+ * arena to aim it; clicking directly on the opponent's own marker (real DOM element, real bounding box)
+ * aims exactly at their true position regardless of viewport size or arena scale, guaranteeing perfect
+ * alignment — the same "aim exactly at the opponent" pattern this project's own MatchModel.test.ts uses
+ * for its skillshot hit-resolution unit tests.
  */
 async function castArcaneBoltAndWaitForCooldown(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Arcane Bolt' }).click();
+  await page.locator('div[aria-label="opponent-marker"]').click();
   await expect(arcaneBoltCooldown(page)).toHaveCount(1, { timeout: 5_000 });
   await expect(arcaneBoltCooldown(page)).toHaveCount(0, { timeout: 10_000 });
 }
@@ -101,11 +131,14 @@ test.describe('a complete Arena match', () => {
     await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible();
     await expect(attacker.locator('div[aria-label="ability-controls"]')).toBeVisible();
 
-    // Touch real movement input too (both participants spawn well within Arcane Bolt's 600-range of each
-    // other regardless, so this isn't needed for range, but it's a real player action the HUD exposes and
-    // the server validates — exercise it for real).
+    // Touch the movement buttons too (a real player action the HUD exposes and the server validates —
+    // exercise it for real; a single click each is a token amount, not the real repositioning below).
     await attacker.getByRole('button', { name: 'Move Up' }).click();
     await defender.getByRole('button', { name: 'Move Down' }).click();
+
+    // CORRECTION (11_cross_1): real repositioning is now required before any cast can land at all — see
+    // moveIntoRangeAndClearSight's own doc comment for why the default spawns no longer suffice.
+    await moveIntoRangeAndClearSight(attacker, defender);
 
     // Three Arcane Bolts (32 damage each) reliably eliminate Vex's 85 HP; Bob never fights back, so the
     // outcome is deterministic — Alice wins, Bob loses, no draw risk. No need to wait out the third
@@ -113,6 +146,7 @@ test.describe('a complete Arena match', () => {
     await castArcaneBoltAndWaitForCooldown(attacker);
     await castArcaneBoltAndWaitForCooldown(attacker);
     await attacker.getByRole('button', { name: 'Arcane Bolt' }).click();
+    await attacker.locator('div[aria-label="opponent-marker"]').click();
 
     await expect(attacker.getByRole('heading', { name: 'Victory' })).toBeVisible({ timeout: 20_000 });
     await expect(attacker.getByText('Reason: Elimination')).toBeVisible();
@@ -175,6 +209,11 @@ test.describe('disconnect and reconnect during an active match (R6.1-R6.4)', () 
 
     await expect(attacker.locator('div[aria-label="movement-controls"]')).toBeVisible();
     await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible();
+
+    // CORRECTION (11_cross_1): real repositioning is now required before any cast can land — see
+    // moveIntoRangeAndClearSight's own doc comment. Done before the disconnect simulation below;
+    // position isn't affected by a network drop, so there's no reason to interleave the two concerns.
+    await moveIntoRangeAndClearSight(attacker, defender);
 
     // Drop Dave's real network connection. Carol's client should see the server's real
     // match:player_disconnected broadcast and show the Part 1 banner (R6.2, 3.6.5 Usability).

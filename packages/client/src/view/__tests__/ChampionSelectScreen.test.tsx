@@ -9,10 +9,10 @@ import type { ChampionSelectController } from '../../controller/ChampionSelectCo
 function makeRoster(): Champion[] {
   return [
     new Champion('vex', 'Vex', 'Ranged Burst Mage', 85, 100, 10, 200, [
-      new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30),
+      new Ability('bolt', 'Arcane Bolt', 5, 20, 500, EffectType.DAMAGE, 30, 'A burst of arcane energy.'),
     ]),
     new Champion('korr', 'Korr', 'Bruiser / Control', 180, 100, 8, 150, [
-      new Ability('crush', 'Crushing Blow', 3, 15, 80, EffectType.DAMAGE, 25),
+      new Ability('crush', 'Crushing Blow', 3, 15, 80, EffectType.DAMAGE, 25, 'An overhead strike.'),
     ]),
   ];
 }
