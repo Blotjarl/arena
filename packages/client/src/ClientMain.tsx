@@ -1,18 +1,21 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { io, Socket } from 'socket.io-client';
 import { MatchPhase, SOCKET_EVENTS, IdentifyPayload } from '@arena/shared';
 import { ClientIdentityModel } from './model/ClientIdentityModel';
 import { ClientQueueModel } from './model/ClientQueueModel';
 import { ClientMatchModel } from './model/ClientMatchModel';
+import { ClientLeaderboardModel } from './model/ClientLeaderboardModel';
 import { SocketConnectionController } from './controller/SocketConnectionController';
 import { LobbyController } from './controller/LobbyController';
 import { ChampionSelectController } from './controller/ChampionSelectController';
 import { MatchController } from './controller/MatchController';
+import { LeaderboardController } from './controller/LeaderboardController';
 import { LobbyView, LobbyScreen } from './view/LobbyView';
 import { ChampionSelectView, ChampionSelectScreen } from './view/ChampionSelectView';
 import { MatchHUDView, MatchHUDScreen } from './view/MatchHUDView';
 import { ResultsView, ResultsScreen } from './view/ResultsView';
+import { LeaderboardView, LeaderboardScreen } from './view/LeaderboardView';
 
 /**
  * Constructs one (controller, view) pair, breaking the circular constructor dependency between
@@ -36,6 +39,14 @@ function wirePair<Model, ViewT extends { setController(c: unknown): void }, Cont
  * model state, and re-renders whenever any of the three models changes — registered directly as
  * plain ModelListeners on the models themselves (not through any View's bindUpdateCallback, which
  * is a single-slot mechanism already claimed by whichever screen is currently mounted).
+ *
+ * CORRECTION (11_client_7): the Leaderboard screen is not one of SRS 3.1.1's four formally-listed
+ * screens (see `LeaderboardView.tsx`'s own doc comment for the SRS ambiguity this resolves) and isn't
+ * tied to any server-reported phase the way the other four are — it's a player-initiated "look something
+ * up" overlay. Modeled as a plain `showLeaderboard` boolean owned by this router, checked *before* the
+ * phase-based routing below, so it takes over the whole screen regardless of current match/queue state.
+ * Reachable only from the Lobby (idle) and Results screens, via the `onViewLeaderboard` prop passed into
+ * both — deliberately no entry point during queueing, Champion Select, or an active match.
  */
 function AppRouter(props: {
   identityModel: ClientIdentityModel;
@@ -45,9 +56,20 @@ function AppRouter(props: {
   championSelectView: ChampionSelectView;
   matchHUDView: MatchHUDView;
   resultsView: ResultsView;
+  leaderboardView: LeaderboardView;
 }): JSX.Element {
-  const { identityModel, queueModel, matchModel, lobbyView, championSelectView, matchHUDView, resultsView } = props;
+  const {
+    identityModel,
+    queueModel,
+    matchModel,
+    lobbyView,
+    championSelectView,
+    matchHUDView,
+    resultsView,
+    leaderboardView,
+  } = props;
   const [, forceRender] = useReducer((n: number) => n + 1, 0);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   useEffect(() => {
     const listener = { modelChanged: () => forceRender() };
@@ -56,11 +78,14 @@ function AppRouter(props: {
     matchModel.addModelListener(listener);
   }, [identityModel, queueModel, matchModel]);
 
+  if (showLeaderboard) {
+    return <LeaderboardScreen view={leaderboardView} onBack={() => setShowLeaderboard(false)} />;
+  }
   if (identityModel.username === null || queueModel.status !== 'matched') {
-    return <LobbyScreen view={lobbyView} />;
+    return <LobbyScreen view={lobbyView} onViewLeaderboard={() => setShowLeaderboard(true)} />;
   }
   if (matchModel.result !== null) {
-    return <ResultsScreen view={resultsView} />;
+    return <ResultsScreen view={resultsView} onViewLeaderboard={() => setShowLeaderboard(true)} />;
   }
   if (matchModel.phase === MatchPhase.ACTIVE) {
     return <MatchHUDScreen view={matchHUDView} />;
@@ -154,6 +179,14 @@ export class ClientMain {
     // controller to wire, and no circular dependency to break (LobbyController already exists).
     const resultsView = new ResultsView(matchModel, queueModel, lobbyController);
 
+    // CORRECTION (11_client_7): LeaderboardController talks directly to the api over REST, not through
+    // socketController/Socket.IO — no dependency on the socket wiring above, unlike every other pair.
+    const leaderboardModel = new ClientLeaderboardModel();
+    const { view: leaderboardView } = wirePair<ClientLeaderboardModel, LeaderboardView, LeaderboardController>(
+      (placeholder) => new LeaderboardView(leaderboardModel, placeholder),
+      (view) => new LeaderboardController(leaderboardModel, view),
+    );
+
     const container = document.getElementById('root');
     if (!container) {
       throw new Error('ClientMain.main: no #root element found to mount into');
@@ -168,6 +201,7 @@ export class ClientMain {
         championSelectView={championSelectView}
         matchHUDView={matchHUDView}
         resultsView={resultsView}
+        leaderboardView={leaderboardView}
       />,
     );
   }

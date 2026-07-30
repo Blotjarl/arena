@@ -115,8 +115,8 @@ export class ResultsView implements View, ModelListener {
  * `match:found` payload) — both server-supplied facts. This screen never decides who won; it only
  * labels a decision the server already made.
  */
-export function ResultsScreen(props: { view: ResultsView }): JSX.Element {
-  const { view } = props;
+export function ResultsScreen(props: { view: ResultsView; onViewLeaderboard?: () => void }): JSX.Element {
+  const { view, onViewLeaderboard } = props;
   const [, forceRender] = useReducer((n: number) => n + 1, 0);
 
   useEffect(() => {
@@ -146,6 +146,11 @@ export function ResultsScreen(props: { view: ResultsView }): JSX.Element {
         <button onClick={() => controller.operation('returnToQueue')} className="btn btn-primary btn-large btn-return">
           Return to Queue
         </button>
+        {onViewLeaderboard && (
+          <button onClick={onViewLeaderboard} className="btn btn-secondary">
+            View Leaderboard
+          </button>
+        )}
       </div>
     </div>
   );

@@ -171,6 +171,21 @@ test.describe('a complete Arena match', () => {
     expect(bobEntry, 'Bob (the loser) should have a persisted leaderboard entry').toBeDefined();
     expect(bobEntry!.wins).toBe(0);
     expect(bobEntry!.losses).toBe(1);
+
+    // CORRECTION (11_client_7): everything above this point only ever verified /leaderboard via a direct
+    // Playwright HTTP request, bypassing the UI entirely -- there was no UI to go through. Now there is:
+    // click the real "View Leaderboard" button on the real Results screen and confirm the real winner's
+    // row actually renders, through the real client -> api fetch, not a mock. The poll above already
+    // guaranteed the fire-and-forget report has landed, so this doesn't need its own retry loop.
+    await attacker.getByRole('button', { name: 'View Leaderboard' }).click();
+    const aliceRow = attacker.locator('ul[aria-label="leaderboard-entries"] li', { hasText: 'Alice' });
+    await expect(aliceRow).toBeVisible();
+    await expect(aliceRow).toContainText('1W');
+    await expect(attacker.locator('ul[aria-label="champion-win-rates"] li', { hasText: 'Vex' })).toBeVisible();
+
+    // Back returns to the real Results screen the phase-based routing would otherwise show.
+    await attacker.getByRole('button', { name: 'Back' }).click();
+    await expect(attacker.getByRole('heading', { name: 'Victory' })).toBeVisible();
   });
 });
 

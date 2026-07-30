@@ -490,6 +490,7 @@ sketch.
 | `ClientQueueModel` | `extends AbstractModel` | `status: 'idle' \| 'queued' \| 'matched'`; `position: number \| null`; `matchPayload: MatchFoundPayload \| null` (the raw `match:found` payload, stored by `setMatched()`; read by `LobbyView`/`ChampionSelectView`/`ResultsView` for opponent username/team/roster) | `constructor()`; `setQueued(position: number): void`; `setCancelled(): void`; `setMatched(payload: MatchFoundPayload): void` |
 | `ClientMatchModel` | `extends AbstractModel` | `matchId: MatchId \| null`; `phase: MatchPhase \| null` (null until a match is found — unlike server's `MatchModel`, which always has a phase from construction); `latestState: MatchStatePayload \| null`; `result: MatchEndPayload \| null`; `championSelection: ChampionSelectedPayload \| null` | `constructor()`; `applyChampionSelected(payload: ChampionSelectedPayload): void`; `applyMatchStart(payload: MatchStartPayload): void`; `applyMatchState(payload: MatchStatePayload): void` (R4.7 — read-only mirror, never mutates authoritative values itself); `applyMatchEnd(payload: MatchEndPayload): void` |
 | `InterpolationBuffer` | — | `private samples: MatchStatePayload[]` (ring buffer) | `constructor(capacity: number)`; `push(snapshot: MatchStatePayload): void`; `getInterpolatedPosition(playerId: PlayerId, now: number): Position` (R4.7, R-P4 — smooths rendering between the server's 20Hz ticks without altering any authoritative value) |
+| `ClientLeaderboardModel` | `extends AbstractModel` (Step 11, `11_client_7`) | `entries: LeaderboardEntryDTO[] \| null`; `championWinRates: ChampionWinRateDTO[] \| null`; `loading: boolean`; `error: string \| null` | `constructor()`; `setLoading(): void`; `setLoaded(entries, championWinRates): void`; `setError(message: string): void` (SRS 3.2.8, R8.1–R8.3) |
 
 **Step 10 correction (`10_client_5`)**: `ClientQueueModel.matchPayload` (row above) is a new attribute, not
 in the original sketch. Separately, all three models' mutator methods (`ClientIdentityModel.identify`;
@@ -516,6 +517,7 @@ what surfaced the gap; all mutators now call `notifyChanged()` after updating st
 | `LobbyController` | `extends AbstractController<ClientIdentityModel, LobbyView>` | `constructor(model: ClientIdentityModel, view: LobbyView, socketController: SocketConnectionController)`; `operation(action: 'submitUsername' \| 'joinQueue' \| 'cancelQueue' \| 'returnToQueue', payload?: {username: string}): void` (client-side length/non-empty check mirroring R1.1 for `'submitUsername'`, before delegating to `SocketConnectionController`; `'joinQueue'`/`'returnToQueue'` both emit `queue:join`, `'cancelQueue'` emits `queue:cancel`) |
 | `ChampionSelectController` | `extends AbstractController<ClientMatchModel, ChampionSelectView>` | `constructor(model: ClientMatchModel, view: ChampionSelectView, socketController: SocketConnectionController)`; `operation('selectChampion', payload: {championId: ChampionId}): void` |
 | `MatchController` | `extends AbstractController<ClientMatchModel, MatchHUDView>` | `constructor(model: ClientMatchModel, view: MatchHUDView, socketController: SocketConnectionController, now: () => number = () => Date.now())`; `operation('move' \| 'useAbility', payload): void` (throttles/sends `match:action`) |
+| `LeaderboardController` | `extends AbstractController<ClientLeaderboardModel, LeaderboardView>` (Step 11, `11_client_7`) | `constructor(model, view, apiBaseUrl?: string, fetchImpl?: typeof fetch)`; `operation('refresh'): void` (fetches `GET /leaderboard` + `GET /leaderboard/champions` in parallel). **The client's first controller that talks directly to the api over plain HTTP** — every other controller here forwards through `SocketConnectionController`/Socket.IO instead (master context §2.3). |
 
 **Step 10 correction**: all three controllers above gained constructor parameters beyond the inherited
 `(model, view)` this table originally sketched — `socketController: SocketConnectionController` on all
@@ -533,6 +535,7 @@ plus `now: () => number` on `MatchController` (injected clock for deterministic 
 | `ChampionSelectView` | `View, ModelListener` | Both players, selection countdown, roster with stats/abilities |
 | `MatchHUDView` | `View, ModelListener` | Health/resource bars, cooldown indicators, arena rendering via `InterpolationBuffer` |
 | `ResultsView` | `View, ModelListener` | Outcome, reason, duration, return-to-queue control |
+| `LeaderboardView` | `View, ModelListener` (Step 11, `11_client_7`) | Player ranking table + per-champion win-rate summary (SRS 3.2.8, R8.1–R8.3). **Not one of SRS 3.1.1's four formally-listed screens** — 3.1.1 never actually lists a Leaderboard screen even though 1.3/2.2 both describe the client as letting a player "view a leaderboard," a real ambiguity in the SRS baseline. Resolved as a fifth, non-phase-driven screen: `ClientMain.tsx`'s `AppRouter` owns a plain `showLeaderboard` boolean, checked before the usual four-way phase routing, toggled on via an `onViewLeaderboard` prop passed to `LobbyScreen` (idle state) and `ResultsScreen` only. |
 
 **Note (Step 2 gap-fill):** `ResultsView` pairs with `LobbyController` rather than a dedicated results
 controller — "return to queue" is a lobby action, and no separate controller was specified for this view.
@@ -730,6 +733,18 @@ needs one `matches` row and two `match_participants` rows to commit or fail toge
 **Step 10 addition**: `ApiMain.stop()` is a new method, not in the original sketch — added solely so a
 smoke test can tear the server and pool down cleanly; `ApiMain`'s own JSDoc flags it as outside this table's
 original entry-point sketch.
+
+> **Step 11 correction (`11_client_7`) — real integration bug found by end-to-end testing**: `ApiMain.main()`
+> now installs a small, dependency-free CORS middleware (`Access-Control-Allow-Origin: *` plus a plain
+> `OPTIONS` preflight handler) ahead of every route. Every public `GET` route here was always meant to be
+> fetched directly by the browser client (master context §2.3), but nothing ever actually did that until
+> `LeaderboardController` (`packages/client`, §6b) — the client's first direct REST consumer. Every prior
+> verification of these routes used either Playwright's own server-side `request` fixture or a raw
+> Jest/`fetch` call from Node, neither of which is subject to a browser's CORS policy the way a real
+> `fetch()` from a page served on a different origin is — so the gap was invisible until a real
+> browser-origin request actually hit it (Playwright's e2e suite, once its client-launched `webServer` had
+> a real reason to call `/leaderboard` itself). Public, read-only data with no cookies/credentials involved,
+> so a permissive `*` origin is appropriate.
 
 ---
 

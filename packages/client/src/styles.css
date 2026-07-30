@@ -794,3 +794,89 @@ button {
 .btn-return {
   margin-top: 0.5rem;
 }
+
+/* ---------- Leaderboard (11_client_7) ---------- */
+
+.screen-leaderboard {
+  flex: 1;
+}
+
+.leaderboard-card {
+  max-width: 640px;
+}
+
+.leaderboard-title {
+  text-align: center;
+  color: var(--color-accent);
+}
+
+.leaderboard-subtitle {
+  margin-top: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+.leaderboard-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.leaderboard-actions .btn {
+  width: auto;
+  flex: 1;
+}
+
+.leaderboard-loading,
+.leaderboard-empty {
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.leaderboard-entries,
+.champion-win-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.leaderboard-entry,
+.champion-win-rate-entry {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.55em 0.85em;
+  font-size: var(--font-size-sm);
+}
+
+.champion-win-rate-entry {
+  grid-template-columns: 1fr auto auto;
+}
+
+.leaderboard-rank {
+  color: var(--color-text-faint);
+  font-weight: 700;
+}
+
+.leaderboard-username,
+.champion-win-rate-name {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.leaderboard-record,
+.leaderboard-games,
+.champion-win-rate-games {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.leaderboard-winrate,
+.champion-win-rate-value {
+  color: var(--color-accent);
+  font-weight: 700;
+  white-space: nowrap;
+}
