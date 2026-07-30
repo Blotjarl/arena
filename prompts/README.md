@@ -234,7 +234,12 @@ unchanged) was indistinguishable from a broken button with zero client-side rang
 after prompt 9 surfaced a real regression (prompt 10: both players rendering stacked at the arena's
 top-left corner on first paint — `matchStart` events never reached the rendering buffer, only `matchState`
 ticks did) plus two new feature requests (prompts 11-12: a 1.5x wider arena and real, server-authoritative
-obstacles).
+obstacles). After that shipped and was played again, a further round of gameplay requests (prompt 13,
+`11_cross_1`) asked for a modestly larger arena, diagonal movement, "skillshot" aim-then-click targeting for
+most abilities instead of always auto-hitting the opponent, obstacles blocking abilities (deliberately
+deferred by prompt 11 as a later prompt), and ability hover tooltips — written as a single cross-package
+document since one person (the flagship agent) is executing it directly rather than delegating across the
+team, unlike every prior prompt in this project.
 
 | # | File | Owner | Depends on | Status |
 |---|---|---|---|---|
@@ -250,6 +255,7 @@ obstacles).
 | 10 | `11_client_5_fix-initial-render-and-verify-input.md` | **Raj** | none — highest priority, real regression | [x] |
 | 11 | `11_server_3_wider-arena-and-obstacles.md` | **Marshall** | none (independent of 10) | [x] |
 | 12 | `11_client_6_render-wider-arena-and-obstacles.md` | **Raj** | #10, #11 | [x] |
+| 13 | `11_cross_1_expanded-combat-and-larger-arena.md` | **flagship agent** | #11, #12 (builds on the current arena/obstacle system) | [ ] not yet executed — awaiting Marshall's go-ahead |
 
 Prompts 3 and 5 are explicitly authorized to fix real integration bugs they find, unlike `07_shared_1` —
 Step 11's own process wording is "conduct acceptance tests; fix faults if found," not docs-only
