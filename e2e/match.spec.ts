@@ -28,6 +28,21 @@ async function selectChampion(page: Page, championName: string): Promise<void> {
   await page.getByRole('button', { name: `Select ${championName}` }).click();
 }
 
+/**
+ * A real, hard page reload (F5-equivalent) — destroys every in-memory client model (ClientIdentityModel,
+ * ClientQueueModel, ClientMatchModel all reconstruct blank), unlike `BrowserContext.setOffline()` above,
+ * which keeps the JS execution context (and therefore all client model state) alive through a network-
+ * level drop. `sessionStorage` (`arena:playerId`/`arena:username`) survives the reload on the same tab, but
+ * nothing auto-resubmits it — the user must retype their username and click Continue, exactly like a real
+ * person would (see `docs/acceptance-test-cases.md` AT-03: R1.2 only guarantees the *identifier* is reused
+ * once resubmitted, not that the UI auto-restores past the identify form).
+ */
+async function reidentifyAfterReload(page: Page, username: string): Promise<void> {
+  await page.reload();
+  await page.locator('#username').fill(username);
+  await page.getByRole('button', { name: 'Continue' }).click();
+}
+
 async function holdKey(page: Page, key: string, durationMs: number): Promise<void> {
   await page.keyboard.down(key);
   await page.waitForTimeout(durationMs);
@@ -289,5 +304,104 @@ test.describe('disconnect and reconnect during an active match (R6.1-R6.4)', () 
     // the 29.9s/30.1s boundary in MatchModel.test.ts. Never reconnects Frank.
     await expect(attacker.getByRole('heading', { name: 'Victory' })).toBeVisible({ timeout: 40_000 });
     await expect(attacker.getByText('Reason: Opponent disconnected')).toBeVisible();
+  });
+});
+
+/**
+ * R6.1-R6.4, but via a real hard page reload rather than `BrowserContext.setOffline()` (see the
+ * disconnect/reconnect suite above) — a genuinely different code path, since a reload also wipes every
+ * in-memory client model, not just the network transport. Found by manual testing: reloading mid-match
+ * previously left the reloaded player stuck on the idle Lobby with a "Find Match" button that silently did
+ * nothing (the server still counted them as an active match participant, so `queue:join` was rejected —
+ * see the LobbyView 'error' listener test coverage for that half of the fix). `ServerMain.rebindIfInMatch`
+ * now reconnects the participant directly and replays whatever events bring a fresh client back up to date.
+ */
+test.describe('hard page reload mid-match (R6.3, real reload — not setOffline)', () => {
+  let attackerContext: BrowserContext;
+  let defenderContext: BrowserContext;
+
+  test.afterEach(async () => {
+    await attackerContext?.close();
+    await defenderContext?.close();
+  });
+
+  test('CRITICAL CHECKPOINT: a reload during active combat lands the reloaded player back in the Match HUD with state intact, not the idle Lobby', async ({
+    browser,
+  }) => {
+    attackerContext = await browser.newContext();
+    defenderContext = await browser.newContext();
+    const attacker = await attackerContext.newPage();
+    const defender = await defenderContext.newPage();
+
+    await identifyAndQueue(attacker, 'Grace');
+    await identifyAndQueue(defender, 'Heidi');
+
+    await expect(attacker.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+    await expect(defender.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+
+    await selectChampion(attacker, 'Vex');
+    await selectChampion(defender, 'Vex');
+
+    await expect(attacker.locator('div[aria-label="movement-controls"]')).toBeVisible();
+    await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible();
+
+    await moveIntoRangeAndClearSight(attacker, defender);
+    await castArcaneBoltAndWaitForCooldown(attacker);
+    await expect(defender.locator('div[aria-label="you-hud"]')).toContainText('HP 53');
+
+    await reidentifyAfterReload(defender, 'Heidi');
+
+    // CRITICAL CHECKPOINT: must land directly back in the Match HUD — never the idle Lobby's "Find
+    // Match" button, which would mean the reconnect rehydration (ServerMain.rebindIfInMatch) failed.
+    await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible({ timeout: 10_000 });
+    await expect(defender.getByRole('button', { name: 'Find Match' })).not.toBeVisible();
+
+    // Match state survived the reload: the earlier Arcane Bolt's damage is still reflected.
+    await expect(defender.locator('div[aria-label="you-hud"]')).toContainText('HP 53');
+
+    // Combat resumes bidirectionally without repositioning again — both players are already in range
+    // and line-of-sight-clear from the repositioning above, and neither has moved since. The reloaded
+    // player can act (proving they're genuinely rebound, not just looking at a frozen snapshot), and the
+    // still-connected attacker's casts still land on them (proving the match itself never lost track of
+    // either participant).
+    await castArcaneBoltAndWaitForCooldown(defender);
+    await expect(attacker.locator('div[aria-label="you-hud"]')).toContainText('HP 53');
+
+    await castArcaneBoltAndWaitForCooldown(attacker);
+    await expect(defender.locator('div[aria-label="you-hud"]')).toContainText('HP 21');
+  });
+
+  test('CRITICAL CHECKPOINT: a reload during Champion Select restores the already-made selection instead of the idle Lobby', async ({
+    browser,
+  }) => {
+    attackerContext = await browser.newContext();
+    defenderContext = await browser.newContext();
+    const attacker = await attackerContext.newPage();
+    const defender = await defenderContext.newPage();
+
+    await identifyAndQueue(attacker, 'Ivan');
+    await identifyAndQueue(defender, 'Judy');
+
+    await expect(attacker.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+    await expect(defender.locator('ul[aria-label="champion-roster"]')).toBeVisible();
+
+    // Only the attacker selects before reloading — the defender deliberately never selects in this test,
+    // keeping the match in CHAMPION_SELECT (not ACTIVE) for the whole scenario.
+    await selectChampion(attacker, 'Vex');
+    await expect(attacker.getByText('You selected: vex')).toBeVisible();
+
+    await reidentifyAfterReload(attacker, 'Ivan');
+
+    // CRITICAL CHECKPOINT: lands directly back in Champion Select (not idle Lobby), with the prior
+    // selection already reflected — proving MatchModel.getRehydrationInfo()'s replay actually restores
+    // per-player selection state, not just a generic "still in a match somewhere" rebind.
+    await expect(attacker.locator('ul[aria-label="champion-roster"]')).toBeVisible({ timeout: 10_000 });
+    await expect(attacker.getByRole('button', { name: 'Find Match' })).not.toBeVisible();
+    await expect(attacker.getByText('You selected: vex')).toBeVisible();
+
+    // The match still proceeds normally once the defender also selects.
+    await selectChampion(defender, 'Vex');
+    await expect(attacker.locator('div[aria-label="movement-controls"]')).toBeVisible();
+    await expect(defender.locator('div[aria-label="movement-controls"]')).toBeVisible();
   });
 });

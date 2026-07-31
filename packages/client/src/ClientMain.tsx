@@ -161,7 +161,7 @@ export class ClientMain {
       LobbyView,
       LobbyController
     >(
-      (placeholder) => new LobbyView(identityModel, queueModel, placeholder),
+      (placeholder) => new LobbyView(identityModel, queueModel, placeholder, socket),
       (view) => new LobbyController(identityModel, view, socketController),
     );
 

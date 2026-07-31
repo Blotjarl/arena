@@ -39,10 +39,16 @@ export type OnMatchCreated = (playerIds: [PlayerId, PlayerId], match: MatchModel
  * reconnecting player's brand-new `ConnectionHandler` (a fresh Socket.IO connection gets a fresh handler,
  * see `ServerMain`) be rebound to the match it's already in, since `bindMatch()` otherwise only ever fires
  * once, at original pairing time.
+ *
+ * CORRECTION (reload-reconnect fix): `players` is both original `Player` objects, in the same [A, B] order
+ * `MatchModel`'s own constructor uses to assign `Team.A`/`Team.B` — added so `ServerMain.rebindIfInMatch`
+ * can rebuild a `MatchFoundPayload` (team, opponent username) for a reconnecting client without adding a
+ * new public accessor to `MatchModel` just for this.
  */
 export interface MatchRegistryEntry {
   match: MatchModel;
   view: MatchBroadcastView;
+  players: [Player, Player];
 }
 
 /**
@@ -109,8 +115,8 @@ export class MatchmakingController extends AbstractController {
     // CORRECTION (Step 10, 10_server_10): registers both players into the process-wide match registry so a
     // reconnecting player's fresh ConnectionHandler can be rebound to this match later — see the cleanup
     // listener below, which removes these same two entries once the match ends.
-    this.matchRegistry.set(playerIdA, { match, view: matchBroadcastView });
-    this.matchRegistry.set(playerIdB, { match, view: matchBroadcastView });
+    this.matchRegistry.set(playerIdA, { match, view: matchBroadcastView, players: [playerA, playerB] });
+    this.matchRegistry.set(playerIdB, { match, view: matchBroadcastView, players: [playerA, playerB] });
 
     this.tickLoop.register(match);
     // CORRECTION (Step 10): MatchBroadcastView has no TickLoop reference (docs/01_class_list.md §5c

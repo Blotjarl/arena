@@ -355,6 +355,26 @@ for real in the Step 11 (`11_cross_1`) correction below** — `submitAbility` no
 > vary travel duration per ability instead of a flat 500ms, and vary shape per `ability.id` for a handful
 > of abilities, mirroring `11_client_8`'s existing per-`ability.id` icon pattern.
 
+> **Post-Step-13 correction (reload-reconnect fix)**: `MatchModel` gains a new read-only method,
+> `getRehydrationInfo(): { phase: MatchPhase; selections: { playerId: string; championId: string }[] }`
+> (added to the operations list above), used by `ServerMain.rebindIfInMatch` (§5d) to rebuild whatever a
+> reconnecting client needs replayed. Found by manually testing a real hard page reload mid-match (not
+> covered by any existing acceptance test): `rebindIfInMatch` previously only rewired a reconnecting
+> connection's controllers, never actually calling `MatchModel.reconnect()` (that only ever happened if the
+> *client* itself emitted `match:reconnect`, which it only does when its own `ClientMatchModel.matchId` is
+> already set — impossible right after a hard reload, since every client model reconstructs blank) and never
+> telling the client it was still in a match at all (`AppRouter`'s routing requires `queueModel.status ===
+> 'matched'`, only ever set by handling `match:found`). A reloaded player was stuck on the idle Lobby with a
+> "Find Match" button that silently did nothing (the server still counted them as an active participant, so
+> `queue:join` was rejected — see `LobbyView`'s correction in §6c for the other half of that symptom), and
+> the match could even auto-forfeit at the 30-second grace period despite the player being back. Fixed by
+> having `rebindIfInMatch` call `match.reconnect(playerId)` directly (no client round-trip needed) and then
+> replay whatever events bring a fresh client up to date, targeted at just the reconnecting socket: always
+> `match:found` (restores `queueModel.status`), then either `champion:selected` for each already-made pick
+> (still `CHAMPION_SELECT`) or `match:start` with the live `snapshot()` as `initialState` (already `ACTIVE`)
+> — reusing `SocketConnectionController`'s existing handlers for these exact wire events rather than
+> inventing a new one.
+
 > **Step 10 correction (`10_server_10`)**: `MatchmakingQueue.join()`'s own doc comment always said it
 > throws `AlreadyQueuedError` "if the player is already queued or already in an active match" (R2.2), but
 > until this correction the implementation only ever checked `entries` — the queue itself — with no
@@ -441,6 +461,12 @@ sketch.
 > `ServerMain.main()` (see that class's correction below) and threaded in the same way `sockets`/
 > `onMatchCreated`/`reportingClient` already were.
 
+> **Post-Step-13 correction (reload-reconnect fix)**: `MatchRegistryEntry` gains a third field, `players:
+> [Player, Player]` — the original two `Player` objects, in the same `[A, B]` order `MatchModel`'s own
+> constructor uses to assign `Team.A`/`Team.B`. `createMatch()`'s two `matchRegistry.set()` calls now include
+> it. Added so `ServerMain.rebindIfInMatch` (§5d) can rebuild a `MatchFoundPayload` (team, opponent username)
+> for a reconnecting client without adding a new public accessor to `MatchModel` just for this.
+
 ### 5c. `server/view`
 
 | Class | Implements | Operations |
@@ -481,12 +507,17 @@ sketch.
 > process-wide `matchRegistry: Map<PlayerId, MatchRegistryEntry>` (new, parallel to the existing `sockets`/
 > `connectionHandlers` maps — see `MatchmakingController`'s correction in §5b for how it's populated and
 > cleared), and a new standalone exported function, `rebindIfInMatch(handler: ConnectionHandler,
-> matchRegistry, playerId: PlayerId): void` (deliberately not inlined in `main()`'s connection closure, so
-> it's testable without a live socket per 3.6.4) — called from the existing `onIdentified` callback (the
-> same one that already does `sockets.set`/`connectionHandlers.set` on every successful identify, reconnect
-> included) — looks the newly-identified player up in `matchRegistry` and calls `handler.bindMatch(...)` if
-> found. A player whose match has already ended has no entry (cleared by `MatchmakingController`'s
-> `'match:end'` listener before this can ever run) and is correctly left unbound.
+> matchRegistry, playerId: PlayerId, socket): void` (deliberately not inlined in `main()`'s connection
+> closure, so it's testable without a live socket per 3.6.4) — called from the existing `onIdentified`
+> callback (the same one that already does `sockets.set`/`connectionHandlers.set` on every successful
+> identify, reconnect included) — looks the newly-identified player up in `matchRegistry` and calls
+> `handler.bindMatch(...)` if found. A player whose match has already ended has no entry (cleared by
+> `MatchmakingController`'s `'match:end'` listener before this can ever run) and is correctly left unbound.
+
+> **Post-Step-13 correction (reload-reconnect fix)**: `rebindIfInMatch` gains a fourth parameter (`socket`)
+> and does substantially more than rewiring controllers — see `MatchModel.getRehydrationInfo()`'s correction
+> note in §5a for the real bug this closes (a hard page reload mid-match left the player stuck on the idle
+> Lobby, unable to resume) and the full behavior this function now performs.
 
 > **Step 11 addition**: `ServerMain.stop(): Promise<void>` is a new method, not in the original sketch —
 > added for the same reason as `ApiMain.stop()` (§8's `ApiMain` entry): a Playwright acceptance test starts
@@ -623,6 +654,20 @@ never exposed to `ClientMatchModel`) and a matching `getOpponentDisconnect()` ac
 that clears once the matching `match:player_reconnected` arrives. `socket` is optional (defaulting to
 unset, in which case the banner never appears) so every pre-existing call site that has no reason to
 exercise it — most unit tests — is unaffected; `ClientMain.tsx` passes the real socket.
+
+**Post-Step-13 correction (reload-reconnect fix) — `LobbyView` gains a 4th, optional constructor param**:
+`LobbyView(model, queueModel, controller, socket?)`. Same pattern as `MatchHUDView`'s `socket` param above:
+`SocketConnectionController.bindInboundEvents`'s own doc comment (§6b) is explicit that the generic `error`
+event has no matching model `apply()`/`set()` slot, so this view listens to the raw socket directly rather
+than a new model field being invented for it. Found by manually testing the reload-reconnect fix above: a
+server-rejected queue action (`AlreadyQueuedError`, e.g. from `queue:join` while `ServerMain.rebindIfInMatch`
+has this connection bound to a still-active match) was previously silently swallowed client-side — nothing
+rendered it anywhere, a real confirmed gap, not a hypothetical one. Backs a new transient, UI-only
+`queueError: ErrorPayload | null` field (never persisted) and a matching `getQueueError()` accessor, which
+`LobbyScreen` renders as a `role="alert"` message in the idle/queued states — cleared whenever either
+observed model changes (a real transition makes whatever error preceded it stale). `socket` is optional, so
+every pre-existing call site that has no reason to exercise it — most unit tests — is unaffected;
+`ClientMain.tsx` passes the real socket.
 
 **Step 11 correction (`11_client_8`) — `ChampionSprite` extracted to its own module**: the pixel-art sprite
 renderer (`CHAMPION_SPRITES`, `SPRITE_CELL_PX`, `SPRITE_PIXEL_COLORS`, `ChampionSprite`) previously lived as
