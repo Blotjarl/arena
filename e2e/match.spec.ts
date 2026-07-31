@@ -139,6 +139,12 @@ test.describe('a complete Arena match', () => {
     await expect(defender.getByText('Opponent: Alice')).toBeVisible();
 
     await selectChampion(attacker, 'Vex');
+
+    // CRITICAL CHECKPOINT (R3.3): Bob's screen must reflect that Alice has locked in a champion without
+    // Bob taking any action — real, confirmed gap found by live testing; see docs/01_class_list.md's
+    // ChampionSelectScreen correction. Does not name the champion (avoids a counter-pick advantage).
+    await expect(defender.getByText('Opponent has locked in a champion')).toBeVisible();
+
     await selectChampion(defender, 'Vex');
 
     // Both reach the Match HUD.
