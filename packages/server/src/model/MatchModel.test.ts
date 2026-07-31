@@ -147,6 +147,30 @@ describe('MatchModel', () => {
     });
   });
 
+  describe('getRehydrationInfo', () => {
+    it('reports CHAMPION_SELECT with no selections before anyone has picked', () => {
+      const match = new MatchModel('m1', makePlayers());
+      expect(match.getRehydrationInfo()).toEqual({ phase: MatchPhase.CHAMPION_SELECT, selections: [] });
+    });
+
+    it('reports the single selection made so far while still in CHAMPION_SELECT', () => {
+      const match = new MatchModel('m1', makePlayers());
+      match.selectChampion('p1', 'vex');
+      expect(match.getRehydrationInfo()).toEqual({
+        phase: MatchPhase.CHAMPION_SELECT,
+        selections: [{ playerId: 'p1', championId: 'vex' }],
+      });
+    });
+
+    it('reports ACTIVE with both selections once both players have picked', () => {
+      const match = new MatchModel('m1', makePlayers());
+      selectBothChampions(match);
+      const info = match.getRehydrationInfo();
+      expect(info.phase).toBe(MatchPhase.ACTIVE);
+      expect(info.selections).toHaveLength(2);
+    });
+  });
+
   describe('constructor — spawn positions', () => {
     it('CORRECTION (Step 11): spawns the two participants at distinct positions on opposite sides of the arena, not both at (0, 0)', () => {
       const match = new MatchModel('m1', makePlayers());

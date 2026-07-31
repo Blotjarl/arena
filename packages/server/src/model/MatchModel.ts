@@ -445,4 +445,22 @@ export class MatchModel extends AbstractModel {
       participants: [this.participants[0].toSnapshot(now), this.participants[1].toSnapshot(now)],
     };
   }
+
+  /**
+   * Read-only view of just enough live state to rehydrate a client that reconnects mid-match (R6.3) —
+   * current phase, plus each participant's champion selection so far (at most one populated entry while
+   * still in CHAMPION_SELECT, since `selectChampion` flips phase to ACTIVE the instant the second
+   * participant picks). Deliberately narrower than exposing `participants` itself: a rehydrating
+   * connection only needs to replay `champion:selected`/`match:start`-shaped events, not touch
+   * ParticipantState directly.
+   * @returns the match's current phase and every already-made champion selection
+   */
+  getRehydrationInfo(): { phase: MatchPhase; selections: { playerId: string; championId: string }[] } {
+    return {
+      phase: this.phase,
+      selections: this.participants
+        .filter((p) => p.champion !== null)
+        .map((p) => ({ playerId: p.playerId, championId: p.champion!.id })),
+    };
+  }
 }

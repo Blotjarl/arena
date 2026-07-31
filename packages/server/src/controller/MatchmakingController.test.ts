@@ -174,8 +174,16 @@ describe('MatchmakingController', () => {
         // Both paired players must already be registered by the time createMatch() returns -- this is what
         // lets ServerMain rebind a reconnecting player's fresh ConnectionHandler before match:reconnect ever
         // arrives.
-        expect(matchRegistry.get('p1')).toEqual({ match, view: onMatchCreated.mock.calls[0][2] });
-        expect(matchRegistry.get('p2')).toEqual({ match, view: onMatchCreated.mock.calls[0][2] });
+        expect(matchRegistry.get('p1')).toEqual({
+          match,
+          view: onMatchCreated.mock.calls[0][2],
+          players: [new Player('p1', 'Alice', expect.any(Date)), new Player('p2', 'Bob', expect.any(Date))],
+        });
+        expect(matchRegistry.get('p2')).toEqual({
+          match,
+          view: onMatchCreated.mock.calls[0][2],
+          players: [new Player('p1', 'Alice', expect.any(Date)), new Player('p2', 'Bob', expect.any(Date))],
+        });
 
         // createMatch() registers three listeners on the new MatchModel: the real MatchBroadcastView (its
         // own modelChanged is still an unimplemented stub, 10_server_7, so it must never be invoked here),

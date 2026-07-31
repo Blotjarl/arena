@@ -1,7 +1,18 @@
 import { createServer } from 'node:http';
 import type { Server as HttpServer } from 'node:http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { PlayerId, Player } from '@arena/shared';
+import {
+  PlayerId,
+  Player,
+  Team,
+  MatchPhase,
+  ChampionRoster,
+  SOCKET_EVENTS,
+  GracePeriodExpiredError,
+  MatchFoundPayload,
+  MatchStartPayload,
+  ChampionSelectedPayload,
+} from '@arena/shared';
 import { MatchmakingQueue } from './model/MatchmakingQueue';
 import { MatchModel } from './model/MatchModel';
 import { TickLoop } from './model/TickLoop';
@@ -18,26 +29,83 @@ const DEFAULT_API_BASE_URL = 'http://localhost:4000';
 
 /**
  * Rebinds a freshly-identified connection to its still-active match, if one is registered (R6.1-R6.4).
- * A Socket.IO transport reconnect creates a brand-new server-side socket, and therefore a brand-new
- * `ConnectionHandler` with only `identify`/`matchmaking` bound (see `ServerMain.main()`'s
- * `io.on('connection', ...)` handler) — without this, `bindMatch()` never runs again for that player, and
- * `match:reconnect`/`match:action`/`champion:select` are silently dropped by `ConnectionHandler`'s own
- * `!this.disconnect` guard. `matchRegistry` is populated by `MatchmakingController.createMatch()` on
- * pairing and cleared on `'match:end'` (10_server_10), so a player whose match has already ended has no
- * entry here and is correctly left unbound. Exported standalone, not inlined in `main()`'s connection
- * closure, so this decision is exercisable by a test without a live socket (3.6.4).
+ * A Socket.IO transport reconnect *or* a full page reload both create a brand-new server-side socket, and
+ * therefore a brand-new `ConnectionHandler` with only `identify`/`matchmaking` bound (see
+ * `ServerMain.main()`'s `io.on('connection', ...)` handler) — without this, `bindMatch()` never runs again
+ * for that player, and `match:reconnect`/`match:action`/`champion:select` are silently dropped by
+ * `ConnectionHandler`'s own `!this.disconnect` guard. `matchRegistry` is populated by
+ * `MatchmakingController.createMatch()` on pairing and cleared on `'match:end'` (10_server_10), so a
+ * player whose match has already ended has no entry here and is correctly left unbound. Exported
+ * standalone, not inlined in `main()`'s connection closure, so this decision is exercisable by a test
+ * without a live socket (3.6.4).
+ *
+ * CORRECTION (reload-reconnect fix): previously only rewired the connection's controllers, leaving two
+ * real gaps found by manually testing a page reload mid-match: (1) `MatchModel.reconnect()` was never
+ * called unless the client itself emitted `match:reconnect` — which it only ever does when its own
+ * in-memory `ClientMatchModel.matchId` is already set (`ClientMain.tsx`'s `'connect'` handler), impossible
+ * on a hard reload where every client model starts blank, so a disconnected participant could stay marked
+ * disconnected (and the match could even auto-forfeit at the 30s grace period) despite the player being
+ * back; (2) the client had no way to learn it was still mid-match at all — `AppRouter`'s routing requires
+ * `queueModel.status === 'matched'` (only ever set by handling `match:found`) before it will even look at
+ * `matchModel.phase`, so the player was stuck on the idle Lobby with no path back into Champion Select or
+ * the Match HUD. This now reconnects the participant directly (no client round-trip needed) and replays
+ * whatever events would have brought a *client* up to date — `match:found` always (restores
+ * `queueModel.status`), then either `champion:selected` for each already-made pick (if still in
+ * CHAMPION_SELECT) or `match:start` with the live snapshot as `initialState` (if already ACTIVE) —
+ * targeted at just this one socket, reusing `SocketConnectionController`'s existing handlers for these
+ * exact wire events rather than inventing a new one.
  * @param handler - the newly-identified connection's fresh ConnectionHandler
  * @param matchRegistry - the process-wide playerId -> still-active-match registry
  * @param playerId - the connection's newly-identified player
+ * @param socket - this connection's live socket, for the targeted rehydration emissions below
  */
 export function rebindIfInMatch(
   handler: ConnectionHandler,
   matchRegistry: Map<PlayerId, MatchRegistryEntry>,
   playerId: PlayerId,
+  socket: Pick<Socket, 'emit'>,
 ): void {
   const entry = matchRegistry.get(playerId);
-  if (entry) {
-    handler.bindMatch(entry.match, entry.view);
+  if (!entry) return;
+  handler.bindMatch(entry.match, entry.view);
+
+  const { match, players } = entry;
+  try {
+    match.reconnect(playerId);
+  } catch (err) {
+    if (!(err instanceof GracePeriodExpiredError)) throw err;
+    // The 30s window elapsed between this connection's identify and whatever last checked it. The match
+    // is about to (or already did) end as a forfeit via the normal tick-driven path — match:end will
+    // still reach this socket once registered (see onIdentified in main() below), just without the
+    // rehydration replay, which is not worth reconstructing for a match that's already over.
+    return;
+  }
+
+  const [playerA, playerB] = players;
+  const isA = playerA.id === playerId;
+  const opponentUsername = isA ? playerB.username : playerA.username;
+  const found: MatchFoundPayload = {
+    matchId: match.id,
+    team: isA ? Team.A : Team.B,
+    opponentUsername,
+    roster: ChampionRoster.getAll(),
+  };
+  socket.emit(SOCKET_EVENTS.MATCH_FOUND, found);
+
+  const { phase, selections } = match.getRehydrationInfo();
+  if (phase === MatchPhase.ACTIVE) {
+    const startPayload: MatchStartPayload = { matchId: match.id, initialState: match.snapshot() };
+    socket.emit(SOCKET_EVENTS.MATCH_START, startPayload);
+  } else if (phase === MatchPhase.CHAMPION_SELECT) {
+    for (const selection of selections) {
+      const selectedPayload: ChampionSelectedPayload = {
+        matchId: match.id,
+        playerId: selection.playerId,
+        championId: selection.championId,
+        bothSelected: false, // always false here -- phase would already be ACTIVE otherwise, see getRehydrationInfo
+      };
+      socket.emit(SOCKET_EVENTS.CHAMPION_SELECTED, selectedPayload);
+    }
   }
 }
 
@@ -111,7 +179,7 @@ export class ServerMain {
       const handler = new ConnectionHandler(socket, { identify, matchmaking }, (player: Player) => {
         sockets.set(player.id, socket);
         connectionHandlers.set(player.id, handler);
-        rebindIfInMatch(handler, matchRegistry, player.id);
+        rebindIfInMatch(handler, matchRegistry, player.id, socket);
       });
       handler.register();
     });
