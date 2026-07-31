@@ -18,7 +18,7 @@ This class is intentionally kept as a shallow adapter — all business logic liv
 and domain controllers, not here. See master context §4.2 (testability without a live socket).</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/controller/SocketConnectionController.ts#L19">client/src/controller/SocketConnectionController.ts:19</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/SocketConnectionController.ts#L28">client/src/controller/SocketConnectionController.ts:28</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -31,6 +31,7 @@ and domain controllers, not here. See master context §4.2 (testability without 
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#models" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>models</span></a>
+<a href="#socket" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>socket</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
@@ -44,17 +45,26 @@ and domain controllers, not here. See master context §4.2 (testability without 
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructorsocketconnectioncontroller"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">SocketConnectionController</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">models</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/client_src_controller_SocketConnectionController.ClientModels.html" class="tsd-signature-type tsd-kind-interface">ClientModels</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">SocketConnectionController</a><a href="#constructorsocketconnectioncontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructorsocketconnectioncontroller"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">SocketConnectionController</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">socket</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">models</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/client_src_controller_SocketConnectionController.ClientModels.html" class="tsd-signature-type tsd-kind-interface">ClientModels</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">SocketConnectionController</a><a href="#constructorsocketconnectioncontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>CORRECTION (Step 10): the stub's constructor took only <code>models</code> — with no socket reference,
+<code>operation()</code> would have nothing to emit on. A real <a href="http://Socket.IO">Socket.IO</a> client (or, in tests, a mock
+satisfying the same <code>emit</code>/<code>on</code> shape) is now constructor-injected, exactly the same
+testability principle <code>ConnectionHandler</code> follows on the server side (master context §4.2):
+this class never calls <code>io(...)</code> itself, so tests never open a real connection.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">socket</span>: <span class="tsd-signature-type">Socket</span></span>
+<div class="tsd-comment tsd-typography"><p>the already-connected (or mock) <a href="http://Socket.IO">Socket.IO</a> client socket</p>
+</div></li>
 <li><span><span class="tsd-kind-parameter">models</span>: <a href="../interfaces/client_src_controller_SocketConnectionController.ClientModels.html" class="tsd-signature-type tsd-kind-interface">ClientModels</a></span>
 <div class="tsd-comment tsd-typography"><p>the three client models that inbound server events are dispatched into</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">SocketConnectionController</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/controller/SocketConnectionController.ts#L23">client/src/controller/SocketConnectionController.ts:23</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/SocketConnectionController.ts#L38">client/src/controller/SocketConnectionController.ts:38</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -64,7 +74,14 @@ and domain controllers, not here. See master context §4.2 (testability without 
 <div class="tsd-comment tsd-typography"><p>the three client models that inbound server events are dispatched into</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/controller/SocketConnectionController.ts#L23">client/src/controller/SocketConnectionController.ts:23</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/SocketConnectionController.ts#L40">client/src/controller/SocketConnectionController.ts:40</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="socket"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>socket</span><a href="#socket" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">socket</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Socket</span></div>
+<div class="tsd-comment tsd-typography"><p>the already-connected (or mock) <a href="http://Socket.IO">Socket.IO</a> client socket</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/SocketConnectionController.ts#L39">client/src/controller/SocketConnectionController.ts:39</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -76,10 +93,16 @@ and domain controllers, not here. See master context §4.2 (testability without 
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Registers listeners for all inbound server events and dispatches each to the matching
 model's apply*() method. Called once during initialisation; must not be called again.</p>
+<p><code>match:player_disconnected</code>, <code>match:player_reconnected</code>, and <code>error</code> are deliberately not
+routed to any model here — no client model has a matching apply()/set() slot for them (see
+<code>docs/01_class_list.md</code> §6a). Disconnect/reconnect status is already carried on every
+<code>match:state</code> tick via <code>ParticipantSnapshot.connectionStatus</code>, so no separate model field is
+needed for it; a view wanting a transient &quot;player disconnected&quot; banner can listen to the raw
+socket event directly rather than this controller inventing a new model field for it.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/controller/SocketConnectionController.ts#L42">client/src/controller/SocketConnectionController.ts:42</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/SocketConnectionController.ts#L68">client/src/controller/SocketConnectionController.ts:68</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="operation"><span>operation</span><a href="#operation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -88,22 +111,21 @@ model's apply*() method. Called once during initialisation; must not be called a
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Emits a named action to the server over the <a href="http://Socket.IO">Socket.IO</a> connection.
 If the socket is not currently connected (e.g. mid-disconnect), the emit is a no-op at the
-<a href="http://Socket.IO">Socket.IO</a> layer; the caller will not receive an error. Reconnect handling and graceful
-degradation during a disconnect are not yet implemented — this stub will be extended in Step 8
-to surface connection-state errors to the UI via the identity model (R6.1).</p>
+<a href="http://Socket.IO">Socket.IO</a> layer — <a href="http://Socket.IO">Socket.IO</a> itself buffers/drops outbound emits while disconnected; this
+method never throws for that reason.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">action</span>: <span class="tsd-signature-type">string</span></span>
-<div class="tsd-comment tsd-typography"><p>the <a href="http://Socket.IO">Socket.IO</a> event name to emit (e.g. 'identity:submit', 'queue:join')</p>
+<div class="tsd-comment tsd-typography"><p>the <a href="http://Socket.IO">Socket.IO</a> event name to emit (e.g. 'identify', 'queue:join')</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">payload</span>: <span class="tsd-signature-type">unknown</span></span>
 <div class="tsd-comment tsd-typography"><p>optional data to attach to the event</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/controller/SocketConnectionController.ts#L34">client/src/controller/SocketConnectionController.ts:34</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/SocketConnectionController.ts#L53">client/src/controller/SocketConnectionController.ts:53</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -122,7 +144,7 @@ to surface connection-state errors to the UI via the identity model (R6.1).</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#models" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>models</span></a></div></details>
+<div><a href="#models" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>models</span></a><a href="#socket" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>socket</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
 <div><a href="#bindinboundevents" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Inbound<wbr/>Events</span></a><a href="#operation"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>operation</span></a></div></details></div></details></div>
 <div class="site-menu">

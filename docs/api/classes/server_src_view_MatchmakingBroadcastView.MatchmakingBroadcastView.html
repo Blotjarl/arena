@@ -19,10 +19,10 @@ A pure observer with no paired controller: it never receives player input, only 
 <section class="tsd-panel">
 <h4>Implements</h4>
 <ul class="tsd-hierarchy">
-<li><a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></li>
-<li><a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a></li></ul></section><aside class="tsd-sources">
+<li><span class="tsd-signature-type">View</span></li>
+<li><span class="tsd-signature-type">ModelListener</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L10">server/src/view/MatchmakingBroadcastView.ts:10</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L21">server/src/view/MatchmakingBroadcastView.ts:21</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -63,7 +63,7 @@ A pure observer with no paired controller: it never receives player input, only 
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MatchmakingBroadcastView</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L11">server/src/view/MatchmakingBroadcastView.ts:11</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L22">server/src/view/MatchmakingBroadcastView.ts:22</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -71,14 +71,14 @@ A pure observer with no paired controller: it never receives player input, only 
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Private</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_MatchmakingQueue.MatchmakingQueue.html" class="tsd-signature-type tsd-kind-class">MatchmakingQueue</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L12">server/src/view/MatchmakingBroadcastView.ts:12</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L23">server/src/view/MatchmakingBroadcastView.ts:23</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="sockets"><code class="tsd-tag">Private</code><span>sockets</span><a href="#sockets" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">sockets</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><br/>    <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Every currently-connected player's socket, keyed by playerId, for targeted emission.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L14">server/src/view/MatchmakingBroadcastView.ts:14</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L25">server/src/view/MatchmakingBroadcastView.ts:25</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -93,9 +93,9 @@ note). Stubbed to throw rather than implemented; do not treat this as an ArenaEr
 exception, it signals a programming error if ever called.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">never</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#getcontroller">getController</a></p>
+<p>Implementation of View.getController</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L32">server/src/view/MatchmakingBroadcastView.ts:32</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L43">server/src/view/MatchmakingBroadcastView.ts:43</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getmodel"><span>get<wbr/>Model</span><a href="#getmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -104,28 +104,35 @@ exception, it signals a programming error if ever called.</p>
 <div class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="server_src_model_MatchmakingQueue.MatchmakingQueue.html" class="tsd-signature-type tsd-kind-class">MatchmakingQueue</a></h4><p>the model this view renders</p>
 <aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#getmodel">getModel</a></p>
+<p>Implementation of View.getModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L19">server/src/view/MatchmakingBroadcastView.ts:19</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L30">server/src/view/MatchmakingBroadcastView.ts:30</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="modelchanged"><span>model<wbr/>Changed</span><a href="#modelchanged" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="modelchanged-1"><span class="tsd-kind-call-signature">modelChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#modelchanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="modelchanged-1"><span class="tsd-kind-call-signature">modelChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelEvent</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#modelchanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Reacts to a MatchmakingQueue change by emitting the corresponding <a href="http://Socket.IO">Socket.IO</a> event to the affected
 player(s): <code>queue:joined</code>, <code>queue:cancelled</code>, or <code>match:found</code>, depending on event.type.</p>
+<p>CORRECTION (Step 10): <code>MatchmakingQueue.join</code>/<code>cancel</code>'s internal ModelEvent payload now includes
+<code>playerId</code> (previously just <code>{position}</code> / <code>{}</code>) — without it, this view had no way to know which
+single socket a <code>queue:joined</code>/<code>queue:cancelled</code> broadcast belongs to. <code>playerId</code> is stripped back out
+before emitting, since it is not part of the wire-contract <code>QueueJoinedPayload</code>/<code>QueueCancelledPayload</code>
+shapes the client actually receives. <code>match:found</code> is never auto-triggered by the model (see
+<code>MatchmakingQueue.tryPairNext</code>'s own doc comment) — <code>MatchmakingController</code> calls this method directly,
+once per paired player, once a real <code>MatchModel</code> exists (10_server_2).</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">event</span>: <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a></span>
+<li><span><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">ModelEvent</span></span>
 <div class="tsd-comment tsd-typography"><p>the model-pushed change to broadcast</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html">ModelListener</a>.<a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html#modelchanged">modelChanged</a></p>
+<p>Implementation of ModelListener.modelChanged</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L46">server/src/view/MatchmakingBroadcastView.ts:46</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L65">server/src/view/MatchmakingBroadcastView.ts:65</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setcontroller"><span>set<wbr/>Controller</span><a href="#setcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -135,9 +142,9 @@ player(s): <code>queue:joined</code>, <code>queue:cancelled</code>, or <code>mat
 <div class="tsd-comment tsd-typography"><p>Not applicable, for the same reason as getController() above.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#setcontroller">setController</a></p>
+<p>Implementation of View.setController</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L37">server/src/view/MatchmakingBroadcastView.ts:37</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L48">server/src/view/MatchmakingBroadcastView.ts:48</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setmodel"><span>set<wbr/>Model</span><a href="#setmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -151,9 +158,9 @@ player(s): <code>queue:joined</code>, <code>queue:cancelled</code>, or <code>mat
 <div class="tsd-comment tsd-typography"><p>the model this view should render</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#setmodel">setModel</a></p>
+<p>Implementation of View.setModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/view/MatchmakingBroadcastView.ts#L23">server/src/view/MatchmakingBroadcastView.ts:23</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/view/MatchmakingBroadcastView.ts#L34">server/src/view/MatchmakingBroadcastView.ts:34</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

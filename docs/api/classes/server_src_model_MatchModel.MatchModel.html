@@ -16,14 +16,14 @@
 truth for both participants (2.1, R4.1). Owns exactly two ParticipantState (1v1 scope) and notifies its
 MatchBroadcastView listener on every state-relevant change via AbstractModel.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="603">
-<h4>Hierarchy (<a href="../hierarchy.html#server/src/model/MatchModel.MatchModel">View Summary</a>)</h4>
+<section class="tsd-panel tsd-hierarchy" data-refl="744">
+<h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li class="tsd-hierarchy-item"><a href="shared_src_mvc_AbstractModel.AbstractModel.html" class="tsd-signature-type tsd-kind-class">AbstractModel</a>
+<li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractModel</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">MatchModel</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L18">server/src/model/MatchModel.ts:18</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L56">server/src/model/MatchModel.ts:56</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -40,16 +40,22 @@ MatchBroadcastView listener on every state-relevant change via AbstractModel.</p
 <a href="#endreason" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>end<wbr/>Reason</span></a>
 <a href="#id" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id</span></a>
 <a href="#participants" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>participants</span></a>
+<a href="#pendingmoves" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>pending<wbr/>Moves</span></a>
 <a href="#phase" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>phase</span></a>
 <a href="#startedat" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>started<wbr/>At</span></a>
+<a href="#tickcount" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>tick<wbr/>Count</span></a>
 <a href="#winningteam" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>winning<wbr/>Team</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#addmodellistener" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Model<wbr/>Listener</span></a>
 <a href="#checkwinconditions" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>check<wbr/>Win<wbr/>Conditions</span></a>
+<a href="#determinewinner" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>determine<wbr/>Winner</span></a>
 <a href="#disconnect" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>disconnect</span></a>
+<a href="#endmatch" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>end<wbr/>Match</span></a>
+<a href="#findparticipant" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>find<wbr/>Participant</span></a>
 <a href="#notifychanged" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>notify<wbr/>Changed</span></a>
+<a href="#opponentof" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>opponent<wbr/>Of</span></a>
 <a href="#reconnect" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>reconnect</span></a>
 <a href="#removemodellistener" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Model<wbr/>Listener</span></a>
 <a href="#selectchampion" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>select<wbr/>Champion</span></a>
@@ -65,7 +71,7 @@ MatchBroadcastView listener on every state-relevant change via AbstractModel.</p
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructormatchmodel"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">MatchModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">players</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><a href="shared_src_domain_Player.Player.html" class="tsd-signature-type tsd-kind-class">Player</a><span class="tsd-signature-symbol">,</span> <a href="shared_src_domain_Player.Player.html" class="tsd-signature-type tsd-kind-class">Player</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">MatchModel</a><a href="#constructormatchmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructormatchmodel"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">MatchModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">players</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">MatchModel</a><a href="#constructormatchmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -73,68 +79,82 @@ MatchBroadcastView listener on every state-relevant change via AbstractModel.</p
 <li><span><span class="tsd-kind-parameter">id</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>Stable identifier for this match.</p>
 </div></li>
-<li><span><span class="tsd-kind-parameter">players</span>: <span class="tsd-signature-symbol">[</span><a href="shared_src_domain_Player.Player.html" class="tsd-signature-type tsd-kind-class">Player</a><span class="tsd-signature-symbol">,</span> <a href="shared_src_domain_Player.Player.html" class="tsd-signature-type tsd-kind-class">Player</a><span class="tsd-signature-symbol">]</span></span></li></ul></div>
+<li><span><span class="tsd-kind-parameter">players</span>: <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">]</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MatchModel</a></h4><aside class="tsd-sources">
-<p>Overrides <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#constructor">constructor</a></p>
+<p>Overrides AbstractModel.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L33">server/src/model/MatchModel.ts:33</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L75">server/src/model/MatchModel.ts:75</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="championselectdeadline"><span>champion<wbr/>Select<wbr/>Deadline</span><a href="#championselectdeadline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">championSelectDeadline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
+<div class="tsd-signature"><span class="tsd-kind-property">championSelectDeadline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Simulation timestamp (ms) by which both players must select a champion, or the match ends (R3.4).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L23">server/src/model/MatchModel.ts:23</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L61">server/src/model/MatchModel.ts:61</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="endedat"><span>ended<wbr/>At</span><a href="#endedat" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">endedAt</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Simulation timestamp (ms) the match ended, or null while still in progress.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L27">server/src/model/MatchModel.ts:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L65">server/src/model/MatchModel.ts:65</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="endreason"><span>end<wbr/>Reason</span><a href="#endreason" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">endReason</span><span class="tsd-signature-symbol">:</span> <a href="../enums/shared_src_domain_EndReason.EndReason.html" class="tsd-signature-type tsd-kind-enum">EndReason</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+<div class="tsd-signature"><span class="tsd-kind-property">endReason</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">EndReason</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Why the match ended, or null while still in progress (R5.3).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L29">server/src/model/MatchModel.ts:29</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L67">server/src/model/MatchModel.ts:67</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="id"><code class="tsd-tag">Readonly</code><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Stable identifier for this match.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L35">server/src/model/MatchModel.ts:35</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L77">server/src/model/MatchModel.ts:77</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="participants"><code class="tsd-tag">Private</code><span>participants</span><a href="#participants" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">participants</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a><span class="tsd-signature-symbol">,</span> <a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a><span class="tsd-signature-symbol">]</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L21">server/src/model/MatchModel.ts:21</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L59">server/src/model/MatchModel.ts:59</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="pendingmoves"><code class="tsd-tag">Private</code><span>pending<wbr/>Moves</span><a href="#pendingmoves" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">pendingMoves</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">dx</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">dy</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
+<div class="tsd-comment tsd-typography"><p>Each participant's most recently submitted movement input, applied once per tick (see submitMove).</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L73">server/src/model/MatchModel.ts:73</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="phase"><span>phase</span><a href="#phase" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">phase</span><span class="tsd-signature-symbol">:</span> <a href="../enums/shared_src_domain_MatchPhase.MatchPhase.html" class="tsd-signature-type tsd-kind-enum">MatchPhase</a><span class="tsd-signature-symbol"> = MatchPhase.CHAMPION_SELECT</span></div>
+<div class="tsd-signature"><span class="tsd-kind-property">phase</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchPhase</span><span class="tsd-signature-symbol"> = MatchPhase.CHAMPION_SELECT</span></div>
 <div class="tsd-comment tsd-typography"><p>Current stage of the match; most operations below are only valid in one specific phase.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L20">server/src/model/MatchModel.ts:20</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L58">server/src/model/MatchModel.ts:58</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="startedat"><span>started<wbr/>At</span><a href="#startedat" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">startedAt</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Simulation timestamp (ms) the ACTIVE phase began, or null before combat starts.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L25">server/src/model/MatchModel.ts:25</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L63">server/src/model/MatchModel.ts:63</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="tickcount"><code class="tsd-tag">Private</code><span>tick<wbr/>Count</span><a href="#tickcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">tickCount</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
+<div class="tsd-comment tsd-typography"><p>Incrementing tick counter included in every broadcast snapshot; not a timestamp.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L71">server/src/model/MatchModel.ts:71</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="winningteam"><span>winning<wbr/>Team</span><a href="#winningteam" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">winningTeam</span><span class="tsd-signature-symbol">:</span> <a href="../enums/shared_src_domain_Team.Team.html" class="tsd-signature-type tsd-kind-enum">Team</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+<div class="tsd-signature"><span class="tsd-kind-property">winningTeam</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Team</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>The winning team, or null for a draw or a match still in progress.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L31">server/src/model/MatchModel.ts:31</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L69">server/src/model/MatchModel.ts:69</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -142,30 +162,46 @@ MatchBroadcastView listener on every state-relevant change via AbstractModel.</p
 <h3 class="tsd-anchor-link" id="addmodellistener"><span>add<wbr/>Model<wbr/>Listener</span><a href="#addmodellistener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="addmodellistener-1"><span class="tsd-kind-call-signature">addModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#addmodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="addmodellistener-1"><span class="tsd-kind-call-signature">addModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelListener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#addmodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">listener</span>: <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a></span>
+<li><span><span class="tsd-kind-parameter">listener</span>: <span class="tsd-signature-type">ModelListener</span></span>
 <div class="tsd-comment tsd-typography"><p>the listener to add; will receive future <code>notifyChanged</code> events</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#addmodellistener">addModelListener</a></p>
+<p>Inherited from AbstractModel.addModelListener</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractModel.ts#L14">shared/src/mvc/AbstractModel.ts:14</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractModel.d.ts:12</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="checkwinconditions"><span>check<wbr/>Win<wbr/>Conditions</span><a href="#checkwinconditions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="checkwinconditions-1"><span class="tsd-kind-call-signature">checkWinConditions</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="../enums/shared_src_domain_EndReason.EndReason.html" class="tsd-signature-type tsd-kind-enum">EndReason</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><a href="#checkwinconditions-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="checkwinconditions-1"><span class="tsd-kind-call-signature">checkWinConditions</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">EndReason</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><a href="#checkwinconditions-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Evaluates whether the match has reached a win condition this tick (elimination or time limit).</p>
+<div class="tsd-comment tsd-typography"><p>Evaluates whether the match has reached a win condition this tick (elimination or time limit).
+Disconnect forfeit and selection timeout are handled separately, not here (SRS 3.2.6 vs. 3.2.5).</p>
 </div>
-<h4 class="tsd-returns-title">Returns <a href="../enums/shared_src_domain_EndReason.EndReason.html" class="tsd-signature-type tsd-kind-enum">EndReason</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><p>the reason the match ended, or null if it should continue</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">EndReason</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><p>the reason the match ended, or null if it should continue</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L101">server/src/model/MatchModel.ts:101</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L400">server/src/model/MatchModel.ts:400</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="determinewinner"><code class="tsd-tag">Protected</code><span>determine<wbr/>Winner</span><a href="#determinewinner" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="determinewinner-1"><span class="tsd-kind-call-signature">determineWinner</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">reason</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">EndReason</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Team</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><a href="#determinewinner-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The ELIMINATION/TIME_LIMIT winner. DISCONNECT_FORFEIT/SELECTION_TIMEOUT are decided at their call sites.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">reason</span>: <span class="tsd-signature-type">EndReason</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Team</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L117">server/src/model/MatchModel.ts:117</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="disconnect"><span>disconnect</span><a href="#disconnect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -183,12 +219,40 @@ Does not itself throw — an already-disconnected participant is simply left as 
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L110">server/src/model/MatchModel.ts:110</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L412">server/src/model/MatchModel.ts:412</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="endmatch"><code class="tsd-tag">Protected</code><span>end<wbr/>Match</span><a href="#endmatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="endmatch-1"><span class="tsd-kind-call-signature">endMatch</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">reason</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">EndReason</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">winningTeam</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Team</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">now</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#endmatch-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">reason</span>: <span class="tsd-signature-type">EndReason</span></span></li>
+<li><span><span class="tsd-kind-parameter">winningTeam</span>: <span class="tsd-signature-type">Team</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></span></li>
+<li><span><span class="tsd-kind-parameter">now</span>: <span class="tsd-signature-type">number</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L105">server/src/model/MatchModel.ts:105</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="findparticipant"><code class="tsd-tag">Protected</code><span>find<wbr/>Participant</span><a href="#findparticipant" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="findparticipant-1"><span class="tsd-kind-call-signature">findParticipant</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a><a href="#findparticipant-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">playerId</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L94">server/src/model/MatchModel.ts:94</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="notifychanged"><span>notify<wbr/>Changed</span><a href="#notifychanged" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="notifychanged-1"><span class="tsd-kind-call-signature">notifyChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#notifychanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="notifychanged-1"><span class="tsd-kind-call-signature">notifyChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelEvent</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#notifychanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Pushes an event to every currently registered listener. Iterates over a clone of the listener list
 so a listener that adds/removes another listener mid-notification can't corrupt the iteration.</p>
@@ -196,13 +260,28 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">event</span>: <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a></span>
+<li><span><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">ModelEvent</span></span>
 <div class="tsd-comment tsd-typography"><p>describes what changed and carries the new state</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#notifychanged">notifyChanged</a></p>
+<p>Inherited from AbstractModel.notifyChanged</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractModel.ts#L28">shared/src/mvc/AbstractModel.ts:28</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractModel.d.ts:20</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="opponentof"><code class="tsd-tag">Protected</code><span>opponent<wbr/>Of</span><a href="#opponentof" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="opponentof-1"><span class="tsd-kind-call-signature">opponentOf</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">participant</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a><a href="#opponentof-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The other participant.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">participant</span>: <a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="server_src_model_ParticipantState.ParticipantState.html" class="tsd-signature-type tsd-kind-class">ParticipantState</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L101">server/src/model/MatchModel.ts:101</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="reconnect"><span>reconnect</span><a href="#reconnect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -223,23 +302,23 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 <h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the 30-second grace period has already elapsed (R6.3, R6.4)</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L119">server/src/model/MatchModel.ts:119</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L427">server/src/model/MatchModel.ts:427</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="removemodellistener"><span>remove<wbr/>Model<wbr/>Listener</span><a href="#removemodellistener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="removemodellistener-1"><span class="tsd-kind-call-signature">removeModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#removemodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="removemodellistener-1"><span class="tsd-kind-call-signature">removeModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelListener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#removemodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">listener</span>: <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a></span>
+<li><span><span class="tsd-kind-parameter">listener</span>: <span class="tsd-signature-type">ModelListener</span></span>
 <div class="tsd-comment tsd-typography"><p>the listener to remove; a no-op if it was never registered</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#removemodellistener">removeModelListener</a></p>
+<p>Inherited from AbstractModel.removeModelListener</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractModel.ts#L19">shared/src/mvc/AbstractModel.ts:19</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractModel.d.ts:14</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="selectchampion"><span>select<wbr/>Champion</span><a href="#selectchampion" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -269,27 +348,55 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 <h4 class="tsd-anchor-link" id="throws-3">Throws<a href="#throws-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the match is not currently in CHAMPION_SELECT</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L53">server/src/model/MatchModel.ts:53</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L137">server/src/model/MatchModel.ts:137</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="snapshot"><span>snapshot</span><a href="#snapshot" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="snapshot-1"><span class="tsd-kind-call-signature">snapshot</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_contract_events.MatchStatePayload.html" class="tsd-signature-type tsd-kind-interface">MatchStatePayload</a><a href="#snapshot-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="snapshot-1"><span class="tsd-kind-call-signature">snapshot</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchStatePayload</span><a href="#snapshot-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="../interfaces/shared_src_contract_events.MatchStatePayload.html" class="tsd-signature-type tsd-kind-interface">MatchStatePayload</a></h4><p>a read-only snapshot of both participants and match metadata, for broadcast to clients.</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">MatchStatePayload</span></h4><p>a read-only snapshot of both participants and match metadata, for broadcast to clients.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L124">server/src/model/MatchModel.ts:124</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L440">server/src/model/MatchModel.ts:440</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="submitability"><span>submit<wbr/>Ability</span><a href="#submitability" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="submitability-1"><span class="tsd-kind-call-signature">submitAbility</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">req</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">abilityId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">targetPlayerId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#submitability-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="submitability-1"><span class="tsd-kind-call-signature">submitAbility</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">req</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">abilityId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">targetPlayerId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">targetPosition</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Position</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#submitability-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Resolves and forwards an ability-use request. Because ParticipantState.useAbility() has no
-target-position parameter, this method is where target range is checked (R4.2) — it has access to
-both participants and computes the distance from req.targetPlayerId/targetPosition against
-ability.range before delegating cooldown/resource/incapacitation checks to ParticipantState.</p>
+<div class="tsd-comment tsd-typography"><p>Resolves and forwards an ability-use request (R4.2).</p>
+<p>CORRECTION (Step 11, 11_cross_1): <code>HEAL</code> stays self-targeted and instant, no aim needed. Every other
+effect type (<code>DAMAGE</code>, <code>CROWD_CONTROL</code>, <code>POSITIONING</code>) is now a skillshot — it requires <code>req.targetPosition</code>
+(a point in arena-space the caster aimed at) and resolves via direction, not a named target player.
+This replaces the old <code>target = req.targetPlayerId ? opponent : caster</code> resolution, which silently made
+every <code>POSITIONING</code> ability a same-position no-op (the client never sent <code>targetPlayerId</code> for them —
+see the class-list correction for this prompt for the full history of that bug).</p>
+<p>CORRECTION (Step 11, 11_cross_2): <code>HEAL</code> is no longer uniformly self-targeted/instant — it now
+branches on <code>ability.range</code>. <code>range === 0</code> (Iron Skin only) keeps the exact behavior above; <code>range &gt; 0</code> (Vital Siphon only, currently) is an aimed drain, resolved through the same gates as
+<code>DAMAGE</code>/<code>CROWD_CONTROL</code> below, applying both damage to the opponent and healing to the caster on a
+hit — see Scope E4 for why this was a real, previously-unread piece of data (Vital Siphon's <code>range</code>
+was already nonzero and simply never consulted).</p>
+<p>For <code>DAMAGE</code>/<code>CROWD_CONTROL</code>/ranged-<code>HEAL</code>: the aim direction is computed from caster to
+<code>targetPosition</code>, then the <em>actual</em> opponent (not the clicked point) is checked against four
+independent conditions, all required for a hit — range (<code>distanceTo(opponent) &lt;= ability.range</code>,
+unchanged from before), forward-facing (the opponent must be on the same side of the caster as the
+aim direction, not merely colinear with the infinite line through it — CORRECTION, 11_cross_2 Scope
+A: previously missing, so a click aimed <em>away</em> from the opponent could still register a hit if they
+happened to be behind the caster along the same line), aim alignment (the opponent's perpendicular
+distance from the cast ray is within the hit radius — <code>SKILLSHOT_HIT_RADIUS</code> for every ability except
+Shockwave Slam, which uses its own wider <code>SHOCKWAVE_SLAM_HIT_RADIUS</code>, Scope E1), and line of sight
+(<code>segmentCrossesObstacle</code> between caster and opponent). A miss on any of these still consumes the
+ability's cooldown/resource via <code>useAbility()</code> — a real &quot;whiffed cast&quot;, not a bug.</p>
+<p>For <code>POSITIONING</code>: the destination is <code>caster.position + direction * ability.range</code>, wall-clamped
+exactly like regular movement; if the straight path to that destination crosses an obstacle, the whole
+cast is rejected (caster does not move, cooldown/resource are still consumed) rather than attempting a
+partial teleport — except Phase Step (Scope E3), a magical teleport &quot;through the space between
+spaces&quot; rather than a physical dash, which is exempt from the obstacle check (still wall-clamped to
+the arena bounds, a hard world boundary rather than an &quot;obstacle&quot; in the same sense). Bulwark Charge
+(Scope E2) additionally staggers the opponent (a short <code>applyCrowdControl</code>) if its travel path passes
+within <code>BULWARK_CHARGE_STAGGER_RADIUS</code> of them — &quot;shoulder-first... shield raised&quot; is more than a
+pure escape, unlike Phase Step/Swift Reposition.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -297,26 +404,29 @@ ability.range before delegating cooldown/resource/incapacitation checks to Parti
 <li><span><span class="tsd-kind-parameter">playerId</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>the acting player</p>
 </div></li>
-<li><span><span class="tsd-kind-parameter">req</span>: <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">abilityId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">targetPlayerId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span></span>
-<div class="tsd-comment tsd-typography"><p>the ability id and optional target</p>
+<li><span><span class="tsd-kind-parameter">req</span>: <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">abilityId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">targetPlayerId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">targetPosition</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Position</span> <span class="tsd-signature-symbol">}</span></span>
+<div class="tsd-comment tsd-typography"><p>the ability id and, for every effect type except self-targeted <code>HEAL</code>, the aimed
+<code>targetPosition</code></p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-throws">
 <h4 class="tsd-anchor-link" id="throws-4">Throws<a href="#throws-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the match is not currently ACTIVE</p>
 <p>All per-ability validation failures — unknown ability, cooldown, insufficient resource, incapacitation,
-and out-of-range target — are caught internally and silently ignored (the action has no effect) rather
-than propagated to the caller, per R4's &quot;silently ignores&quot; behavior; see CombatController.</p>
+missing aim, out-of-range/misaimed/blocked target — are caught internally and silently ignored, per
+R4's &quot;silently ignores&quot; behavior.</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L80">server/src/model/MatchModel.ts:80</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L224">server/src/model/MatchModel.ts:224</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="submitmove"><span>submit<wbr/>Move</span><a href="#submitmove" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="submitmove-1"><span class="tsd-kind-call-signature">submitMove</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">dx</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">dy</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#submitmove-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Forwards movement input to the submitting player's ParticipantState for the current tick.</p>
+<div class="tsd-comment tsd-typography"><p>Forwards movement input to the submitting player's ParticipantState for the current tick. Buffers the
+input rather than moving immediately — actual position integration happens once per tick(), using
+that tick's own deltaSeconds, so movement speed is independent of client send rate.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -333,19 +443,21 @@ than propagated to the caller, per R4's &quot;silently ignores&quot; behavior; s
 <h4 class="tsd-anchor-link" id="throws-5">Throws<a href="#throws-5" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the match is not currently ACTIVE</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L63">server/src/model/MatchModel.ts:63</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L170">server/src/model/MatchModel.ts:170</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="tick"><span>tick</span><a href="#tick" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="tick-1"><span class="tsd-kind-call-signature">tick</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">deltaSeconds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#tick-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Advances the match simulation by one tick: regenerates resource, expires cooldowns/crowd control,
-checks win conditions, and notifies listeners with the new state (R4.3–R4.6).
+<div class="tsd-comment tsd-typography"><p>Advances the match simulation by one tick. During CHAMPION_SELECT, only checks the 30s selection
+deadline (R3.4). Once ACTIVE, first checks each participant's disconnect grace period, ending the
+match by DISCONNECT_FORFEIT if one has elapsed (R6.3, R6.4), then drives combat — applies buffered
+movement, regenerates resource, checks win conditions, and notifies listeners with the new state
+(R4.3–R4.6). A no-op once ENDED.
 CRITICAL: called by TickLoop.onTick() up to 20x/sec, once per registered match. This method itself
 must never throw uncaught — TickLoop wraps each call in a per-match try/catch specifically so one
-match's internal error cannot crash the loop or affect any other in-progress match (R5.4, 3.6.2). This
-isolation guarantee lives in TickLoop, not here; tick() should still avoid throwing where avoidable.</p>
+match's internal error cannot crash the loop or affect any other in-progress match (R5.4, 3.6.2).</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -355,7 +467,7 @@ isolation guarantee lives in TickLoop, not here; tick() should still avoid throw
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/model/MatchModel.ts#L93">server/src/model/MatchModel.ts:93</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchModel.ts#L346">server/src/model/MatchModel.ts:346</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -374,9 +486,9 @@ isolation guarantee lives in TickLoop, not here; tick() should still avoid throw
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#championselectdeadline"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>champion<wbr/>Select<wbr/>Deadline</span></a><a href="#endedat"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>ended<wbr/>At</span></a><a href="#endreason"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>end<wbr/>Reason</span></a><a href="#id"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id</span></a><a href="#participants" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>participants</span></a><a href="#phase"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>phase</span></a><a href="#startedat"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>started<wbr/>At</span></a><a href="#winningteam"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>winning<wbr/>Team</span></a></div></details>
+<div><a href="#championselectdeadline"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>champion<wbr/>Select<wbr/>Deadline</span></a><a href="#endedat"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>ended<wbr/>At</span></a><a href="#endreason"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>end<wbr/>Reason</span></a><a href="#id"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id</span></a><a href="#participants" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>participants</span></a><a href="#pendingmoves" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>pending<wbr/>Moves</span></a><a href="#phase"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>phase</span></a><a href="#startedat"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>started<wbr/>At</span></a><a href="#tickcount" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>tick<wbr/>Count</span></a><a href="#winningteam"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>winning<wbr/>Team</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#addmodellistener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Model<wbr/>Listener</span></a><a href="#checkwinconditions"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>check<wbr/>Win<wbr/>Conditions</span></a><a href="#disconnect"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>disconnect</span></a><a href="#notifychanged" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>notify<wbr/>Changed</span></a><a href="#reconnect"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>reconnect</span></a><a href="#removemodellistener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Model<wbr/>Listener</span></a><a href="#selectchampion"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>select<wbr/>Champion</span></a><a href="#snapshot"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>snapshot</span></a><a href="#submitability"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>submit<wbr/>Ability</span></a><a href="#submitmove"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>submit<wbr/>Move</span></a><a href="#tick"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>tick</span></a></div></details></div></details></div>
+<div><a href="#addmodellistener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Model<wbr/>Listener</span></a><a href="#checkwinconditions"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>check<wbr/>Win<wbr/>Conditions</span></a><a href="#determinewinner" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>determine<wbr/>Winner</span></a><a href="#disconnect"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>disconnect</span></a><a href="#endmatch" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>end<wbr/>Match</span></a><a href="#findparticipant" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>find<wbr/>Participant</span></a><a href="#notifychanged" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>notify<wbr/>Changed</span></a><a href="#opponentof" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>opponent<wbr/>Of</span></a><a href="#reconnect"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>reconnect</span></a><a href="#removemodellistener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Model<wbr/>Listener</span></a><a href="#selectchampion"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>select<wbr/>Champion</span></a><a href="#snapshot"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>snapshot</span></a><a href="#submitability"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>submit<wbr/>Ability</span></a><a href="#submitmove"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>submit<wbr/>Move</span></a><a href="#tick"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>tick</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html">Arena — API Documentation</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

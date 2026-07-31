@@ -15,7 +15,7 @@
 <div class="tsd-comment tsd-typography"><p>Computes leaderboard standings and per-champion win rates from recorded match history (R8.1–R8.3).</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/LeaderboardRepository.ts#L6">api/src/model/LeaderboardRepository.ts:6</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/LeaderboardRepository.ts#L12">api/src/model/LeaderboardRepository.ts:12</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -51,7 +51,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">LeaderboardRepository</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/LeaderboardRepository.ts#L8">api/src/model/LeaderboardRepository.ts:8</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/LeaderboardRepository.ts#L14">api/src/model/LeaderboardRepository.ts:14</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -61,7 +61,7 @@
 <div class="tsd-comment tsd-typography"><p>the shared connection pool this repository queries through</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/LeaderboardRepository.ts#L8">api/src/model/LeaderboardRepository.ts:8</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/LeaderboardRepository.ts#L14">api/src/model/LeaderboardRepository.ts:14</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -69,18 +69,19 @@
 <h3 class="tsd-anchor-link" id="computechampionwinrates"><span>compute<wbr/>Champion<wbr/>Win<wbr/>Rates</span><a href="#computechampionwinrates" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="computechampionwinrates-1"><span class="tsd-kind-call-signature">computeChampionWinRates</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/shared_src_contract_dto.ChampionWinRateDTO.html" class="tsd-signature-type tsd-kind-interface">ChampionWinRateDTO</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#computechampionwinrates-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="computechampionwinrates-1"><span class="tsd-kind-call-signature">computeChampionWinRates</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ChampionWinRateDTO</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#computechampionwinrates-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Computes each champion's aggregate win rate across all recorded matches (R8.3).</p>
+<div class="tsd-comment tsd-typography"><p>Computes each champion's aggregate win rate across all recorded matches (R8.3), the same
+computed-at-query-time way as <code>computeLeaderboard</code> (R8.1's correctness property applies equally here).</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/shared_src_contract_dto.ChampionWinRateDTO.html" class="tsd-signature-type tsd-kind-interface">ChampionWinRateDTO</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>one win-rate summary per champion</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ChampionWinRateDTO</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>one win-rate summary per champion</p>
 
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-throws">
 <h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the underlying query fails</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/LeaderboardRepository.ts#L29">api/src/model/LeaderboardRepository.ts:29</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/LeaderboardRepository.ts#L54">api/src/model/LeaderboardRepository.ts:54</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="computeleaderboard"><span>compute<wbr/>Leaderboard</span><a href="#computeleaderboard" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -88,9 +89,11 @@
 <div class="tsd-signature tsd-anchor-link" id="computeleaderboard-1"><span class="tsd-kind-call-signature">computeLeaderboard</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">minGames</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="api_src_model_LeaderboardEntry.LeaderboardEntry.html" class="tsd-signature-type tsd-kind-class">LeaderboardEntry</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#computeleaderboard-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Computes each qualifying player's win rate. Win rate is always derived fresh from match history at
-query time — wins / gamesPlayed — not a maintained running total (R8.1); this is a correctness
-property, not an implementation detail, so it should not be &quot;optimized&quot; into an incrementally updated
-counter later.</p>
+query time — wins / gamesPlayed, computed by the query itself via <code>FILTER</code>/<code>COUNT</code>, not as a
+separately maintained value (R8.1); this is a correctness property, not an implementation detail, so
+it should not be &quot;optimized&quot; into an incrementally updated counter later. Players below <code>minGames</code>
+are excluded via <code>HAVING</code>, not filtered client-side (R8.2). Ordered by win rate, then total wins,
+descending.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -106,7 +109,7 @@ counter later.</p>
 <h4 class="tsd-anchor-link" id="throws-1">Throws<a href="#throws-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the underlying query fails</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/LeaderboardRepository.ts#L20">api/src/model/LeaderboardRepository.ts:20</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/LeaderboardRepository.ts#L28">api/src/model/LeaderboardRepository.ts:28</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

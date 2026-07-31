@@ -15,7 +15,7 @@
 <div class="tsd-comment tsd-typography"><p>Persists completed matches and serves paginated match history (R7.1, R7.3, R-DB2, R-DB5).</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/MatchRepository.ts#L5">api/src/model/MatchRepository.ts:5</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/MatchRepository.ts#L43">api/src/model/MatchRepository.ts:43</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -51,7 +51,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MatchRepository</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/MatchRepository.ts#L7">api/src/model/MatchRepository.ts:7</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/MatchRepository.ts#L45">api/src/model/MatchRepository.ts:45</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -61,7 +61,7 @@
 <div class="tsd-comment tsd-typography"><p>the shared connection pool this repository queries through</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/MatchRepository.ts#L7">api/src/model/MatchRepository.ts:7</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/MatchRepository.ts#L45">api/src/model/MatchRepository.ts:45</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -69,9 +69,16 @@
 <h3 class="tsd-anchor-link" id="findhistoryforplayer"><span>find<wbr/>History<wbr/>For<wbr/>Player</span><a href="#findhistoryforplayer" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="findhistoryforplayer-1"><span class="tsd-kind-call-signature">findHistoryForPlayer</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">page</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">pageSize</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="shared_src_domain_MatchParticipant.MatchParticipant.html" class="tsd-signature-type tsd-kind-class">MatchParticipant</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#findhistoryforplayer-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="findhistoryforplayer-1"><span class="tsd-kind-call-signature">findHistoryForPlayer</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">page</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">pageSize</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/api_src_model_MatchRepository.MatchHistoryRow.html" class="tsd-signature-type tsd-kind-interface">MatchHistoryRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#findhistoryforplayer-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Looks up a player's match history, most-recent-first (R7.3, R-DB5).</p>
+<div class="tsd-comment tsd-typography"><p>Looks up a player's match history, most-recent-first (R7.3, R-DB5). <code>page</code> is 1-indexed — page 1 is
+the most recent <code>pageSize</code> matches.</p>
+<p>CORRECTION (Step 10): originally returned <code>MatchParticipant[]</code>, but <code>MatchHistoryResponseView</code>
+(<code>10_api_2</code>) needs each row's opponent username for <code>MatchHistoryEntryDTO</code> (R7.3's wire shape), and
+<code>MatchParticipant</code> has no opponent reference. Real implementation joins <code>match_participants</code> to itself
+(on <code>match_id</code>, excluding the querying player's own row — 1v1 matches always have exactly one other
+participant) plus <code>players</code> for that opponent's username, in one query, and returns the enriched
+<code>MatchHistoryRow</code> shape instead.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -80,37 +87,38 @@
 <div class="tsd-comment tsd-typography"><p>the player whose history to fetch</p>
 </div></li>
 <li><span><span class="tsd-kind-parameter">page</span>: <span class="tsd-signature-type">number</span></span>
-<div class="tsd-comment tsd-typography"><p>zero- or one-indexed page number (fixed by the implementation)</p>
+<div class="tsd-comment tsd-typography"><p>1-indexed page number</p>
 </div></li>
 <li><span><span class="tsd-kind-parameter">pageSize</span>: <span class="tsd-signature-type">number</span></span>
 <div class="tsd-comment tsd-typography"><p>number of entries per page</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="shared_src_domain_MatchParticipant.MatchParticipant.html" class="tsd-signature-type tsd-kind-class">MatchParticipant</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>the page of <code>MatchParticipant</code> rows for that player</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/api_src_model_MatchRepository.MatchHistoryRow.html" class="tsd-signature-type tsd-kind-interface">MatchHistoryRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>the page of <code>MatchHistoryRow</code>s for that player</p>
 
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-throws">
 <h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the underlying query fails</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/MatchRepository.ts#L30">api/src/model/MatchRepository.ts:30</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/MatchRepository.ts#L88">api/src/model/MatchRepository.ts:88</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="recordmatch"><span>record<wbr/>Match</span><a href="#recordmatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="recordmatch-1"><span class="tsd-kind-call-signature">recordMatch</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">match</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_domain_Match.Match.html" class="tsd-signature-type tsd-kind-class">Match</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">participants</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_domain_MatchParticipant.MatchParticipant.html" class="tsd-signature-type tsd-kind-class">MatchParticipant</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#recordmatch-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="recordmatch-1"><span class="tsd-kind-call-signature">recordMatch</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">match</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Match</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">participants</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchParticipant</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#recordmatch-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Writes one <code>Match</code> row plus its <code>MatchParticipant</code> rows (exactly one per player) as a single unit
-(R7.1, R-DB2, R-DB4). Precondition: the match reached at least <code>ACTIVE</code> phase before ending — a match
-that ended during Champion Select must not be recorded (R7.2). Enforcing that precondition is the
-caller's (<code>InternalMatchController</code>'s) responsibility; this method persists whatever it is given.</p>
+(R7.1, R-DB2, R-DB4) — via <code>PgPool.transaction</code>, so a failure partway through leaves neither row
+behind. Precondition: the match reached at least <code>ACTIVE</code> phase before ending — a match that ended
+during Champion Select must not be recorded (R7.2). Enforcing that precondition is the caller's
+(<code>InternalMatchController</code>'s) responsibility; this method persists whatever it is given.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">match</span>: <a href="shared_src_domain_Match.Match.html" class="tsd-signature-type tsd-kind-class">Match</a></span>
+<li><span><span class="tsd-kind-parameter">match</span>: <span class="tsd-signature-type">Match</span></span>
 <div class="tsd-comment tsd-typography"><p>the completed match's summary record</p>
 </div></li>
-<li><span><span class="tsd-kind-parameter">participants</span>: <a href="shared_src_domain_MatchParticipant.MatchParticipant.html" class="tsd-signature-type tsd-kind-class">MatchParticipant</a><span class="tsd-signature-symbol">[]</span></span>
+<li><span><span class="tsd-kind-parameter">participants</span>: <span class="tsd-signature-type">MatchParticipant</span><span class="tsd-signature-symbol">[]</span></span>
 <div class="tsd-comment tsd-typography"><p>the two participants' per-match outcome rows</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -119,7 +127,7 @@ caller's (<code>InternalMatchController</code>'s) responsibility; this method pe
 <h4 class="tsd-anchor-link" id="throws-1">Throws<a href="#throws-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the underlying write fails</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/model/MatchRepository.ts#L18">api/src/model/MatchRepository.ts:18</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/model/MatchRepository.ts#L57">api/src/model/MatchRepository.ts:57</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

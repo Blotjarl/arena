@@ -15,14 +15,14 @@
 <div class="tsd-comment tsd-typography"><p>Tracks the local player's matchmaking queue state as reported by the server.
 The server is authoritative — this model only stores what it has been told.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="923">
-<h4>Hierarchy (<a href="../hierarchy.html#client/src/model/ClientQueueModel.ClientQueueModel">View Summary</a>)</h4>
+<section class="tsd-panel tsd-hierarchy" data-refl="1203">
+<h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li class="tsd-hierarchy-item"><a href="shared_src_mvc_AbstractModel.AbstractModel.html" class="tsd-signature-type tsd-kind-class">AbstractModel</a>
+<li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractModel</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ClientQueueModel</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/model/ClientQueueModel.ts#L10">client/src/model/ClientQueueModel.ts:10</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientQueueModel.ts#L10">client/src/model/ClientQueueModel.ts:10</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -34,7 +34,8 @@ The server is authoritative — this model only stores what it has been told.</p
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#position" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>position</span></a>
+<div class="tsd-index-list"><a href="#matchpayload" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>match<wbr/>Payload</span></a>
+<a href="#position" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>position</span></a>
 <a href="#status" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>status</span></a>
 </div></section>
 <section class="tsd-index-section">
@@ -56,24 +57,31 @@ The server is authoritative — this model only stores what it has been told.</p
 <div class="tsd-signature tsd-anchor-link" id="constructorclientqueuemodel"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">ClientQueueModel</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a><a href="#constructorclientqueuemodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#constructor">constructor</a></p></aside></div></li></ul></section></section></details>
+<p>Inherited from AbstractModel.constructor</p></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="matchpayload"><span>match<wbr/>Payload</span><a href="#matchpayload" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">matchPayload</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchFoundPayload</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+<div class="tsd-comment tsd-typography"><p>The match:found payload from the server; null until setMatched() is called.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientQueueModel.ts#L18">client/src/model/ClientQueueModel.ts:18</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="position"><span>position</span><a href="#position" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">position</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>1-based position in the queue as last reported by the server; null when not queued.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/model/ClientQueueModel.ts#L15">client/src/model/ClientQueueModel.ts:15</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientQueueModel.ts#L15">client/src/model/ClientQueueModel.ts:15</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="status"><span>status</span><a href="#status" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">status</span><span class="tsd-signature-symbol">:</span> <a href="../types/client_src_model_ClientQueueModel.QueueStatus.html" class="tsd-signature-type tsd-kind-type-alias">QueueStatus</a><span class="tsd-signature-symbol"> = &#39;idle&#39;</span></div>
 <div class="tsd-comment tsd-typography"><p>Current queue lifecycle state; starts idle and transitions on server events.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/model/ClientQueueModel.ts#L12">client/src/model/ClientQueueModel.ts:12</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientQueueModel.ts#L12">client/src/model/ClientQueueModel.ts:12</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -81,23 +89,23 @@ The server is authoritative — this model only stores what it has been told.</p
 <h3 class="tsd-anchor-link" id="addmodellistener"><span>add<wbr/>Model<wbr/>Listener</span><a href="#addmodellistener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="addmodellistener-1"><span class="tsd-kind-call-signature">addModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#addmodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="addmodellistener-1"><span class="tsd-kind-call-signature">addModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelListener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#addmodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">listener</span>: <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a></span>
+<li><span><span class="tsd-kind-parameter">listener</span>: <span class="tsd-signature-type">ModelListener</span></span>
 <div class="tsd-comment tsd-typography"><p>the listener to add; will receive future <code>notifyChanged</code> events</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#addmodellistener">addModelListener</a></p>
+<p>Inherited from AbstractModel.addModelListener</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractModel.ts#L14">shared/src/mvc/AbstractModel.ts:14</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractModel.d.ts:12</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="notifychanged"><span>notify<wbr/>Changed</span><a href="#notifychanged" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="notifychanged-1"><span class="tsd-kind-call-signature">notifyChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#notifychanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="notifychanged-1"><span class="tsd-kind-call-signature">notifyChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelEvent</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#notifychanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Pushes an event to every currently registered listener. Iterates over a clone of the listener list
 so a listener that adds/removes another listener mid-notification can't corrupt the iteration.</p>
@@ -105,29 +113,29 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">event</span>: <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a></span>
+<li><span><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">ModelEvent</span></span>
 <div class="tsd-comment tsd-typography"><p>describes what changed and carries the new state</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#notifychanged">notifyChanged</a></p>
+<p>Inherited from AbstractModel.notifyChanged</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractModel.ts#L28">shared/src/mvc/AbstractModel.ts:28</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractModel.d.ts:20</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="removemodellistener"><span>remove<wbr/>Model<wbr/>Listener</span><a href="#removemodellistener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="removemodellistener-1"><span class="tsd-kind-call-signature">removeModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#removemodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="removemodellistener-1"><span class="tsd-kind-call-signature">removeModelListener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelListener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#removemodellistener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">listener</span>: <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a></span>
+<li><span><span class="tsd-kind-parameter">listener</span>: <span class="tsd-signature-type">ModelListener</span></span>
 <div class="tsd-comment tsd-typography"><p>the listener to remove; a no-op if it was never registered</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractModel.AbstractModel.html">AbstractModel</a>.<a href="shared_src_mvc_AbstractModel.AbstractModel.html#removemodellistener">removeModelListener</a></p>
+<p>Inherited from AbstractModel.removeModelListener</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractModel.ts#L19">shared/src/mvc/AbstractModel.ts:19</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractModel.d.ts:14</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setcancelled"><span>set<wbr/>Cancelled</span><a href="#setcancelled" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -138,24 +146,24 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/model/ClientQueueModel.ts#L28">client/src/model/ClientQueueModel.ts:28</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientQueueModel.ts#L35">client/src/model/ClientQueueModel.ts:35</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setmatched"><span>set<wbr/>Matched</span><a href="#setmatched" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="setmatched-1"><span class="tsd-kind-call-signature">setMatched</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">payload</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_contract_events.MatchFoundPayload.html" class="tsd-signature-type tsd-kind-interface">MatchFoundPayload</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setmatched-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="setmatched-1"><span class="tsd-kind-call-signature">setMatched</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">payload</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchFoundPayload</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setmatched-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Records that a match has been found and stores the server's match-found payload (R2.6).</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">payload</span>: <a href="../interfaces/shared_src_contract_events.MatchFoundPayload.html" class="tsd-signature-type tsd-kind-interface">MatchFoundPayload</a></span>
+<li><span><span class="tsd-kind-parameter">payload</span>: <span class="tsd-signature-type">MatchFoundPayload</span></span>
 <div class="tsd-comment tsd-typography"><p>the match:found event payload from the server</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/model/ClientQueueModel.ts#L36">client/src/model/ClientQueueModel.ts:36</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientQueueModel.ts#L45">client/src/model/ClientQueueModel.ts:45</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setqueued"><span>set<wbr/>Queued</span><a href="#setqueued" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -172,7 +180,7 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/model/ClientQueueModel.ts#L21">client/src/model/ClientQueueModel.ts:21</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientQueueModel.ts#L24">client/src/model/ClientQueueModel.ts:24</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -191,7 +199,7 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#position"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>position</span></a><a href="#status"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>status</span></a></div></details>
+<div><a href="#matchpayload"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>match<wbr/>Payload</span></a><a href="#position"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>position</span></a><a href="#status"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>status</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
 <div><a href="#addmodellistener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Model<wbr/>Listener</span></a><a href="#notifychanged" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>notify<wbr/>Changed</span></a><a href="#removemodellistener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Model<wbr/>Listener</span></a><a href="#setcancelled"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Cancelled</span></a><a href="#setmatched"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Matched</span></a><a href="#setqueued"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Queued</span></a></div></details></div></details></div>
 <div class="site-menu">

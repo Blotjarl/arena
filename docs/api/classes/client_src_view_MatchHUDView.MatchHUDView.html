@@ -19,10 +19,10 @@ Player input is forwarded to MatchController (SRS 3.1.1, R4.1–R4.7).</p>
 <section class="tsd-panel">
 <h4>Implements</h4>
 <ul class="tsd-hierarchy">
-<li><a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></li>
-<li><a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a></li></ul></section><aside class="tsd-sources">
+<li><span class="tsd-signature-type">View</span></li>
+<li><span class="tsd-signature-type">ModelListener</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L11">client/src/view/MatchHUDView.tsx:11</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L401">client/src/view/MatchHUDView.tsx:401</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -35,17 +35,25 @@ Player input is forwarded to MatchController (SRS 3.1.1, R4.1–R4.7).</p>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#controller" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controller</span></a>
+<a href="#identitymodel" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>identity<wbr/>Model</span></a>
 <a href="#interpolation" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>interpolation</span></a>
 <a href="#model" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a>
 <a href="#onupdate" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Update</span></a>
+<a href="#opponentdisconnect" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>opponent<wbr/>Disconnect</span></a>
+<a href="#socket" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>socket?</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#bindupdatecallback" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Update<wbr/>Callback</span></a>
+<div class="tsd-index-list"><a href="#bindsocketevents" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Socket<wbr/>Events</span></a>
+<a href="#bindupdatecallback" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Update<wbr/>Callback</span></a>
 <a href="#getcontroller" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Controller</span></a>
+<a href="#getidentitymodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Identity<wbr/>Model</span></a>
+<a href="#getinterpolationbuffer" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Interpolation<wbr/>Buffer</span></a>
 <a href="#getmodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a>
+<a href="#getopponentdisconnect" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Opponent<wbr/>Disconnect</span></a>
 <a href="#modelchanged" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>model<wbr/>Changed</span></a>
 <a href="#setcontroller" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Controller</span></a>
+<a href="#setidentitymodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Identity<wbr/>Model</span></a>
 <a href="#setmodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -55,20 +63,37 @@ Player input is forwarded to MatchController (SRS 3.1.1, R4.1–R4.7).</p>
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructormatchhudview"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">MatchHUDView</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientMatchModel.ClientMatchModel.html" class="tsd-signature-type tsd-kind-class">ClientMatchModel</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">controller</span><span class="tsd-signature-symbol">:</span> <a href="client_src_controller_MatchController.MatchController.html" class="tsd-signature-type tsd-kind-class">MatchController</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">MatchHUDView</a><a href="#constructormatchhudview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructormatchhudview"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">MatchHUDView</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">identityModel</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientMatchModel.ClientMatchModel.html" class="tsd-signature-type tsd-kind-class">ClientMatchModel</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">controller</span><span class="tsd-signature-symbol">:</span> <a href="client_src_controller_MatchController.MatchController.html" class="tsd-signature-type tsd-kind-class">MatchController</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">socket</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">&quot;on&quot;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">MatchHUDView</a><a href="#constructormatchhudview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>CORRECTION (Step 10): same pattern as LobbyView/ChampionSelectView — distinguishing &quot;you&quot; from
+&quot;the opponent&quot; in the HUD needs this connection's own playerId, which ClientMatchModel does not
+carry. getModel()/setModel() still resolve to ClientMatchModel, matching MatchController's
+<code>AbstractController&lt;ClientMatchModel, MatchHUDView&gt;</code> pairing; ClientIdentityModel is reachable via
+a separate getIdentityModel() accessor, outside the formal View&lt;M,C&gt; contract.</p>
+<p>CORRECTION (Step 11, 11_shared_4): <code>socket</code> is a new, optional 4th param — see <code>opponentDisconnect</code>
+above for why. Optional (rather than required) so every existing call site that has no reason to
+care about the disconnect banner (e.g. most unit tests) is unaffected; ClientMain.tsx passes the
+real socket.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">identityModel</span>: <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a></span>
+<div class="tsd-comment tsd-typography"><p>supplies this connection's own playerId, to tell &quot;you&quot; apart from the opponent</p>
+</div></li>
 <li><span><span class="tsd-kind-parameter">model</span>: <a href="client_src_model_ClientMatchModel.ClientMatchModel.html" class="tsd-signature-type tsd-kind-class">ClientMatchModel</a></span>
 <div class="tsd-comment tsd-typography"><p>the match model this view observes for authoritative combat state</p>
 </div></li>
 <li><span><span class="tsd-kind-parameter">controller</span>: <a href="client_src_controller_MatchController.MatchController.html" class="tsd-signature-type tsd-kind-class">MatchController</a></span>
 <div class="tsd-comment tsd-typography"><p>the controller this view forwards player input through</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">socket</span>: <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">&quot;on&quot;</span><span class="tsd-signature-symbol">&gt;</span></span>
+<div class="tsd-comment tsd-typography"><p>the live <a href="http://Socket.IO">Socket.IO</a> client connection, listened to directly for the two transient
+connection-status events; omit in contexts (most tests) that don't exercise the disconnect banner</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MatchHUDView</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L25">client/src/view/MatchHUDView.tsx:25</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L440">client/src/view/MatchHUDView.tsx:440</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -78,7 +103,14 @@ Player input is forwarded to MatchController (SRS 3.1.1, R4.1–R4.7).</p>
 <div class="tsd-comment tsd-typography"><p>the controller this view forwards player input through</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L27">client/src/view/MatchHUDView.tsx:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L443">client/src/view/MatchHUDView.tsx:443</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="identitymodel"><code class="tsd-tag">Private</code><span>identity<wbr/>Model</span><a href="#identitymodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">identityModel</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a></div>
+<div class="tsd-comment tsd-typography"><p>supplies this connection's own playerId, to tell &quot;you&quot; apart from the opponent</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L441">client/src/view/MatchHUDView.tsx:441</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="interpolation"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>interpolation</span><a href="#interpolation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">interpolation</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_InterpolationBuffer.InterpolationBuffer.html" class="tsd-signature-type tsd-kind-class">InterpolationBuffer</a><span class="tsd-signature-symbol"> = ...</span></div>
@@ -86,24 +118,61 @@ Player input is forwarded to MatchController (SRS 3.1.1, R4.1–R4.7).</p>
 Positions produced here are never written back to ClientMatchModel.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L19">client/src/view/MatchHUDView.tsx:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L409">client/src/view/MatchHUDView.tsx:409</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Private</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientMatchModel.ClientMatchModel.html" class="tsd-signature-type tsd-kind-class">ClientMatchModel</a></div>
 <div class="tsd-comment tsd-typography"><p>the match model this view observes for authoritative combat state</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L26">client/src/view/MatchHUDView.tsx:26</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L442">client/src/view/MatchHUDView.tsx:442</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="onupdate"><code class="tsd-tag">Private</code><span>on<wbr/>Update</span><a href="#onupdate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">onUpdate</span><span class="tsd-signature-symbol">:</span> (<span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">void</span>) <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Callback registered by MatchHUDScreen to trigger a React re-render on model changes.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L13">client/src/view/MatchHUDView.tsx:13</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L403">client/src/view/MatchHUDView.tsx:403</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="opponentdisconnect"><code class="tsd-tag">Private</code><span>opponent<wbr/>Disconnect</span><a href="#opponentdisconnect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">opponentDisconnect</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PlayerDisconnectedPayload</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+<div class="tsd-comment tsd-typography"><p>Transient, UI-only banner state for the opponent's live connection status — deliberately NOT a
+ClientMatchModel field. Per SocketConnectionController.bindInboundEvents' own doc comment,
+<code>match:player_disconnected</code>/<code>match:player_reconnected</code> are intentionally never routed through any
+model (disconnect status is already carried per-tick via ParticipantSnapshot.connectionStatus, and
+a view wanting a transient banner is expected to listen to the raw socket event directly instead).
+This view does exactly that, via the optional <code>socket</code> constructor param below, rather than having
+SocketConnectionController invent a new model field just for this. Cleared on a matching reconnect,
+never persisted, never read by anything outside this view.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L421">client/src/view/MatchHUDView.tsx:421</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="socket"><code class="tsd-tag">Private</code> <code class="tsd-tag">Optional</code> <code class="tsd-tag">Readonly</code><span>socket</span><a href="#socket" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">socket</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">&quot;on&quot;</span><span class="tsd-signature-symbol">&gt;</span></div>
+<div class="tsd-comment tsd-typography"><p>the live <a href="http://Socket.IO">Socket.IO</a> client connection, listened to directly for the two transient
+connection-status events; omit in contexts (most tests) that don't exercise the disconnect banner</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L444">client/src/view/MatchHUDView.tsx:444</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="bindsocketevents"><code class="tsd-tag">Private</code><span>bind<wbr/>Socket<wbr/>Events</span><a href="#bindsocketevents" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-private">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="bindsocketevents-1"><span class="tsd-kind-call-signature">bindSocketEvents</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#bindsocketevents-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Listens directly to the raw socket (when provided) for the opponent's connection status, bypassing
+both ClientMatchModel and SocketConnectionController — see <code>opponentDisconnect</code>'s doc comment above.
+A disconnect payload naming this connection's own playerId is ignored (this connection is, by
+definition, still connected if it's running this code); a reconnect payload only clears the banner
+if it names the same player currently shown as disconnected.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L457">client/src/view/MatchHUDView.tsx:457</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="bindupdatecallback"><span>bind<wbr/>Update<wbr/>Callback</span><a href="#bindupdatecallback" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -120,7 +189,7 @@ Positions produced here are never written back to ClientMatchModel.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L36">client/src/view/MatchHUDView.tsx:36</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L483">client/src/view/MatchHUDView.tsx:483</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getcontroller"><span>get<wbr/>Controller</span><a href="#getcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -131,9 +200,34 @@ Positions produced here are never written back to ClientMatchModel.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="client_src_controller_MatchController.MatchController.html" class="tsd-signature-type tsd-kind-class">MatchController</a></h4><p>the current MatchController</p>
 <aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#getcontroller">getController</a></p>
+<p>Implementation of View.getController</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L61">client/src/view/MatchHUDView.tsx:61</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L524">client/src/view/MatchHUDView.tsx:524</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getidentitymodel"><span>get<wbr/>Identity<wbr/>Model</span><a href="#getidentitymodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getidentitymodel-1"><span class="tsd-kind-call-signature">getIdentityModel</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a><a href="#getidentitymodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns the observed identity model (CORRECTION, Step 10 — see constructor doc above).</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a></h4><p>the current ClientIdentityModel</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L508">client/src/view/MatchHUDView.tsx:508</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getinterpolationbuffer"><span>get<wbr/>Interpolation<wbr/>Buffer</span><a href="#getinterpolationbuffer" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getinterpolationbuffer-1"><span class="tsd-kind-call-signature">getInterpolationBuffer</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_InterpolationBuffer.InterpolationBuffer.html" class="tsd-signature-type tsd-kind-class">InterpolationBuffer</a><a href="#getinterpolationbuffer-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns the rendering-only interpolation buffer, for MatchHUDScreen to query render positions
+from. Never exposed as anything other than read access — nothing outside this view pushes to it.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="client_src_model_InterpolationBuffer.InterpolationBuffer.html" class="tsd-signature-type tsd-kind-class">InterpolationBuffer</a></h4><p>the current InterpolationBuffer</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L541">client/src/view/MatchHUDView.tsx:541</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getmodel"><span>get<wbr/>Model</span><a href="#getmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -144,28 +238,45 @@ Positions produced here are never written back to ClientMatchModel.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="client_src_model_ClientMatchModel.ClientMatchModel.html" class="tsd-signature-type tsd-kind-class">ClientMatchModel</a></h4><p>the current ClientMatchModel</p>
 <aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#getmodel">getModel</a></p>
+<p>Implementation of View.getModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L44">client/src/view/MatchHUDView.tsx:44</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L491">client/src/view/MatchHUDView.tsx:491</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getopponentdisconnect"><span>get<wbr/>Opponent<wbr/>Disconnect</span><a href="#getopponentdisconnect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getopponentdisconnect-1"><span class="tsd-kind-call-signature">getOpponentDisconnect</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PlayerDisconnectedPayload</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><a href="#getopponentdisconnect-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns the opponent's current disconnect banner state, or null if the opponent is connected (or
+this view was constructed without a socket). Read by MatchHUDScreen to render the transient banner.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">PlayerDisconnectedPayload</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><p>the most recent unresolved PlayerDisconnectedPayload naming the opponent, or null</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L475">client/src/view/MatchHUDView.tsx:475</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="modelchanged"><span>model<wbr/>Changed</span><a href="#modelchanged" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="modelchanged-1"><span class="tsd-kind-call-signature">modelChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#modelchanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="modelchanged-1"><span class="tsd-kind-call-signature">modelChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelEvent</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#modelchanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Called by AbstractModel when the match model fires a change event (i.e. a new tick snapshot
-has arrived). Feeds the snapshot into the interpolation buffer, then invokes onUpdate.</p>
+has arrived). Feeds the snapshot into the interpolation buffer, then invokes onUpdate.
+REGRESSION FIX (11_client_5): <code>matchStart</code> carries the real spawn positions in
+<code>payload.initialState</code> (a MatchStatePayload) but was never routed into the buffer, so both
+markers rendered at the buffer's empty-state (0,0) fallback until the first <code>matchState</code> tick
+arrived — a visible corner-stack on match start.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">event</span>: <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a></span>
+<li><span><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">ModelEvent</span></span>
 <div class="tsd-comment tsd-typography"><p>the model event describing what changed</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html">ModelListener</a>.<a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html#modelchanged">modelChanged</a></p>
+<p>Implementation of ModelListener.modelChanged</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L78">client/src/view/MatchHUDView.tsx:78</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L554">client/src/view/MatchHUDView.tsx:554</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setcontroller"><span>set<wbr/>Controller</span><a href="#setcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -181,9 +292,26 @@ has arrived). Feeds the snapshot into the interpolation buffer, then invokes onU
 <div class="tsd-comment tsd-typography"><p>the new MatchController</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#setcontroller">setController</a></p>
+<p>Implementation of View.setController</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L69">client/src/view/MatchHUDView.tsx:69</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L532">client/src/view/MatchHUDView.tsx:532</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="setidentitymodel"><span>set<wbr/>Identity<wbr/>Model</span><a href="#setidentitymodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="setidentitymodel-1"><span class="tsd-kind-call-signature">setIdentityModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">identityModel</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setidentitymodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Replaces the observed identity model reference. Does not re-register as a listener.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">identityModel</span>: <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a></span>
+<div class="tsd-comment tsd-typography"><p>the new ClientIdentityModel to observe</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L516">client/src/view/MatchHUDView.tsx:516</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setmodel"><span>set<wbr/>Model</span><a href="#setmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -200,9 +328,9 @@ view as a listener on the new model — call <code>model.addModelListener(this)<
 <div class="tsd-comment tsd-typography"><p>the new ClientMatchModel to observe</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#setmodel">setModel</a></p>
+<p>Implementation of View.setModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/MatchHUDView.tsx#L53">client/src/view/MatchHUDView.tsx:53</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/MatchHUDView.tsx#L500">client/src/view/MatchHUDView.tsx:500</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -221,9 +349,9 @@ view as a listener on the new model — call <code>model.addModelListener(this)<
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#controller" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controller</span></a><a href="#interpolation" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>interpolation</span></a><a href="#model" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#onupdate" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Update</span></a></div></details>
+<div><a href="#controller" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controller</span></a><a href="#identitymodel" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>identity<wbr/>Model</span></a><a href="#interpolation" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>interpolation</span></a><a href="#model" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#onupdate" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Update</span></a><a href="#opponentdisconnect" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>opponent<wbr/>Disconnect</span></a><a href="#socket" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>socket</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#bindupdatecallback"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Update<wbr/>Callback</span></a><a href="#getcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Controller</span></a><a href="#getmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a><a href="#modelchanged"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>model<wbr/>Changed</span></a><a href="#setcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Controller</span></a><a href="#setmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a></div></details></div></details></div>
+<div><a href="#bindsocketevents" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Socket<wbr/>Events</span></a><a href="#bindupdatecallback"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Update<wbr/>Callback</span></a><a href="#getcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Controller</span></a><a href="#getidentitymodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Identity<wbr/>Model</span></a><a href="#getinterpolationbuffer"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Interpolation<wbr/>Buffer</span></a><a href="#getmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a><a href="#getopponentdisconnect"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Opponent<wbr/>Disconnect</span></a><a href="#modelchanged"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>model<wbr/>Changed</span></a><a href="#setcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Controller</span></a><a href="#setidentitymodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Identity<wbr/>Model</span></a><a href="#setmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html">Arena — API Documentation</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

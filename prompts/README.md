@@ -282,6 +282,31 @@ reconnect) was never exercised end-to-end — unlike prompt 3's four bugs, this 
 wiring actually work?) is genuinely unknown until the prompt runs — plus a match-persistence path that was
 verified working by hand but never given permanent test coverage.
 
+## Step 12 — Reverse engineer the code to produce a consistent UML class diagram
+
+Re-runs `scripts/generate-class-diagram.js` (Step 6) against the codebase in its final state — genuinely
+new design work was already done at Step 6; this is that same deterministic generator applied one more
+time, now that Steps 9-11 (model/controller/view implementation and all of Step 11's acceptance-testing/
+polish rounds) are done. Found one real, small gap while running it: the generated page's title/heading
+hardcoded "Step 6" regardless of output path, which the generator's own closing requirement addresses
+directly (change the shared script, don't fork it) — fixed with a backward-compatible optional third CLI
+argument, verified not to change Step 6's own committed output at all.
+
+| # | File | Owner | Depends on | Status |
+|---|---|---|---|---|
+| 1 | `12_shared_1_final-class-diagram.md` | **flagship agent** | Steps 9-11 complete | [x] |
+
+## Step 13 — Create a final javadoc
+
+Re-runs `npm run docs` (TypeDoc, set up at Step 5) against the final codebase. `docs/api/` had not actually
+been regenerated-and-committed since Step 5's own commit despite a great deal of real, documented code
+shipping since (the leaderboard system, the visual overhaul, the ability-uniqueness work) — a genuine gap,
+not a formality, closed here.
+
+| # | File | Owner | Depends on | Status |
+|---|---|---|---|---|
+| 1 | `13_shared_1_final-javadoc.md` | **flagship agent** | Steps 9-11 complete | [x] |
+
 ## Later steps
 
-Steps 12 (final reverse-engineered diagram) and 13 (final javadoc) have not had prompts written yet.
+None remain — Steps 1-13 of `docs/ProjectProcess.txt` are all complete.
