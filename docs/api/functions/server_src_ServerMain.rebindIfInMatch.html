@@ -14,17 +14,33 @@
 <section class="tsd-panel">
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="rebindifinmatch"><span class="tsd-kind-call-signature">rebindIfInMatch</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">handler</span><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_controller_ConnectionHandler.ConnectionHandler.html" class="tsd-signature-type tsd-kind-class">ConnectionHandler</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">matchRegistry</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <a href="../interfaces/server_src_controller_MatchmakingController.MatchRegistryEntry.html" class="tsd-signature-type tsd-kind-interface">MatchRegistryEntry</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#rebindifinmatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="rebindifinmatch"><span class="tsd-kind-call-signature">rebindIfInMatch</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">handler</span><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_controller_ConnectionHandler.ConnectionHandler.html" class="tsd-signature-type tsd-kind-class">ConnectionHandler</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">matchRegistry</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <a href="../interfaces/server_src_controller_MatchmakingController.MatchRegistryEntry.html" class="tsd-signature-type tsd-kind-interface">MatchRegistryEntry</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">playerId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">socket</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">&quot;emit&quot;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#rebindifinmatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Rebinds a freshly-identified connection to its still-active match, if one is registered (R6.1-R6.4).
-A <a href="http://Socket.IO">Socket.IO</a> transport reconnect creates a brand-new server-side socket, and therefore a brand-new
-<code>ConnectionHandler</code> with only <code>identify</code>/<code>matchmaking</code> bound (see <code>ServerMain.main()</code>'s
-<code>io.on('connection', ...)</code> handler) — without this, <code>bindMatch()</code> never runs again for that player, and
-<code>match:reconnect</code>/<code>match:action</code>/<code>champion:select</code> are silently dropped by <code>ConnectionHandler</code>'s own
-<code>!this.disconnect</code> guard. <code>matchRegistry</code> is populated by <code>MatchmakingController.createMatch()</code> on
-pairing and cleared on <code>'match:end'</code> (10_server_10), so a player whose match has already ended has no
-entry here and is correctly left unbound. Exported standalone, not inlined in <code>main()</code>'s connection
-closure, so this decision is exercisable by a test without a live socket (3.6.4).</p>
+A <a href="http://Socket.IO">Socket.IO</a> transport reconnect <em>or</em> a full page reload both create a brand-new server-side socket, and
+therefore a brand-new <code>ConnectionHandler</code> with only <code>identify</code>/<code>matchmaking</code> bound (see
+<code>ServerMain.main()</code>'s <code>io.on('connection', ...)</code> handler) — without this, <code>bindMatch()</code> never runs again
+for that player, and <code>match:reconnect</code>/<code>match:action</code>/<code>champion:select</code> are silently dropped by
+<code>ConnectionHandler</code>'s own <code>!this.disconnect</code> guard. <code>matchRegistry</code> is populated by
+<code>MatchmakingController.createMatch()</code> on pairing and cleared on <code>'match:end'</code> (10_server_10), so a
+player whose match has already ended has no entry here and is correctly left unbound. Exported
+standalone, not inlined in <code>main()</code>'s connection closure, so this decision is exercisable by a test
+without a live socket (3.6.4).</p>
+<p>CORRECTION (reload-reconnect fix): previously only rewired the connection's controllers, leaving two
+real gaps found by manually testing a page reload mid-match: (1) <code>MatchModel.reconnect()</code> was never
+called unless the client itself emitted <code>match:reconnect</code> — which it only ever does when its own
+in-memory <code>ClientMatchModel.matchId</code> is already set (<code>ClientMain.tsx</code>'s <code>'connect'</code> handler), impossible
+on a hard reload where every client model starts blank, so a disconnected participant could stay marked
+disconnected (and the match could even auto-forfeit at the 30s grace period) despite the player being
+back; (2) the client had no way to learn it was still mid-match at all — <code>AppRouter</code>'s routing requires
+<code>queueModel.status === 'matched'</code> (only ever set by handling <code>match:found</code>) before it will even look at
+<code>matchModel.phase</code>, so the player was stuck on the idle Lobby with no path back into Champion Select or
+the Match HUD. This now reconnects the participant directly (no client round-trip needed) and replays
+whatever events would have brought a <em>client</em> up to date — <code>match:found</code> always (restores
+<code>queueModel.status</code>), then either <code>champion:selected</code> for each already-made pick (if still in
+CHAMPION_SELECT) or <code>match:start</code> with the live snapshot as <code>initialState</code> (if already ACTIVE) —
+targeted at just this one socket, reusing <code>SocketConnectionController</code>'s existing handlers for these
+exact wire events rather than inventing a new one.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -37,10 +53,13 @@ closure, so this decision is exercisable by a test without a live socket (3.6.4)
 </div></li>
 <li><span><span class="tsd-kind-parameter">playerId</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>the connection's newly-identified player</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">socket</span>: <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">&quot;emit&quot;</span><span class="tsd-signature-symbol">&gt;</span></span>
+<div class="tsd-comment tsd-typography"><p>this connection's live socket, for the targeted rehydration emissions below</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/ServerMain.ts#L33">server/src/ServerMain.ts:33</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/ServerMain.ts#L62">server/src/ServerMain.ts:62</a></li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

@@ -15,14 +15,14 @@
 <div class="tsd-comment tsd-typography"><p>Handles queue join/cancel requests against the shared MatchmakingQueue and, on a successful pairing,
 stands up a new match (R2.1–R2.6).</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="612">
+<section class="tsd-panel tsd-hierarchy" data-refl="613">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractController</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">MatchmakingController</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L52">server/src/controller/MatchmakingController.ts:52</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L58">server/src/controller/MatchmakingController.ts:58</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -84,7 +84,7 @@ reconnecting player's fresh ConnectionHandler to their match (R6.1-R6.4).</p>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MatchmakingController</a></h4><aside class="tsd-sources">
 <p>Overrides AbstractController.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L53">server/src/controller/MatchmakingController.ts:53</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L59">server/src/controller/MatchmakingController.ts:59</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -96,7 +96,7 @@ with ServerMain — populated here on pairing and cleared on 'match:end', so Ser
 reconnecting player's fresh ConnectionHandler to their match (R6.1-R6.4).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L67">server/src/controller/MatchmakingController.ts:67</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L73">server/src/controller/MatchmakingController.ts:73</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Protected</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Model</span></div><aside class="tsd-sources">
@@ -109,7 +109,7 @@ reconnecting player's fresh ConnectionHandler to their match (R6.1-R6.4).</p>
 <div class="tsd-comment tsd-typography"><p>CORRECTION (Step 10): cross-connection wiring callback — see OnMatchCreated doc above. Not part of docs/01_class_list.md's original constructor sketch, added because ChampionSelectController/CombatController/DisconnectController require a MatchModel that doesn't exist until pairing happens on (from either player's perspective) only one of the two connections.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L60">server/src/controller/MatchmakingController.ts:60</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L66">server/src/controller/MatchmakingController.ts:66</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="reportingclient"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>reporting<wbr/>Client</span><a href="#reportingclient" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">reportingClient</span><span class="tsd-signature-symbol">:</span> <a href="server_src_controller_MatchReportingClient.MatchReportingClient.html" class="tsd-signature-type tsd-kind-class">MatchReportingClient</a></div>
@@ -117,19 +117,19 @@ reconnecting player's fresh ConnectionHandler to their match (R6.1-R6.4).</p>
 one shared client — see MatchReportingListener, constructed per-match in createMatch() below.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L63">server/src/controller/MatchmakingController.ts:63</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L69">server/src/controller/MatchmakingController.ts:69</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="sockets"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>sockets</span><a href="#sockets" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">sockets</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><br/>    <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">DefaultEventsMap</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Every currently-connected player's socket, keyed by playerId — shared with the broadcast views, so a freshly-built MatchBroadcastView can target this match's two participants.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L58">server/src/controller/MatchmakingController.ts:58</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L64">server/src/controller/MatchmakingController.ts:64</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="tickloop"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>tick<wbr/>Loop</span><a href="#tickloop" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tickLoop</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_TickLoop.TickLoop.html" class="tsd-signature-type tsd-kind-class">TickLoop</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L56">server/src/controller/MatchmakingController.ts:56</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L62">server/src/controller/MatchmakingController.ts:62</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="view"><code class="tsd-tag">Protected</code><span>view</span><a href="#view" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">View</span></div><aside class="tsd-sources">
@@ -154,7 +154,7 @@ one shared client — see MatchReportingListener, constructed per-match in creat
 <li><span><span class="tsd-kind-parameter">usernameB</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L96">server/src/controller/MatchmakingController.ts:96</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L102">server/src/controller/MatchmakingController.ts:102</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="getmodel"><span>get<wbr/>Model</span><a href="#getmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -206,7 +206,7 @@ TickLoop (R2.6) — the pairing itself is MatchmakingQueue's responsibility, not
 </div></div><aside class="tsd-sources">
 <p>Overrides AbstractController.operation</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L81">server/src/controller/MatchmakingController.ts:81</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L87">server/src/controller/MatchmakingController.ts:87</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="setmodel"><span>set<wbr/>Model</span><a href="#setmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">

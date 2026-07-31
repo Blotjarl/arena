@@ -16,14 +16,14 @@
 Every field is populated exclusively by apply*() calls driven by server events — the client
 never computes or overrides values here; it only stores what the server has sent.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="1170">
+<section class="tsd-panel tsd-hierarchy" data-refl="1180">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractModel</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ClientMatchModel</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L11">client/src/model/ClientMatchModel.ts:11</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L11">client/src/model/ClientMatchModel.ts:11</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -72,35 +72,35 @@ never computes or overrides values here; it only stores what the server has sent
 <div class="tsd-comment tsd-typography"><p>Most recent champion selection payload; null until champion:selected is received.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L25">client/src/model/ClientMatchModel.ts:25</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L25">client/src/model/ClientMatchModel.ts:25</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="lateststate"><span>latest<wbr/>State</span><a href="#lateststate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">latestState</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchStatePayload</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Most recent authoritative state snapshot; null until the first match:state tick arrives.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L19">client/src/model/ClientMatchModel.ts:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L19">client/src/model/ClientMatchModel.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="matchid"><span>match<wbr/>Id</span><a href="#matchid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">matchId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Server-assigned match identifier; null until the match:start event is received.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L13">client/src/model/ClientMatchModel.ts:13</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L13">client/src/model/ClientMatchModel.ts:13</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="phase"><span>phase</span><a href="#phase" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">phase</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchPhase</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Current phase of the match lifecycle; null until champion selection begins.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L16">client/src/model/ClientMatchModel.ts:16</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L16">client/src/model/ClientMatchModel.ts:16</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="result"><span>result</span><a href="#result" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">result</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchEndPayload</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Final match result payload; null until match:end is received.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L22">client/src/model/ClientMatchModel.ts:22</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L22">client/src/model/ClientMatchModel.ts:22</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -136,7 +136,7 @@ never computes or overrides values here; it only stores what the server has sent
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L31">client/src/model/ClientMatchModel.ts:31</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L31">client/src/model/ClientMatchModel.ts:31</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="applymatchend"><span>apply<wbr/>Match<wbr/>End</span><a href="#applymatchend" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -153,7 +153,7 @@ never computes or overrides values here; it only stores what the server has sent
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L64">client/src/model/ClientMatchModel.ts:64</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L64">client/src/model/ClientMatchModel.ts:64</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="applymatchstart"><span>apply<wbr/>Match<wbr/>Start</span><a href="#applymatchstart" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -170,7 +170,7 @@ never computes or overrides values here; it only stores what the server has sent
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L43">client/src/model/ClientMatchModel.ts:43</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L43">client/src/model/ClientMatchModel.ts:43</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="applymatchstate"><span>apply<wbr/>Match<wbr/>State</span><a href="#applymatchstate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -188,7 +188,7 @@ Must store the payload without modification — no field merging or client-side 
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L55">client/src/model/ClientMatchModel.ts:55</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L55">client/src/model/ClientMatchModel.ts:55</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="notifychanged"><span>notify<wbr/>Changed</span><a href="#notifychanged" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -241,7 +241,7 @@ new match.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/model/ClientMatchModel.ts#L79">client/src/model/ClientMatchModel.ts:79</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/model/ClientMatchModel.ts#L79">client/src/model/ClientMatchModel.ts:79</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

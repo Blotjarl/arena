@@ -17,14 +17,14 @@ ClientLeaderboardModel. The client's first controller that talks directly to the
 every other controller forwards through SocketConnectionController/Socket.IO instead (master context
 §2.3: &quot;Client &lt;-&gt; API: ordinary HTTP/REST (match history, leaderboard)&quot;).</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="1004">
+<section class="tsd-panel tsd-hierarchy" data-refl="1014">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractController</span><span class="tsd-signature-symbol">&lt;</span><a href="client_src_model_ClientLeaderboardModel.ClientLeaderboardModel.html" class="tsd-signature-type tsd-kind-class">ClientLeaderboardModel</a><span class="tsd-signature-symbol">,</span> <a href="client_src_view_LeaderboardView.LeaderboardView.html" class="tsd-signature-type tsd-kind-class">LeaderboardView</a><span class="tsd-signature-symbol">&gt;</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">LeaderboardController</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/LeaderboardController.ts#L21">client/src/controller/LeaderboardController.ts:21</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/controller/LeaderboardController.ts#L21">client/src/controller/LeaderboardController.ts:21</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -112,7 +112,7 @@ closure defers that reference until the default is actually <em>called</em>, not
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">LeaderboardController</a></h4><aside class="tsd-sources">
 <p>Overrides AbstractController&lt;ClientLeaderboardModel, LeaderboardView&gt;.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/LeaderboardController.ts#L40">client/src/controller/LeaderboardController.ts:40</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/controller/LeaderboardController.ts#L40">client/src/controller/LeaderboardController.ts:40</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -122,7 +122,7 @@ closure defers that reference until the default is actually <em>called</em>, not
 <div class="tsd-comment tsd-typography"><p>the api's base URL; defaults to the configured/real api origin</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/LeaderboardController.ts#L43">client/src/controller/LeaderboardController.ts:43</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/controller/LeaderboardController.ts#L43">client/src/controller/LeaderboardController.ts:43</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="fetchimpl"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>fetch<wbr/>Impl</span><a href="#fetchimpl" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fetchImpl</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">URL</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">RequestInfo</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol"> = ...</span></div>
@@ -154,7 +154,7 @@ closure defers that reference until the default is actually <em>called</em>, not
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">init</span>: <span class="tsd-signature-type">RequestInit</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span></h4></li></ul></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/LeaderboardController.ts#L44">client/src/controller/LeaderboardController.ts:44</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/controller/LeaderboardController.ts#L44">client/src/controller/LeaderboardController.ts:44</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Protected</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientLeaderboardModel.ClientLeaderboardModel.html" class="tsd-signature-type tsd-kind-class">ClientLeaderboardModel</a></div><aside class="tsd-sources">
@@ -214,7 +214,7 @@ as the real fetch resolves. A non-ok HTTP response and a rejected/thrown fetch b
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Overrides AbstractController.operation</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/LeaderboardController.ts#L58">client/src/controller/LeaderboardController.ts:58</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/controller/LeaderboardController.ts#L58">client/src/controller/LeaderboardController.ts:58</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="refresh"><code class="tsd-tag">Private</code><span>refresh</span><a href="#refresh" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-private">
@@ -223,7 +223,7 @@ as the real fetch resolves. A non-ok HTTP response and a rejected/thrown fetch b
 <div class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/controller/LeaderboardController.ts#L64">client/src/controller/LeaderboardController.ts:64</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/client/src/controller/LeaderboardController.ts#L64">client/src/controller/LeaderboardController.ts:64</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="setmodel"><span>set<wbr/>Model</span><a href="#setmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
