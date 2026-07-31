@@ -15,10 +15,12 @@
 <div class="tsd-comment tsd-typography"><p>Thin <a href="http://Socket.IO">Socket.IO</a> transport adapter for one client connection — not an AbstractController. Kept separate
 from the *Controller classes it dispatches to per 3.6.4 (Maintainability), so game logic remains
 exercisable by automated tests without a live socket (see master context §4.2). This class contains no
-game logic of its own; it only binds inbound socket events to the right controller's operation().</p>
+game logic of its own; it only binds inbound socket events to the right controller's operation(), and
+owns the two pieces of per-connection session state (identified player, current match) that the wire
+contract itself carries no room for.</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/controller/ConnectionHandler.ts#L24">server/src/controller/ConnectionHandler.ts:24</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L31">server/src/controller/ConnectionHandler.ts:31</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -30,12 +32,21 @@ game logic of its own; it only binds inbound socket events to the right controll
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#controllers" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controllers</span></a>
+<div class="tsd-index-list"><a href="#championselect" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>champion<wbr/>Select</span></a>
+<a href="#combat" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>combat</span></a>
+<a href="#controllers" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controllers</span></a>
+<a href="#disconnect" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>disconnect</span></a>
+<a href="#identified" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>identified</span></a>
+<a href="#onidentified" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Identified?</span></a>
+<a href="#player" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>player</span></a>
 <a href="#socket" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>socket</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#register" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>register</span></a>
+<div class="tsd-index-list"><a href="#bindmatch" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Match</span></a>
+<a href="#emiterror" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>emit<wbr/>Error</span></a>
+<a href="#register" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>register</span></a>
+<a href="#requireidentified" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>require<wbr/>Identified</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="constructors-1">Constructors<a href="#constructors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
@@ -44,32 +55,107 @@ game logic of its own; it only binds inbound socket events to the right controll
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructorconnectionhandler"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">ConnectionHandler</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">socket</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">controllers</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/server_src_controller_ConnectionHandler.ConnectionControllers.html" class="tsd-signature-type tsd-kind-interface">ConnectionControllers</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">ConnectionHandler</a><a href="#constructorconnectionhandler" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructorconnectionhandler"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">ConnectionHandler</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">socket</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">controllers</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/server_src_controller_ConnectionHandler.ConnectionControllers.html" class="tsd-signature-type tsd-kind-interface">ConnectionControllers</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">onIdentified</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">player</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">ConnectionHandler</a><a href="#constructorconnectionhandler" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">socket</span>: <span class="tsd-signature-type">Socket</span></span></li>
-<li><span><span class="tsd-kind-parameter">controllers</span>: <a href="../interfaces/server_src_controller_ConnectionHandler.ConnectionControllers.html" class="tsd-signature-type tsd-kind-interface">ConnectionControllers</a></span></li></ul></div>
+<li><span><span class="tsd-kind-parameter">controllers</span>: <a href="../interfaces/server_src_controller_ConnectionHandler.ConnectionControllers.html" class="tsd-signature-type tsd-kind-interface">ConnectionControllers</a></span></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">onIdentified</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">player</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">void</span></span>
+<div class="tsd-comment tsd-typography"><p>CORRECTION (Step 10): invoked once, right after a successful identify, with the newly-established
+Player — lets ServerMain register this connection's socket/handler into its own playerId-keyed
+registries (needed for MatchmakingController's cross-connection <code>onMatchCreated</code> wiring, 10_server_2)
+without adding a second, ordering-fragile <code>socket.on('identify', ...)</code> listener alongside this one.</p>
+</div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">ConnectionHandler</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/controller/ConnectionHandler.ts#L25">server/src/controller/ConnectionHandler.ts:25</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L38">server/src/controller/ConnectionHandler.ts:38</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
 <section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="championselect"><code class="tsd-tag">Private</code><span>champion<wbr/>Select</span><a href="#championselect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">championSelect</span><span class="tsd-signature-symbol">:</span> <a href="server_src_controller_ChampionSelectController.ChampionSelectController.html" class="tsd-signature-type tsd-kind-class">ChampionSelectController</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L34">server/src/controller/ConnectionHandler.ts:34</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="combat"><code class="tsd-tag">Private</code><span>combat</span><a href="#combat" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">combat</span><span class="tsd-signature-symbol">:</span> <a href="server_src_controller_CombatController.CombatController.html" class="tsd-signature-type tsd-kind-class">CombatController</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L35">server/src/controller/ConnectionHandler.ts:35</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="controllers"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>controllers</span><a href="#controllers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">controllers</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/server_src_controller_ConnectionHandler.ConnectionControllers.html" class="tsd-signature-type tsd-kind-interface">ConnectionControllers</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/controller/ConnectionHandler.ts#L27">server/src/controller/ConnectionHandler.ts:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L40">server/src/controller/ConnectionHandler.ts:40</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="disconnect"><code class="tsd-tag">Private</code><span>disconnect</span><a href="#disconnect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">disconnect</span><span class="tsd-signature-symbol">:</span> <a href="server_src_controller_DisconnectController.DisconnectController.html" class="tsd-signature-type tsd-kind-class">DisconnectController</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L36">server/src/controller/ConnectionHandler.ts:36</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="identified"><code class="tsd-tag">Private</code><span>identified</span><a href="#identified" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">identified</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L32">server/src/controller/ConnectionHandler.ts:32</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="onidentified"><code class="tsd-tag">Private</code> <code class="tsd-tag">Optional</code> <code class="tsd-tag">Readonly</code><span>on<wbr/>Identified</span><a href="#onidentified" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">onIdentified</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">player</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">void</span></div>
+<div class="tsd-comment tsd-typography"><p>CORRECTION (Step 10): invoked once, right after a successful identify, with the newly-established
+Player — lets ServerMain register this connection's socket/handler into its own playerId-keyed
+registries (needed for MatchmakingController's cross-connection <code>onMatchCreated</code> wiring, 10_server_2)
+without adding a second, ordering-fragile <code>socket.on('identify', ...)</code> listener alongside this one.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L45">server/src/controller/ConnectionHandler.ts:45</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="player"><code class="tsd-tag">Private</code><span>player</span><a href="#player" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">player</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Player</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L33">server/src/controller/ConnectionHandler.ts:33</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="socket"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>socket</span><a href="#socket" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">socket</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Socket</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/controller/ConnectionHandler.ts#L26">server/src/controller/ConnectionHandler.ts:26</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L39">server/src/controller/ConnectionHandler.ts:39</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="bindmatch"><span>bind<wbr/>Match</span><a href="#bindmatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="bindmatch-1"><span class="tsd-kind-call-signature">bindMatch</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">match</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_MatchModel.MatchModel.html" class="tsd-signature-type tsd-kind-class">MatchModel</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <a href="server_src_view_MatchBroadcastView.MatchBroadcastView.html" class="tsd-signature-type tsd-kind-class">MatchBroadcastView</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#bindmatch-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Binds this connection's match-scoped controllers once matchmaking pairs its player with an opponent —
+called by MatchmakingController's <code>onMatchCreated</code> callback (10_server_2), once per paired connection.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">match</span>: <a href="server_src_model_MatchModel.MatchModel.html" class="tsd-signature-type tsd-kind-class">MatchModel</a></span>
+<div class="tsd-comment tsd-typography"><p>the newly-created match this connection's player belongs to</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">view</span>: <a href="server_src_view_MatchBroadcastView.MatchBroadcastView.html" class="tsd-signature-type tsd-kind-class">MatchBroadcastView</a></span>
+<div class="tsd-comment tsd-typography"><p>that match's broadcast view, shared with the opponent's connection</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L54">server/src/controller/ConnectionHandler.ts:54</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="emiterror"><code class="tsd-tag">Private</code><span>emit<wbr/>Error</span><a href="#emiterror" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-private">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="emiterror-1"><span class="tsd-kind-call-signature">emitError</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">err</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#emiterror-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type">unknown</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L60">server/src/controller/ConnectionHandler.ts:60</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="register"><span>register</span><a href="#register" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -78,13 +164,27 @@ game logic of its own; it only binds inbound socket events to the right controll
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Binds <code>socket.on(eventName, ...)</code> for every inbound event in the shared contract (<code>identify</code>,
 <code>queue:join</code>, <code>queue:cancel</code>, <code>champion:select</code>, <code>match:action</code>, <code>match:reconnect</code>, <code>disconnect</code>),
-forwarding each to the matching controller's <code>operation()</code>. Does not itself catch exceptions thrown
-by a controller — each controller is responsible for its own error handling per R4.1/R4.2's
-swallow-vs-surface split (see CombatController, ChampionSelectController).</p>
+forwarding each to the matching controller's <code>operation()</code>. Every dispatch is wrapped in a uniform
+try/catch that turns any propagating <code>ArenaError</code> into an <code>error</code> socket emission — this is generic
+routing, not per-controller-type logic, so it doesn't conflict with each controller already deciding
+for itself which failures to swallow vs. let propagate (CombatController vs. ChampionSelectController).
+Events other than <code>identify</code> are gated behind <code>UnidentifiedConnectionError</code> until this connection's
+player has identified successfully (R1.4); <code>champion:select</code>/<code>match:action</code>/<code>match:reconnect</code> are
+additionally silently ignored (not an error — a normal timing gap, not client misbehavior) before this
+connection has been paired into a match by <code>bindMatch()</code>.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/controller/ConnectionHandler.ts#L37">server/src/controller/ConnectionHandler.ts:37</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L87">server/src/controller/ConnectionHandler.ts:87</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="requireidentified"><code class="tsd-tag">Private</code><span>require<wbr/>Identified</span><a href="#requireidentified" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-private">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="requireidentified-1"><span class="tsd-kind-call-signature">requireIdentified</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#requireidentified-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/ConnectionHandler.ts#L69">server/src/controller/ConnectionHandler.ts:69</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -103,9 +203,9 @@ swallow-vs-surface split (see CombatController, ChampionSelectController).</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#controllers" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controllers</span></a><a href="#socket" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>socket</span></a></div></details>
+<div><a href="#championselect" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>champion<wbr/>Select</span></a><a href="#combat" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>combat</span></a><a href="#controllers" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controllers</span></a><a href="#disconnect" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>disconnect</span></a><a href="#identified" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>identified</span></a><a href="#onidentified" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Identified</span></a><a href="#player" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>player</span></a><a href="#socket" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>socket</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#register"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>register</span></a></div></details></div></details></div>
+<div><a href="#bindmatch"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Match</span></a><a href="#emiterror" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>emit<wbr/>Error</span></a><a href="#register"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>register</span></a><a href="#requireidentified" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>require<wbr/>Identified</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html">Arena — API Documentation</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

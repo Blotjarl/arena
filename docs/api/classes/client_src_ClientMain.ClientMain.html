@@ -16,7 +16,7 @@
 and mounts the React root onto the DOM (SRS 2.1, R-D7).</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/ClientMain.tsx#L7">client/src/ClientMain.tsx:7</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/ClientMain.tsx#L112">client/src/ClientMain.tsx:112</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -47,14 +47,31 @@ and mounts the React root onto the DOM (SRS 2.1, R-D7).</p>
 <h3 class="tsd-anchor-link" id="main"><code class="tsd-tag">Static</code><span>main</span><a href="#main" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="main-1"><span class="tsd-kind-call-signature">main</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#main-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="main-1"><span class="tsd-kind-call-signature">main</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">socketFactory</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#main-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Instantiates all models, controllers, and views; wires them together; and mounts the React
 root with the screen router as the top-level component.</p>
+<p>CORRECTION (Step 10): docs/01_class_list.md §6d's sketch takes no parameters. A <code>socketFactory</code>
+is added, defaulting to a real <code>io()</code> call, so this method never needs to open a live socket
+connection to be exercised by a test (master context §4.2's testability principle) — a test
+supplies a mock satisfying the same <code>emit</code>/<code>on</code> shape instead.</p>
+<p>CORRECTION (Step 11): the default <code>socketFactory</code> now calls <code>io(DEFAULT_SERVER_URL)</code> instead of
+a bare <code>io()</code>, so it connects to the configured game server rather than assuming same-origin.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">socketFactory</span>: <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol"> = ...</span></span>
+<div class="tsd-comment tsd-typography"><p>produces the <a href="http://Socket.IO">Socket.IO</a> client socket to use; defaults to a real connection
+to <code>VITE_SERVER_URL</code> (or <code>http://localhost:3001</code> if unset)</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-throws">
+<h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if no <code>#root</code> element exists in the document to mount into</p>
+</div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/ClientMain.tsx#L12">client/src/ClientMain.tsx:12</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/ClientMain.tsx#L128">client/src/ClientMain.tsx:128</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

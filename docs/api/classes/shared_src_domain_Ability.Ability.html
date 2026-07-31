@@ -15,7 +15,7 @@
 <div class="tsd-comment tsd-typography"><p>A single champion-specific action: a cooldown, a resource cost, and one effect (SRS 1.4).</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L4">shared/src/domain/Ability.ts:4</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L4">shared/src/domain/Ability.ts:4</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -28,6 +28,7 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#cooldownseconds" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>cooldown<wbr/>Seconds</span></a>
+<a href="#description" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>description</span></a>
 <a href="#effecttype" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>effect<wbr/>Type</span></a>
 <a href="#id" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id</span></a>
 <a href="#magnitude" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>magnitude</span></a>
@@ -42,7 +43,7 @@
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructorability"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">Ability</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">cooldownSeconds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">resourceCost</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">range</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">effectType</span><span class="tsd-signature-symbol">:</span> <a href="../enums/shared_src_domain_EffectType.EffectType.html" class="tsd-signature-type tsd-kind-enum">EffectType</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">magnitude</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">Ability</a><a href="#constructorability" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructorability"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">Ability</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">cooldownSeconds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">resourceCost</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">range</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">effectType</span><span class="tsd-signature-symbol">:</span> <a href="../enums/shared_src_domain_EffectType.EffectType.html" class="tsd-signature-type tsd-kind-enum">EffectType</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">magnitude</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">description</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">Ability</a><a href="#constructorability" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -67,10 +68,15 @@
 </div></li>
 <li><span><span class="tsd-kind-parameter">magnitude</span>: <span class="tsd-signature-type">number</span></span>
 <div class="tsd-comment tsd-typography"><p>The effect's strength — damage/heal amount, stun duration, etc., interpreted per <code>effectType</code>.</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">description</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>Short flavor text describing what this ability does, shown as a hover tooltip in both Champion
+Select and the match HUD (Step 11, 11_cross_1). Purely descriptive/cosmetic — never read by any
+game-logic code, unlike every other field on this class.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">Ability</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L5">shared/src/domain/Ability.ts:5</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L5">shared/src/domain/Ability.ts:5</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -80,49 +86,58 @@
 <div class="tsd-comment tsd-typography"><p>Minimum time, in seconds, between two uses of this ability by the same player.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L11">shared/src/domain/Ability.ts:11</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L11">shared/src/domain/Ability.ts:11</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="description"><code class="tsd-tag">Readonly</code><span>description</span><a href="#description" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">description</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>Short flavor text describing what this ability does, shown as a hover tooltip in both Champion
+Select and the match HUD (Step 11, 11_cross_1). Purely descriptive/cosmetic — never read by any
+game-logic code, unlike every other field on this class.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L25">shared/src/domain/Ability.ts:25</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="effecttype"><code class="tsd-tag">Readonly</code><span>effect<wbr/>Type</span><a href="#effecttype" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">effectType</span><span class="tsd-signature-symbol">:</span> <a href="../enums/shared_src_domain_EffectType.EffectType.html" class="tsd-signature-type tsd-kind-enum">EffectType</a></div>
 <div class="tsd-comment tsd-typography"><p>Which kind of effect this ability produces on use.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L17">shared/src/domain/Ability.ts:17</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L17">shared/src/domain/Ability.ts:17</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="id"><code class="tsd-tag">Readonly</code><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Identifier unique within the owning champion's kit (e.g. <code>'crushing-blow'</code>).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L7">shared/src/domain/Ability.ts:7</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L7">shared/src/domain/Ability.ts:7</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="magnitude"><code class="tsd-tag">Readonly</code><span>magnitude</span><a href="#magnitude" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">magnitude</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>The effect's strength — damage/heal amount, stun duration, etc., interpreted per <code>effectType</code>.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L19">shared/src/domain/Ability.ts:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L19">shared/src/domain/Ability.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="name"><code class="tsd-tag">Readonly</code><span>name</span><a href="#name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Display name shown in the client UI.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L9">shared/src/domain/Ability.ts:9</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L9">shared/src/domain/Ability.ts:9</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="range"><code class="tsd-tag">Readonly</code><span>range</span><a href="#range" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">range</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Maximum distance from the caster this ability can target.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L15">shared/src/domain/Ability.ts:15</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L15">shared/src/domain/Ability.ts:15</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="resourcecost"><code class="tsd-tag">Readonly</code><span>resource<wbr/>Cost</span><a href="#resourcecost" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">resourceCost</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Amount of the caster's resource this ability consumes per use.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/domain/Ability.ts#L13">shared/src/domain/Ability.ts:13</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/shared/src/domain/Ability.ts#L13">shared/src/domain/Ability.ts:13</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -141,7 +156,7 @@
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#cooldownseconds"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>cooldown<wbr/>Seconds</span></a><a href="#effecttype"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>effect<wbr/>Type</span></a><a href="#id"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id</span></a><a href="#magnitude"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>magnitude</span></a><a href="#name"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>name</span></a><a href="#range"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>range</span></a><a href="#resourcecost"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>resource<wbr/>Cost</span></a></div></details></div></details></div>
+<div><a href="#cooldownseconds"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>cooldown<wbr/>Seconds</span></a><a href="#description"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>description</span></a><a href="#effecttype"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>effect<wbr/>Type</span></a><a href="#id"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id</span></a><a href="#magnitude"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>magnitude</span></a><a href="#name"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>name</span></a><a href="#range"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>range</span></a><a href="#resourcecost"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>resource<wbr/>Cost</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html">Arena — API Documentation</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

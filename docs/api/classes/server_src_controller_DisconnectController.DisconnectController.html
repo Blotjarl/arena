@@ -12,18 +12,24 @@
 <li><a href="" aria-current="page">DisconnectController</a></li></ul>
 <h1>Class DisconnectController</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Handles socket disconnect and match:reconnect events, owning the 30-second reconnect grace-period
-timer (R6.1–R6.4). Unlike CombatController/ChampionSelectController, a reconnect failure is genuinely
-exceptional (the player missed their window) and is surfaced to the caller rather than swallowed.</p>
+<div class="tsd-comment tsd-typography"><p>Handles socket disconnect and <code>match:reconnect</code> events (R6.1–R6.4). Unlike CombatController/
+ChampionSelectController, a reconnect failure is genuinely exceptional (the player missed their
+window) and is surfaced to the caller rather than swallowed.</p>
+<p>CORRECTION (Step 10): this controller does not own a separate grace-period timer, despite the original
+stub's doc comment suggesting it should — <code>MatchModel.tick()</code> (implemented and merged in <code>09_server_5</code>)
+already checks every disconnected participant's elapsed grace period on every tick and ends the match
+via <code>DISCONNECT_FORFEIT</code> once 30s have passed (R6.3, R6.4). A second, independently-scheduled timer
+here would be redundant and could race the tick-driven one. This controller's only job is forwarding to
+<code>MatchModel.disconnect</code>/<code>reconnect</code>.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="495">
-<h4>Hierarchy (<a href="../hierarchy.html#server/src/controller/DisconnectController.DisconnectController">View Summary</a>)</h4>
+<section class="tsd-panel tsd-hierarchy" data-refl="575">
+<h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li class="tsd-hierarchy-item"><a href="shared_src_mvc_AbstractController.AbstractController.html" class="tsd-signature-type tsd-kind-class">AbstractController</a>
+<li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractController</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">DisconnectController</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/controller/DisconnectController.ts#L8">server/src/controller/DisconnectController.ts:8</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/DisconnectController.ts#L22">server/src/controller/DisconnectController.ts:22</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -53,36 +59,32 @@ exceptional (the player missed their window) and is surfaced to the caller rathe
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructordisconnectcontroller"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">DisconnectController</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">DisconnectController</a><a href="#constructordisconnectcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructordisconnectcontroller"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">DisconnectController</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_MatchModel.MatchModel.html" class="tsd-signature-type tsd-kind-class">MatchModel</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <a href="server_src_view_MatchBroadcastView.MatchBroadcastView.html" class="tsd-signature-type tsd-kind-class">MatchBroadcastView</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">DisconnectController</a><a href="#constructordisconnectcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">model</span>: <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></span>
-<div class="tsd-comment tsd-typography"><p>the model this controller mediates for</p>
-</div></li>
-<li><span><span class="tsd-kind-parameter">view</span>: <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></span>
-<div class="tsd-comment tsd-typography"><p>the view this controller is paired with</p>
-</div></li></ul></div>
+<li><span><span class="tsd-kind-parameter">model</span>: <a href="server_src_model_MatchModel.MatchModel.html" class="tsd-signature-type tsd-kind-class">MatchModel</a></span></li>
+<li><span><span class="tsd-kind-parameter">view</span>: <a href="server_src_view_MatchBroadcastView.MatchBroadcastView.html" class="tsd-signature-type tsd-kind-class">MatchBroadcastView</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">DisconnectController</a></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#constructor">constructor</a></p>
+<p>Overrides AbstractController.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L20">shared/src/mvc/AbstractController.ts:20</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/DisconnectController.ts#L23">server/src/controller/DisconnectController.ts:23</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Protected</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></div><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#model">model</a></p>
+<div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Model</span></div><aside class="tsd-sources">
+<p>Inherited from AbstractController.model</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L13">shared/src/mvc/AbstractController.ts:13</a></li></ul></aside></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:10</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="view"><code class="tsd-tag">Protected</code><span>view</span><a href="#view" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></div><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#view">view</a></p>
+<div class="tsd-signature"><span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">View</span></div><aside class="tsd-sources">
+<p>Inherited from AbstractController.view</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L14">shared/src/mvc/AbstractController.ts:14</a></li></ul></aside></section></section></details>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:11</li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -90,33 +92,31 @@ exceptional (the player missed their window) and is surfaced to the caller rathe
 <h3 class="tsd-anchor-link" id="getmodel"><span>get<wbr/>Model</span><a href="#getmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="getmodel-1"><span class="tsd-kind-call-signature">getModel</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a><a href="#getmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getmodel-1"><span class="tsd-kind-call-signature">getModel</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Model</span><a href="#getmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></h4><p>the model this controller is mediating for</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Model</span></h4><p>the model this controller is mediating for</p>
 <aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#getmodel">getModel</a></p>
+<p>Inherited from AbstractController.getModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L26">shared/src/mvc/AbstractController.ts:26</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:18</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="getview"><span>get<wbr/>View</span><a href="#getview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="getview-1"><span class="tsd-kind-call-signature">getView</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a><a href="#getview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getview-1"><span class="tsd-kind-call-signature">getView</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">View</span><a href="#getview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></h4><p>the view this controller is paired with</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">View</span></h4><p>the view this controller is paired with</p>
 <aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#getview">getView</a></p>
+<p>Inherited from AbstractController.getView</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L36">shared/src/mvc/AbstractController.ts:36</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:22</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="operation"><span>operation</span><a href="#operation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="operation-1"><span class="tsd-kind-call-signature">operation</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">action</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">payload</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#operation-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="operation-1"><span class="tsd-kind-call-signature">operation</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">action</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">payload</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/server_src_controller_DisconnectController.DisconnectRequest.html" class="tsd-signature-type tsd-kind-interface">DisconnectRequest</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#operation-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Dispatches a <code>disconnect</code> or <code>match:reconnect</code> event. On 'disconnect', starts the grace-period timer
-via MatchModel.disconnect() and schedules the forfeit that fires if it's not cancelled by a reconnect.
-On 'match:reconnect', cancels that timer and restores the participant via MatchModel.reconnect().</p>
+<div class="tsd-comment tsd-typography"><p>Dispatches a <code>disconnect</code> or <code>match:reconnect</code> event to the underlying MatchModel.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -124,7 +124,7 @@ On 'match:reconnect', cancels that timer and restores the participant via MatchM
 <li><span><span class="tsd-kind-parameter">action</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>'disconnect' or 'match:reconnect'</p>
 </div></li>
-<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">payload</span>: <span class="tsd-signature-type">unknown</span></span>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">payload</span>: <a href="../interfaces/server_src_controller_DisconnectController.DisconnectRequest.html" class="tsd-signature-type tsd-kind-interface">DisconnectRequest</a></span>
 <div class="tsd-comment tsd-typography"><p>the reconnecting/disconnecting player's identity</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -132,41 +132,41 @@ On 'match:reconnect', cancels that timer and restores the participant via MatchM
 <div class="tsd-tag-throws">
 <h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if 'match:reconnect' arrives after the 30-second grace period (R6.3, R6.4)</p>
 </div></div><aside class="tsd-sources">
-<p>Overrides <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#operation">operation</a></p>
+<p>Overrides AbstractController.operation</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/server/src/controller/DisconnectController.ts#L17">server/src/controller/DisconnectController.ts:17</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/DisconnectController.ts#L33">server/src/controller/DisconnectController.ts:33</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="setmodel"><span>set<wbr/>Model</span><a href="#setmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="setmodel-1"><span class="tsd-kind-call-signature">setModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="setmodel-1"><span class="tsd-kind-call-signature">setModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Model</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">model</span>: <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></span>
+<li><span><span class="tsd-kind-parameter">model</span>: <span class="tsd-signature-type">Model</span></span>
 <div class="tsd-comment tsd-typography"><p>the model this controller should mediate for</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#setmodel">setModel</a></p>
+<p>Inherited from AbstractController.setModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L31">shared/src/mvc/AbstractController.ts:31</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:20</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="setview"><span>set<wbr/>View</span><a href="#setview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="setview-1"><span class="tsd-kind-call-signature">setView</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="setview-1"><span class="tsd-kind-call-signature">setView</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">View</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">view</span>: <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></span>
+<li><span><span class="tsd-kind-parameter">view</span>: <span class="tsd-signature-type">View</span></span>
 <div class="tsd-comment tsd-typography"><p>the view this controller should be paired with</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#setview">setView</a></p>
+<p>Inherited from AbstractController.setView</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L41">shared/src/mvc/AbstractController.ts:41</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:24</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

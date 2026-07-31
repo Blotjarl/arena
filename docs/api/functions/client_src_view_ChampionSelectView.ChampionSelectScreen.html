@@ -17,6 +17,12 @@
 <div class="tsd-signature tsd-anchor-link" id="championselectscreen"><span class="tsd-kind-call-signature">ChampionSelectScreen</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">props</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <a href="../classes/client_src_view_ChampionSelectView.ChampionSelectView.html" class="tsd-signature-type tsd-kind-class">ChampionSelectView</a> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Element</span><a href="#championselectscreen" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Both players, selection countdown, roster with stats/abilities (SRS 3.1.1).</p>
+<p>CRITICAL (master context §1.1): the roster, opponent identity, and every champion's stats/abilities
+shown here are exactly what the server sent on <code>match:found</code> — this component never invents or
+computes them. The on-screen countdown is a purely local, approximate UX timer (R3.4 is enforced
+server-side by MatchModel.selectChampion's 30-second deadline check, which this screen has no access
+to and does not attempt to replicate); reaching 0 here changes nothing by itself — only a rejected
+<code>champion:select</code> (surfaced as a wire <code>error</code> event) or the server's own phase transition does.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -24,7 +30,7 @@
 <li><span><span class="tsd-kind-parameter">props</span>: <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <a href="../classes/client_src_view_ChampionSelectView.ChampionSelectView.html" class="tsd-signature-type tsd-kind-class">ChampionSelectView</a> <span class="tsd-signature-symbol">}</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Element</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/ChampionSelectView.tsx#L76">client/src/view/ChampionSelectView.tsx:76</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/ChampionSelectView.tsx#L138">client/src/view/ChampionSelectView.tsx:138</a></li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

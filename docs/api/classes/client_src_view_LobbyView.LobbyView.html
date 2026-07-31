@@ -18,10 +18,10 @@ React functional component (LobbyScreen) to re-render (SRS 3.1.1, R1.1–R1.4, R
 <section class="tsd-panel">
 <h4>Implements</h4>
 <ul class="tsd-hierarchy">
-<li><a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></li>
-<li><a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html" class="tsd-signature-type tsd-kind-interface">ModelListener</a></li></ul></section><aside class="tsd-sources">
+<li><span class="tsd-signature-type">View</span></li>
+<li><span class="tsd-signature-type">ModelListener</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L9">client/src/view/LobbyView.tsx:9</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L11">client/src/view/LobbyView.tsx:11</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -36,15 +36,18 @@ React functional component (LobbyScreen) to re-render (SRS 3.1.1, R1.1–R1.4, R
 <div class="tsd-index-list"><a href="#controller" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controller</span></a>
 <a href="#model" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a>
 <a href="#onupdate" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Update</span></a>
+<a href="#queuemodel" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>queue<wbr/>Model</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#bindupdatecallback" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Update<wbr/>Callback</span></a>
 <a href="#getcontroller" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Controller</span></a>
 <a href="#getmodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a>
+<a href="#getqueuemodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Queue<wbr/>Model</span></a>
 <a href="#modelchanged" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>model<wbr/>Changed</span></a>
 <a href="#setcontroller" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Controller</span></a>
 <a href="#setmodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a>
+<a href="#setqueuemodel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Queue<wbr/>Model</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="constructors-1">Constructors<a href="#constructors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
@@ -53,20 +56,31 @@ React functional component (LobbyScreen) to re-render (SRS 3.1.1, R1.1–R1.4, R
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructorlobbyview"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">LobbyView</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">controller</span><span class="tsd-signature-symbol">:</span> <a href="client_src_controller_LobbyController.LobbyController.html" class="tsd-signature-type tsd-kind-class">LobbyController</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">LobbyView</a><a href="#constructorlobbyview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructorlobbyview"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">LobbyView</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">queueModel</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientQueueModel.ClientQueueModel.html" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">controller</span><span class="tsd-signature-symbol">:</span> <a href="client_src_controller_LobbyController.LobbyController.html" class="tsd-signature-type tsd-kind-class">LobbyController</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">LobbyView</a><a href="#constructorlobbyview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>CORRECTION (Step 10): the Lobby screen's own documented responsibility (docs/01_class_list.md §6c —
+&quot;Username field, 'Find Match' control, queue status/cancel&quot;) spans two models, not one: identity
+(username/playerId) and queue (position/status). The stub's constructor only took ClientIdentityModel.
+A second, non-<code>View&lt;M,C&gt;</code>-generic-typed model reference is added here purely for observation — the
+same pattern MatchmakingController (server side) established for extra constructor dependencies
+beyond the formal (model, view) pair. getModel()/setModel() below still resolve to
+ClientIdentityModel, matching LobbyController's own <code>AbstractController&lt;ClientIdentityModel, LobbyView&gt;</code> pairing — queueModel is reachable via the separate getQueueModel() accessor.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">model</span>: <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a></span>
 <div class="tsd-comment tsd-typography"><p>the identity model this view observes</p>
 </div></li>
+<li><span><span class="tsd-kind-parameter">queueModel</span>: <a href="client_src_model_ClientQueueModel.ClientQueueModel.html" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a></span>
+<div class="tsd-comment tsd-typography"><p>the queue model this view also observes, for queue status/cancel rendering</p>
+</div></li>
 <li><span><span class="tsd-kind-parameter">controller</span>: <a href="client_src_controller_LobbyController.LobbyController.html" class="tsd-signature-type tsd-kind-class">LobbyController</a></span>
 <div class="tsd-comment tsd-typography"><p>the lobby controller this view dispatches user actions through</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">LobbyView</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L17">client/src/view/LobbyView.tsx:17</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L28">client/src/view/LobbyView.tsx:28</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -76,21 +90,28 @@ React functional component (LobbyScreen) to re-render (SRS 3.1.1, R1.1–R1.4, R
 <div class="tsd-comment tsd-typography"><p>the lobby controller this view dispatches user actions through</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L19">client/src/view/LobbyView.tsx:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L31">client/src/view/LobbyView.tsx:31</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Private</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a></div>
 <div class="tsd-comment tsd-typography"><p>the identity model this view observes</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L18">client/src/view/LobbyView.tsx:18</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L29">client/src/view/LobbyView.tsx:29</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="onupdate"><code class="tsd-tag">Private</code><span>on<wbr/>Update</span><a href="#onupdate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">onUpdate</span><span class="tsd-signature-symbol">:</span> (<span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">void</span>) <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
 <div class="tsd-comment tsd-typography"><p>Callback registered by LobbyScreen to trigger a React re-render on model changes.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L11">client/src/view/LobbyView.tsx:11</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L13">client/src/view/LobbyView.tsx:13</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="queuemodel"><code class="tsd-tag">Private</code><span>queue<wbr/>Model</span><a href="#queuemodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">queueModel</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientQueueModel.ClientQueueModel.html" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a></div>
+<div class="tsd-comment tsd-typography"><p>the queue model this view also observes, for queue status/cancel rendering</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L30">client/src/view/LobbyView.tsx:30</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -107,11 +128,11 @@ The paired functional component supplies this so modelChanged can trigger a re-r
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">callback</span>: <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">void</span></span>
-<div class="tsd-comment tsd-typography"><p>called with no arguments whenever the model changes</p>
+<div class="tsd-comment tsd-typography"><p>called with no arguments whenever either observed model changes</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L29">client/src/view/LobbyView.tsx:29</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L42">client/src/view/LobbyView.tsx:42</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getcontroller"><span>get<wbr/>Controller</span><a href="#getcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -122,9 +143,9 @@ The paired functional component supplies this so modelChanged can trigger a re-r
 </div>
 <h4 class="tsd-returns-title">Returns <a href="client_src_controller_LobbyController.LobbyController.html" class="tsd-signature-type tsd-kind-class">LobbyController</a></h4><p>the current LobbyController</p>
 <aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#getcontroller">getController</a></p>
+<p>Implementation of View.getController</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L54">client/src/view/LobbyView.tsx:54</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L86">client/src/view/LobbyView.tsx:86</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getmodel"><span>get<wbr/>Model</span><a href="#getmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -135,28 +156,42 @@ The paired functional component supplies this so modelChanged can trigger a re-r
 </div>
 <h4 class="tsd-returns-title">Returns <a href="client_src_model_ClientIdentityModel.ClientIdentityModel.html" class="tsd-signature-type tsd-kind-class">ClientIdentityModel</a></h4><p>the current ClientIdentityModel</p>
 <aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#getmodel">getModel</a></p>
+<p>Implementation of View.getModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L37">client/src/view/LobbyView.tsx:37</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L50">client/src/view/LobbyView.tsx:50</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getqueuemodel"><span>get<wbr/>Queue<wbr/>Model</span><a href="#getqueuemodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getqueuemodel-1"><span class="tsd-kind-call-signature">getQueueModel</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientQueueModel.ClientQueueModel.html" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a><a href="#getqueuemodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns the observed queue model.
+CORRECTION (Step 10): not part of the formal View&lt;M,C&gt; contract (see constructor doc above) — a
+plain accessor LobbyScreen uses to render queue status/cancel.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="client_src_model_ClientQueueModel.ClientQueueModel.html" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a></h4><p>the current ClientQueueModel</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L69">client/src/view/LobbyView.tsx:69</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="modelchanged"><span>model<wbr/>Changed</span><a href="#modelchanged" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="modelchanged-1"><span class="tsd-kind-call-signature">modelChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#modelchanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="modelchanged-1"><span class="tsd-kind-call-signature">modelChanged</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ModelEvent</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#modelchanged-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Called by AbstractModel when the identity model fires a change event.
+<div class="tsd-comment tsd-typography"><p>Called by AbstractModel when either observed model fires a change event.
 Invokes the registered onUpdate callback to trigger a React re-render.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">event</span>: <a href="shared_src_mvc_ModelEvent.ModelEvent.html" class="tsd-signature-type tsd-kind-class">ModelEvent</a></span>
+<li><span><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">ModelEvent</span></span>
 <div class="tsd-comment tsd-typography"><p>the model event describing what changed</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html">ModelListener</a>.<a href="../interfaces/shared_src_mvc_ModelListener.ModelListener.html#modelchanged">modelChanged</a></p>
+<p>Implementation of ModelListener.modelChanged</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L71">client/src/view/LobbyView.tsx:71</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L103">client/src/view/LobbyView.tsx:103</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setcontroller"><span>set<wbr/>Controller</span><a href="#setcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -172,9 +207,9 @@ Invokes the registered onUpdate callback to trigger a React re-render.</p>
 <div class="tsd-comment tsd-typography"><p>the new LobbyController</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#setcontroller">setController</a></p>
+<p>Implementation of View.setController</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L62">client/src/view/LobbyView.tsx:62</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L94">client/src/view/LobbyView.tsx:94</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setmodel"><span>set<wbr/>Model</span><a href="#setmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -191,9 +226,27 @@ view as a listener on the new model — call <code>model.addModelListener(this)<
 <div class="tsd-comment tsd-typography"><p>the new ClientIdentityModel to observe</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/shared_src_mvc_View.View.html">View</a>.<a href="../interfaces/shared_src_mvc_View.View.html#setmodel">setModel</a></p>
+<p>Implementation of View.setModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/client/src/view/LobbyView.tsx#L46">client/src/view/LobbyView.tsx:46</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L59">client/src/view/LobbyView.tsx:59</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="setqueuemodel"><span>set<wbr/>Queue<wbr/>Model</span><a href="#setqueuemodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="setqueuemodel-1"><span class="tsd-kind-call-signature">setQueueModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">queueModel</span><span class="tsd-signature-symbol">:</span> <a href="client_src_model_ClientQueueModel.ClientQueueModel.html" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setqueuemodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Replaces the observed queue model reference. Does not re-register as a listener — call
+<code>queueModel.addModelListener(this)</code> separately if needed.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">queueModel</span>: <a href="client_src_model_ClientQueueModel.ClientQueueModel.html" class="tsd-signature-type tsd-kind-class">ClientQueueModel</a></span>
+<div class="tsd-comment tsd-typography"><p>the new ClientQueueModel to observe</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/client/src/view/LobbyView.tsx#L78">client/src/view/LobbyView.tsx:78</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -212,9 +265,9 @@ view as a listener on the new model — call <code>model.addModelListener(this)<
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#controller" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controller</span></a><a href="#model" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#onupdate" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Update</span></a></div></details>
+<div><a href="#controller" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controller</span></a><a href="#model" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#onupdate" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>on<wbr/>Update</span></a><a href="#queuemodel" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>queue<wbr/>Model</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#bindupdatecallback"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Update<wbr/>Callback</span></a><a href="#getcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Controller</span></a><a href="#getmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a><a href="#modelchanged"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>model<wbr/>Changed</span></a><a href="#setcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Controller</span></a><a href="#setmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a></div></details></div></details></div>
+<div><a href="#bindupdatecallback"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>bind<wbr/>Update<wbr/>Callback</span></a><a href="#getcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Controller</span></a><a href="#getmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a><a href="#getqueuemodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Queue<wbr/>Model</span></a><a href="#modelchanged"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>model<wbr/>Changed</span></a><a href="#setcontroller"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Controller</span></a><a href="#setmodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a><a href="#setqueuemodel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Queue<wbr/>Model</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html">Arena — API Documentation</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

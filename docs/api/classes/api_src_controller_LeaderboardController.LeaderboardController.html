@@ -13,15 +13,17 @@
 <h1>Class LeaderboardController</h1></div>
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p><code>GET /leaderboard</code> and <code>GET /leaderboard/champions</code> — serves aggregate standings (R8.1–R8.3).</p>
+<p>Uses the default (untyped) <code>AbstractController</code> generics via the shared <code>NULL_MODEL</code>/<code>NULL_VIEW</code>
+stand-in — see <code>10_api_1</code>'s design note 4 for why.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="1133">
-<h4>Hierarchy (<a href="../hierarchy.html#api/src/controller/LeaderboardController.LeaderboardController">View Summary</a>)</h4>
+<section class="tsd-panel tsd-hierarchy" data-refl="1570">
+<h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li class="tsd-hierarchy-item"><a href="shared_src_mvc_AbstractController.AbstractController.html" class="tsd-signature-type tsd-kind-class">AbstractController</a>
+<li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractController</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">LeaderboardController</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/controller/LeaderboardController.ts#L5">api/src/controller/LeaderboardController.ts:5</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L17">api/src/controller/LeaderboardController.ts:17</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -33,7 +35,10 @@
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#model" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a>
+<div class="tsd-index-list"><a href="#errorview" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>error<wbr/>View</span></a>
+<a href="#leaderboardrepository" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>leaderboard<wbr/>Repository</span></a>
+<a href="#model" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a>
+<a href="#responseview" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>response<wbr/>View</span></a>
 <a href="#view" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>view</span></a>
 </div></section>
 <section class="tsd-index-section">
@@ -43,6 +48,8 @@
 <a href="#getmodel" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a>
 <a href="#getview" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>View</span></a>
 <a href="#operation" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>operation</span></a>
+<a href="#parsemingames" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>parse<wbr/>Min<wbr/>Games</span></a>
+<a href="#responderror" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>respond<wbr/>Error</span></a>
 <a href="#setmodel" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a>
 <a href="#setview" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>View</span></a>
 </div></section></div></details></section></section>
@@ -53,36 +60,48 @@
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructorleaderboardcontroller"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">LeaderboardController</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">LeaderboardController</a><a href="#constructorleaderboardcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructorleaderboardcontroller"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">LeaderboardController</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">leaderboardRepository</span><span class="tsd-signature-symbol">:</span> <a href="api_src_model_LeaderboardRepository.LeaderboardRepository.html" class="tsd-signature-type tsd-kind-class">LeaderboardRepository</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">responseView</span><span class="tsd-signature-symbol">?:</span> <a href="api_src_view_LeaderboardResponseView.LeaderboardResponseView.html" class="tsd-signature-type tsd-kind-class">LeaderboardResponseView</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">errorView</span><span class="tsd-signature-symbol">?:</span> <a href="api_src_view_ErrorResponseView.ErrorResponseView.html" class="tsd-signature-type tsd-kind-class">ErrorResponseView</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">LeaderboardController</a><a href="#constructorleaderboardcontroller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">model</span>: <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></span>
-<div class="tsd-comment tsd-typography"><p>the model this controller mediates for</p>
-</div></li>
-<li><span><span class="tsd-kind-parameter">view</span>: <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></span>
-<div class="tsd-comment tsd-typography"><p>the view this controller is paired with</p>
-</div></li></ul></div>
+<li><span><span class="tsd-kind-parameter">leaderboardRepository</span>: <a href="api_src_model_LeaderboardRepository.LeaderboardRepository.html" class="tsd-signature-type tsd-kind-class">LeaderboardRepository</a></span></li>
+<li><span><span class="tsd-kind-parameter">responseView</span>: <a href="api_src_view_LeaderboardResponseView.LeaderboardResponseView.html" class="tsd-signature-type tsd-kind-class">LeaderboardResponseView</a><span class="tsd-signature-symbol"> = ...</span></span></li>
+<li><span><span class="tsd-kind-parameter">errorView</span>: <a href="api_src_view_ErrorResponseView.ErrorResponseView.html" class="tsd-signature-type tsd-kind-class">ErrorResponseView</a><span class="tsd-signature-symbol"> = ...</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">LeaderboardController</a></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#constructor">constructor</a></p>
+<p>Overrides AbstractController.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L20">shared/src/mvc/AbstractController.ts:20</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L18">api/src/controller/LeaderboardController.ts:18</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="errorview"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>error<wbr/>View</span><a href="#errorview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">errorView</span><span class="tsd-signature-symbol">:</span> <a href="api_src_view_ErrorResponseView.ErrorResponseView.html" class="tsd-signature-type tsd-kind-class">ErrorResponseView</a><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L21">api/src/controller/LeaderboardController.ts:21</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="leaderboardrepository"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>leaderboard<wbr/>Repository</span><a href="#leaderboardrepository" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">leaderboardRepository</span><span class="tsd-signature-symbol">:</span> <a href="api_src_model_LeaderboardRepository.LeaderboardRepository.html" class="tsd-signature-type tsd-kind-class">LeaderboardRepository</a></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L19">api/src/controller/LeaderboardController.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Protected</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></div><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#model">model</a></p>
+<div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Model</span></div><aside class="tsd-sources">
+<p>Inherited from AbstractController.model</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L13">shared/src/mvc/AbstractController.ts:13</a></li></ul></aside></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:10</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="responseview"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>response<wbr/>View</span><a href="#responseview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">responseView</span><span class="tsd-signature-symbol">:</span> <a href="api_src_view_LeaderboardResponseView.LeaderboardResponseView.html" class="tsd-signature-type tsd-kind-class">LeaderboardResponseView</a><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L20">api/src/controller/LeaderboardController.ts:20</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="view"><code class="tsd-tag">Protected</code><span>view</span><a href="#view" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></div><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#view">view</a></p>
+<div class="tsd-signature"><span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">View</span></div><aside class="tsd-sources">
+<p>Inherited from AbstractController.view</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L14">shared/src/mvc/AbstractController.ts:14</a></li></ul></aside></section></section></details>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:11</li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -92,7 +111,10 @@
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="getchampionwinrates-1"><span class="tsd-kind-call-signature">getChampionWinRates</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">req</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">res</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#getchampionwinrates-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Fetches per-champion win rates via <code>LeaderboardRepository.computeChampionWinRates</code>.</p>
+<div class="tsd-comment tsd-typography"><p>Fetches per-champion win rates via <code>LeaderboardRepository.computeChampionWinRates</code>. No response-view
+formatting step is needed here — <code>computeChampionWinRates</code> already returns the wire-shaped
+<code>ChampionWinRateDTO[]</code> directly, since there's no domain-vs-DTO gap to bridge (unlike
+<code>LeaderboardEntry</code>, there's no separate <code>ChampionWinRate</code> domain class per <code>docs/01_class_list.md</code>).</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -105,7 +127,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/controller/LeaderboardController.ts#L22">api/src/controller/LeaderboardController.ts:22</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L52">api/src/controller/LeaderboardController.ts:52</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getleaderboard"><span>get<wbr/>Leaderboard</span><a href="#getleaderboard" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -113,7 +135,9 @@
 <div class="tsd-signature tsd-anchor-link" id="getleaderboard-1"><span class="tsd-kind-call-signature">getLeaderboard</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">req</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">res</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#getleaderboard-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Fetches leaderboard standings via <code>LeaderboardRepository.computeLeaderboard</code> and formats them through
-<code>LeaderboardResponseView</code>.</p>
+<code>LeaderboardResponseView</code>. Catches any <code>ArenaError</code> and formats it via <code>ErrorResponseView</code> instead of
+letting it propagate — same controller-catches/view-shows pattern as <code>InternalMatchController</code>
+(<code>10_api_1</code>).</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -124,35 +148,31 @@
 <li><span><span class="tsd-kind-parameter">res</span>: <span class="tsd-signature-type">Response</span></span>
 <div class="tsd-comment tsd-typography"><p>Express response, written to directly rather than returned</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
-<div class="tsd-comment tsd-typography">
-<div class="tsd-tag-throws">
-<h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if <code>minGames</code> is present but not a non-negative integer (3.6.2)</p>
-</div></div><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/controller/LeaderboardController.ts#L13">api/src/controller/LeaderboardController.ts:13</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L34">api/src/controller/LeaderboardController.ts:34</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="getmodel"><span>get<wbr/>Model</span><a href="#getmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="getmodel-1"><span class="tsd-kind-call-signature">getModel</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a><a href="#getmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getmodel-1"><span class="tsd-kind-call-signature">getModel</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Model</span><a href="#getmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></h4><p>the model this controller is mediating for</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Model</span></h4><p>the model this controller is mediating for</p>
 <aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#getmodel">getModel</a></p>
+<p>Inherited from AbstractController.getModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L26">shared/src/mvc/AbstractController.ts:26</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:18</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="getview"><span>get<wbr/>View</span><a href="#getview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="getview-1"><span class="tsd-kind-call-signature">getView</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a><a href="#getview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getview-1"><span class="tsd-kind-call-signature">getView</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">View</span><a href="#getview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></h4><p>the view this controller is paired with</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">View</span></h4><p>the view this controller is paired with</p>
 <aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#getview">getView</a></p>
+<p>Inherited from AbstractController.getView</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L36">shared/src/mvc/AbstractController.ts:36</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:22</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="operation"><span>operation</span><a href="#operation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -173,41 +193,68 @@ Express routes call <code>getLeaderboard</code>/<code>getChampionWinRates</code>
 <div class="tsd-comment tsd-typography"><p>unused</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Overrides <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#operation">operation</a></p>
+<p>Overrides AbstractController.operation</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/controller/LeaderboardController.ts#L33">api/src/controller/LeaderboardController.ts:33</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L89">api/src/controller/LeaderboardController.ts:89</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="parsemingames"><code class="tsd-tag">Private</code><span>parse<wbr/>Min<wbr/>Games</span><a href="#parsemingames" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-private">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="parsemingames-1"><span class="tsd-kind-call-signature">parseMinGames</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">raw</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><a href="#parsemingames-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">raw</span>: <span class="tsd-signature-type">unknown</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L61">api/src/controller/LeaderboardController.ts:61</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-private">
+<h3 class="tsd-anchor-link" id="responderror"><code class="tsd-tag">Private</code><span>respond<wbr/>Error</span><a href="#responderror" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-private">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="responderror-1"><span class="tsd-kind-call-signature">respondError</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">err</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">res</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#responderror-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type">unknown</span></span></li>
+<li><span><span class="tsd-kind-parameter">res</span>: <span class="tsd-signature-type">Response</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/controller/LeaderboardController.ts#L73">api/src/controller/LeaderboardController.ts:73</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="setmodel"><span>set<wbr/>Model</span><a href="#setmodel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="setmodel-1"><span class="tsd-kind-call-signature">setModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="setmodel-1"><span class="tsd-kind-call-signature">setModel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">model</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Model</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setmodel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">model</span>: <a href="../interfaces/shared_src_mvc_Model.Model.html" class="tsd-signature-type tsd-kind-interface">Model</a></span>
+<li><span><span class="tsd-kind-parameter">model</span>: <span class="tsd-signature-type">Model</span></span>
 <div class="tsd-comment tsd-typography"><p>the model this controller should mediate for</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#setmodel">setModel</a></p>
+<p>Inherited from AbstractController.setModel</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L31">shared/src/mvc/AbstractController.ts:31</a></li></ul></aside></div></li></ul></section>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:20</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="setview"><span>set<wbr/>View</span><a href="#setview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="setview-1"><span class="tsd-kind-call-signature">setView</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="setview-1"><span class="tsd-kind-call-signature">setView</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">view</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">View</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#setview-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">view</span>: <a href="../interfaces/shared_src_mvc_View.View.html" class="tsd-signature-type tsd-kind-interface">View</a></span>
+<li><span><span class="tsd-kind-parameter">view</span>: <span class="tsd-signature-type">View</span></span>
 <div class="tsd-comment tsd-typography"><p>the view this controller should be paired with</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="shared_src_mvc_AbstractController.AbstractController.html">AbstractController</a>.<a href="shared_src_mvc_AbstractController.AbstractController.html#setview">setView</a></p>
+<p>Inherited from AbstractController.setView</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/shared/src/mvc/AbstractController.ts#L41">shared/src/mvc/AbstractController.ts:41</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in shared/dist/mvc/AbstractController.d.ts:24</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -226,9 +273,9 @@ Express routes call <code>getLeaderboard</code>/<code>getChampionWinRates</code>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#model" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#view" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>view</span></a></div></details>
+<div><a href="#errorview" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>error<wbr/>View</span></a><a href="#leaderboardrepository" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>leaderboard<wbr/>Repository</span></a><a href="#model" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#responseview" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>response<wbr/>View</span></a><a href="#view" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>view</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#getchampionwinrates"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Champion<wbr/>Win<wbr/>Rates</span></a><a href="#getleaderboard"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Leaderboard</span></a><a href="#getmodel" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a><a href="#getview" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>View</span></a><a href="#operation"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>operation</span></a><a href="#setmodel" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a><a href="#setview" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>View</span></a></div></details></div></details></div>
+<div><a href="#getchampionwinrates"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Champion<wbr/>Win<wbr/>Rates</span></a><a href="#getleaderboard"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Leaderboard</span></a><a href="#getmodel" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Model</span></a><a href="#getview" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>View</span></a><a href="#operation"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>operation</span></a><a href="#parsemingames" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>parse<wbr/>Min<wbr/>Games</span></a><a href="#responderror" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>respond<wbr/>Error</span></a><a href="#setmodel" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Model</span></a><a href="#setview" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>View</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html">Arena — API Documentation</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

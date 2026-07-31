@@ -12,12 +12,16 @@
 <li><a href="" aria-current="page">MatchHistoryResponseView</a></li></ul>
 <h1>Class MatchHistoryResponseView</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Formats <code>MatchParticipant[]</code> into the wire-shaped, paginated <code>MatchHistoryEntryDTO[]</code> for a REST
-response. A plain formatter, not a <code>View</code> implementer — a synchronous HTTP response has no push/observe
+<div class="tsd-comment tsd-typography"><p>Formats <code>MatchHistoryRow[]</code> into the wire-shaped, paginated <code>MatchHistoryEntryDTO[]</code> for a REST response.
+A plain formatter, not a <code>View</code> implementer — a synchronous HTTP response has no push/observe
 relationship to establish.</p>
+<p>CORRECTION (Step 10): the original stub's signature took <code>MatchParticipant[]</code>, but that domain type
+carries no <code>opponentUsername</code> — see <code>MatchRepository.findHistoryForPlayer</code>'s Step 10 correction
+(<code>10_api_2</code>), which now returns the enriched <code>MatchHistoryRow</code> shape instead. This view's only remaining
+job is the <code>Date</code> → ISO-8601 string conversion <code>MatchHistoryEntryDTO</code> requires for the wire.</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/view/MatchHistoryResponseView.ts#L8">api/src/view/MatchHistoryResponseView.ts:8</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/view/MatchHistoryResponseView.ts#L14">api/src/view/MatchHistoryResponseView.ts:14</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -48,18 +52,18 @@ relationship to establish.</p>
 <h3 class="tsd-anchor-link" id="render"><span>render</span><a href="#render" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="render-1"><span class="tsd-kind-call-signature">render</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">participants</span><span class="tsd-signature-symbol">:</span> <a href="shared_src_domain_MatchParticipant.MatchParticipant.html" class="tsd-signature-type tsd-kind-class">MatchParticipant</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/shared_src_contract_dto.MatchHistoryEntryDTO.html" class="tsd-signature-type tsd-kind-interface">MatchHistoryEntryDTO</a><span class="tsd-signature-symbol">[]</span><a href="#render-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="render-1"><span class="tsd-kind-call-signature">render</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">rows</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/api_src_model_MatchRepository.MatchHistoryRow.html" class="tsd-signature-type tsd-kind-interface">MatchHistoryRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchHistoryEntryDTO</span><span class="tsd-signature-symbol">[]</span><a href="#render-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">participants</span>: <a href="shared_src_domain_MatchParticipant.MatchParticipant.html" class="tsd-signature-type tsd-kind-class">MatchParticipant</a><span class="tsd-signature-symbol">[]</span></span>
-<div class="tsd-comment tsd-typography"><p>the page of match-participant rows to format</p>
+<li><span><span class="tsd-kind-parameter">rows</span>: <a href="../interfaces/api_src_model_MatchRepository.MatchHistoryRow.html" class="tsd-signature-type tsd-kind-interface">MatchHistoryRow</a><span class="tsd-signature-symbol">[]</span></span>
+<div class="tsd-comment tsd-typography"><p>the page of match-history rows to format</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="../interfaces/shared_src_contract_dto.MatchHistoryEntryDTO.html" class="tsd-signature-type tsd-kind-interface">MatchHistoryEntryDTO</a><span class="tsd-signature-symbol">[]</span></h4><p>the DTO array to send as the JSON response body</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">MatchHistoryEntryDTO</span><span class="tsd-signature-symbol">[]</span></h4><p>the DTO array to send as the JSON response body</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/6f6381e41b8736f2af85c5b0c1a0e6c116537b4f/packages/api/src/view/MatchHistoryResponseView.ts#L13">api/src/view/MatchHistoryResponseView.ts:13</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/api/src/view/MatchHistoryResponseView.ts#L19">api/src/view/MatchHistoryResponseView.ts:19</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
