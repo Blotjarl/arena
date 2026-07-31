@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useState } from 'react';
-import { View, ModelListener, ModelEvent } from '@arena/shared';
+import type { Socket } from 'socket.io-client';
+import { View, ModelListener, ModelEvent, SOCKET_EVENTS, ErrorPayload } from '@arena/shared';
 import { ClientIdentityModel } from '../model/ClientIdentityModel';
 import { ClientQueueModel } from '../model/ClientQueueModel';
 import { LobbyController } from '../controller/LobbyController';
@@ -13,6 +14,20 @@ export class LobbyView implements View, ModelListener {
   private onUpdate: (() => void) | null = null;
 
   /**
+   * Transient, UI-only surface for a server-rejected queue action (e.g. `AlreadyQueuedError` when this
+   * connection is rebound to a still-active match on reconnect — see `ServerMain.rebindIfInMatch`) —
+   * deliberately NOT a model field, same reasoning and same pattern as `MatchHUDView.opponentDisconnect`:
+   * `SocketConnectionController.bindInboundEvents`'s own doc comment is explicit that a generic `error`
+   * event has no matching model apply()/set() slot, and a view wanting to show one is expected to listen
+   * to the raw socket directly rather than SocketConnectionController inventing a model field just for
+   * this. Before this field existed, every server-side queue rejection was silently swallowed client-side
+   * — nothing rendered it anywhere (a real, confirmed gap, not a hypothetical one). Cleared whenever
+   * either observed model changes, since any successful transition (a fresh queue:joined, a rebind's
+   * match:found, etc.) makes whatever error preceded it stale.
+   */
+  private queueError: ErrorPayload | null = null;
+
+  /**
    * CORRECTION (Step 10): the Lobby screen's own documented responsibility (docs/01_class_list.md §6c —
    * "Username field, 'Find Match' control, queue status/cancel") spans two models, not one: identity
    * (username/playerId) and queue (position/status). The stub's constructor only took ClientIdentityModel.
@@ -21,17 +36,43 @@ export class LobbyView implements View, ModelListener {
    * beyond the formal (model, view) pair. getModel()/setModel() below still resolve to
    * ClientIdentityModel, matching LobbyController's own `AbstractController<ClientIdentityModel,
    * LobbyView>` pairing — queueModel is reachable via the separate getQueueModel() accessor.
+   *
+   * CORRECTION (reload-reconnect fix): `socket` is a new, optional 4th param, same pattern and same
+   * reasoning as `MatchHUDView`'s own `socket` param — see `queueError`'s doc comment above. Optional so
+   * every existing call site with no reason to exercise this (most unit tests) is unaffected; ClientMain.tsx
+   * passes the real socket.
    * @param model - the identity model this view observes
    * @param queueModel - the queue model this view also observes, for queue status/cancel rendering
    * @param controller - the lobby controller this view dispatches user actions through
+   * @param socket - the live Socket.IO client connection, listened to directly for server-rejected queue
+   *   actions; omit in contexts (most tests) that don't exercise that path
    */
   constructor(
     private model: ClientIdentityModel,
     private queueModel: ClientQueueModel,
     private controller: LobbyController,
+    private readonly socket?: Pick<Socket, 'on'>,
   ) {
     this.model.addModelListener(this);
     this.queueModel.addModelListener(this);
+    this.bindSocketEvents();
+  }
+
+  /** Listens directly to the raw socket (when provided) for a server-rejected queue action — see `queueError`'s doc comment above. */
+  private bindSocketEvents(): void {
+    this.socket?.on(SOCKET_EVENTS.ERROR, (payload: ErrorPayload) => {
+      this.queueError = payload;
+      this.onUpdate?.();
+    });
+  }
+
+  /**
+   * Returns the most recent server-rejected queue action, or null if none (or already superseded by a
+   * successful model change — see `queueError`'s doc comment above).
+   * @returns the most recent unresolved ErrorPayload, or null
+   */
+  getQueueError(): ErrorPayload | null {
+    return this.queueError;
   }
 
   /**
@@ -96,11 +137,14 @@ export class LobbyView implements View, ModelListener {
   }
 
   /**
-   * Called by AbstractModel when either observed model fires a change event.
-   * Invokes the registered onUpdate callback to trigger a React re-render.
+   * Called by AbstractModel when either observed model fires a change event. Clears any stale
+   * `queueError` first — a real model change means whatever server rejection preceded it no longer
+   * describes the current state (see that field's doc comment) — then invokes the registered onUpdate
+   * callback to trigger a React re-render.
    * @param event - the model event describing what changed
    */
   modelChanged(event: ModelEvent): void {
+    this.queueError = null;
     this.onUpdate?.();
   }
 }
@@ -157,6 +201,8 @@ export function LobbyScreen(props: { view: LobbyView; onViewLeaderboard?: () => 
     );
   }
 
+  const queueError = view.getQueueError();
+
   if (queue.status === 'idle') {
     return (
       <div className="screen screen-lobby">
@@ -170,6 +216,7 @@ export function LobbyScreen(props: { view: LobbyView; onViewLeaderboard?: () => 
               View Leaderboard
             </button>
           )}
+          {queueError && <p role="alert" className="alert-error">{queueError.message}</p>}
         </div>
       </div>
     );
@@ -184,6 +231,7 @@ export function LobbyScreen(props: { view: LobbyView; onViewLeaderboard?: () => 
           <button onClick={() => controller.operation('cancelQueue')} className="btn btn-secondary">
             Cancel
           </button>
+          {queueError && <p role="alert" className="alert-error">{queueError.message}</p>}
         </div>
       </div>
     );

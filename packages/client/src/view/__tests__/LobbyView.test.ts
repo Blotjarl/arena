@@ -1,3 +1,4 @@
+import type { Socket } from 'socket.io-client';
 import { ModelEvent } from '@arena/shared';
 import { LobbyView } from '../LobbyView';
 import { ClientIdentityModel } from '../../model/ClientIdentityModel';
@@ -96,6 +97,57 @@ describe('LobbyView', () => {
 
       queue.setQueued(2);
 
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('clears a previously-set queueError on any model change', () => {
+      const identity = new ClientIdentityModel();
+      const view = new LobbyView(identity, new ClientQueueModel(), makeController());
+      view.modelChanged(new ModelEvent(identity, 'identity:changed', {})); // no-op, just exercising the path
+      // Simulate a prior server-rejected queue action having set queueError (see the socket test below for
+      // how it's actually populated), then a later model change clearing it.
+      (view as unknown as { queueError: unknown }).queueError = { code: 'ALREADY_QUEUED', message: 'boom' };
+
+      view.modelChanged(new ModelEvent(identity, 'identity:changed', {}));
+
+      expect(view.getQueueError()).toBeNull();
+    });
+  });
+
+  describe('getQueueError / socket wiring', () => {
+    function makeFakeSocket(): { on: jest.Mock; handlers: Map<string, (payload: unknown) => void> } {
+      const handlers = new Map<string, (payload: unknown) => void>();
+      const on = jest.fn((event: string, handler: (payload: unknown) => void) => {
+        handlers.set(event, handler);
+      });
+      return { on, handlers };
+    }
+
+    it('is null before any error event arrives', () => {
+      const view = new LobbyView(new ClientIdentityModel(), new ClientQueueModel(), makeController());
+      expect(view.getQueueError()).toBeNull();
+    });
+
+    it('does not throw when constructed without a socket (most existing call sites)', () => {
+      expect(
+        () => new LobbyView(new ClientIdentityModel(), new ClientQueueModel(), makeController()),
+      ).not.toThrow();
+    });
+
+    it('CRITICAL CHECKPOINT: a server-emitted error event (e.g. AlreadyQueuedError on a rebound reconnect) is captured and triggers a re-render', () => {
+      const socket = makeFakeSocket();
+      const view = new LobbyView(
+        new ClientIdentityModel(),
+        new ClientQueueModel(),
+        makeController(),
+        socket as unknown as Socket,
+      );
+      const callback = jest.fn();
+      view.bindUpdateCallback(callback);
+
+      socket.handlers.get('error')!({ code: 'ALREADY_QUEUED', message: 'Already in an active match.' });
+
+      expect(view.getQueueError()).toEqual({ code: 'ALREADY_QUEUED', message: 'Already in an active match.' });
       expect(callback).toHaveBeenCalled();
     });
   });

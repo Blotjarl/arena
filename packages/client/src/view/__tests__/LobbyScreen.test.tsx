@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import type { Socket } from 'socket.io-client';
 import { InvalidUsernameError, Team } from '@arena/shared';
 import { LobbyView, LobbyScreen } from '../LobbyView';
 import { ClientIdentityModel } from '../../model/ClientIdentityModel';
@@ -111,6 +112,25 @@ describe('LobbyScreen', () => {
       expect(screen.getByText(/Position in queue: 4/)).toBeTruthy();
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
       expect(controller.operation).toHaveBeenCalledWith('cancelQueue');
+    });
+
+    it('CRITICAL CHECKPOINT: a server-rejected queue action (e.g. AlreadyQueuedError on a rebound reconnect) is rendered as an alert', () => {
+      const identity = new ClientIdentityModel();
+      identity.identify('Raj');
+      const queue = new ClientQueueModel();
+      const controller = makeMockController(identity);
+      const handlers = new Map<string, (payload: unknown) => void>();
+      const fakeSocket = { on: jest.fn((event: string, handler: (payload: unknown) => void) => handlers.set(event, handler)) };
+      const view = new LobbyView(identity, queue, controller, fakeSocket as unknown as Socket);
+
+      render(<LobbyScreen view={view} />);
+      expect(screen.getByRole('button', { name: 'Find Match' })).toBeTruthy();
+
+      act(() => {
+        handlers.get('error')!({ code: 'ALREADY_QUEUED', message: 'Already queued or in an active match.' });
+      });
+
+      expect(screen.getByRole('alert').textContent).toMatch(/already queued or in an active match/i);
     });
 
     it('CRITICAL CHECKPOINT: a queue update pushed after mount (simulating an inbound server event) re-renders without remounting', () => {
