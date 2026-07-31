@@ -5,7 +5,10 @@
  * the same HTML template/visual conventions as docs/01_class_diagram.html (Step 1's hand-authored
  * diagram) so the two are directly comparable.
  *
- * Usage: node scripts/generate-class-diagram.js <output-html-path>
+ * Usage: node scripts/generate-class-diagram.js <output-html-path> <step-label>
+ * <step-label> (e.g. "Step 12 — Final") only affects the page's own title/heading text, never the
+ * generated diagram content — defaults to "Step 6" so the original zero-arg invocation this script was
+ * first written for keeps producing byte-for-byte the same output it always has.
  */
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -13,6 +16,7 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..');
 const outputPath = process.argv[2] || path.join(repoRoot, 'docs', '06_class_diagram_reverse-engineered.html');
+const stepLabel = process.argv[3] || 'Step 6';
 const modelPath = path.join(repoRoot, '.typedoc-model.json');
 const templatePath = path.join(repoRoot, 'docs', '01_class_diagram.html');
 
@@ -282,7 +286,7 @@ const out = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arena — Step 6 Reverse-Engineered Class Diagram</title>
+<title>Arena — ${stepLabel} Reverse-Engineered Class Diagram</title>
 ${styleMatch[0]}
 </head>
 <body>
@@ -290,7 +294,7 @@ ${styleMatch[0]}
   <main>
     <header class="page-head">
       <div class="eyebrow">Arena — Software Engineering Term Project</div>
-      <h1 class="title">Step 6 — Reverse-Engineered Class Diagram</h1>
+      <h1 class="title">${stepLabel} — Reverse-Engineered Class Diagram</h1>
       <p class="dek">Generated deterministically by <code>scripts/generate-class-diagram.js</code> from the
       actual current source under <code>packages/</code> — not hand-authored. Compare each section against
       the corresponding one in <code>docs/01_class_diagram.html</code> (Step 1) to find drift between plan
