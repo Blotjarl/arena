@@ -1,0 +1,472 @@
+ARENA -- TEXTUAL DESCRIPTION OF SYSTEM STRUCTURE AND CRITICAL ALGORITHMS
+=========================================================================
+
+Submission material item 4 (docs/ProjectProcess.txt): "Textual description of the structure of your
+system and implemented algorithms critical for the system's behavior."
+
+This document describes the real, final, as-built system (not a plan). Every fact below is drawn
+directly from the current source tree under packages/, cross-checked against docs/ArenaSRS.pdf's
+numbered requirements (R1.1 etc.) where relevant. File paths are given so each claim can be checked
+against the actual code.
+
+
+PART 1 -- SYSTEM STRUCTURE
+=========================================================================
+
+1.1 Subsystems
+-------------------------------------------------------------------------
+Arena is an npm workspace monorepo with four packages:
+
+  packages/shared  -- TypeScript types, the MVC framework, domain classes (Champion, Ability,
+                       Position, ...), the WebSocket/REST wire contract, and shared exception classes.
+                       Depended on by all three of the packages below; depends on nothing else in the
+                       repo. Compiled to CommonJS so ts-jest can transform it uniformly across every
+                       package's test suite.
+
+  packages/server   -- The authoritative real-time game server. A Node.js process using Socket.IO for
+                       WebSocket transport. Owns every match-critical decision: matchmaking, movement,
+                       ability resolution, damage, cooldowns, and win conditions (SRS 2.1). Never trusts
+                       a client-reported value for any of these.
+
+  packages/client   -- The React/TypeScript browser application. Renders whatever state the server
+                       sends and forwards player input as requests; never computes or asserts a
+                       game-affecting outcome itself. Talks to the server over one persistent
+                       Socket.IO connection per browser tab, and to the api over plain HTTP/REST for
+                       match history and leaderboard data.
+
+  packages/api      -- A Node.js/Express REST service backed by PostgreSQL. Stores player profiles,
+                       records completed match results, and serves match-history/leaderboard queries.
+                       The game server notifies this service of match begin/end over plain HTTP
+                       (fire-and-forget from the server's perspective), rather than writing to the
+                       database directly on the hot path of match simulation.
+
+1.2 MVC framework (packages/shared/src/mvc)
+-------------------------------------------------------------------------
+Every subsystem that has UI-adjacent or push-notification-driven state is built on the same small,
+shared MVC framework, defined once in packages/shared and reused everywhere:
+
+  Model            (interface)  -- notifyChanged(event): void
+  View<M,C>        (interface)  -- getModel/setModel, getController/setController
+  Controller<M,V>  (interface)  -- getModel/setModel, getView/setView, operation(action, payload)
+  ModelListener    (interface)  -- modelChanged(event: ModelEvent): void
+  ModelEvent       (class)      -- { source, type, payload, timestamp }
+  AbstractModel    (abstract)   -- maintains a ModelListener[] array; notifyChanged() fans out to all
+                                    registered listeners
+  AbstractController<M,V> (abstract) -- holds a (model, view) pair; operation() is abstract, overridden
+                                    per concrete controller
+
+This is a push-notification pattern, not request/response: a Model mutates its own state, then calls
+notifyChanged(), which synchronously invokes modelChanged() on every registered ModelListener. On the
+server, MatchModel is a Model whose listener is a broadcast View that serializes state onto every
+connected socket. On the client, each screen's *View class is itself a ModelListener on one or more
+client-side Models, and its own paired React function component re-renders via a callback the View
+invokes from its modelChanged() handler -- the same push-based design, just with a React re-render as
+the final step instead of a socket broadcast.
+
+1.3 Communication protocols
+-------------------------------------------------------------------------
+Client <-> Server: a single persistent WebSocket connection per browser tab, via Socket.IO. Every
+message is one of a small, fixed, versioned set of named events defined in
+packages/shared/src/contract/events.ts (SOCKET_EVENTS) and packages/shared/src/contract/payloads.ts.
+Client-to-server events: identify, queue:join, queue:cancel, champion:select, match:action,
+match:reconnect. Server-to-client events: queue:joined, queue:cancelled, match:found,
+champion:selected, match:start, match:state, match:end, match:player_disconnected,
+match:player_reconnected, error.
+
+Client <-> API: ordinary HTTP/REST with JSON bodies, via Express (packages/api/src/ApiMain.ts). Real
+endpoints: GET /players/:id/matches?page=&pageSize= (match history), GET /leaderboard,
+GET /leaderboard/champions (leaderboard + per-champion win rates). A separate pair of internal-only
+endpoints (POST /internal/matches/begin, POST /internal/matches/end) is used exclusively by the game
+server to report match outcomes -- not called by the client.
+
+Server -> API: the game server's ConnectionHandler/MatchReportingClient posts to the two internal
+endpoints above at match begin and match end. This call is fire-and-forget from the server's own
+perspective (its result is not awaited by anything on the live match's critical path) -- a failure to
+persist a match is logged by the api and does not affect the in-progress or already-finished match on
+the server side (R7.4).
+
+1.4 Server-side package layout (packages/server/src)
+-------------------------------------------------------------------------
+  model/       MatchModel, ParticipantState, MatchmakingQueue, QueueEntry, TickLoop
+  controller/  PlayerIdentifyController, MatchmakingController, ChampionSelectController,
+               CombatController, DisconnectController, ConnectionHandler, MatchReportingClient
+  view/        MatchmakingBroadcastView, MatchBroadcastView
+  ServerMain.ts  wires everything together and starts the process
+
+MatchModel is the authoritative state machine for one match, champion selection through a win
+condition (see Part 2 for its algorithms in detail). ParticipantState holds one player's live combat
+state (position, health, resource, cooldowns, connection status) within a match. TickLoop drives every
+registered MatchModel at a fixed rate (Part 2.1). MatchmakingQueue is the FIFO pairing structure (Part
+2.9). ConnectionHandler is the single place a Socket.IO connection is wired to the five controllers
+above, each handling one category of client-to-server event.
+
+1.5 Client-side package layout (packages/client/src)
+-------------------------------------------------------------------------
+  model/       ClientIdentityModel, ClientQueueModel, ClientMatchModel, ClientLeaderboardModel,
+               InterpolationBuffer
+  controller/  SocketConnectionController, LobbyController, ChampionSelectController, MatchController,
+               LeaderboardController
+  view/        LobbyView+LobbyScreen, ChampionSelectView+ChampionSelectScreen,
+               MatchHUDView+MatchHUDScreen, ResultsView+ResultsScreen,
+               LeaderboardView+LeaderboardScreen, ChampionSprite (shared pixel-art renderer)
+  ClientMain.tsx  mounts the React root and wires the whole model/controller/view graph; AppRouter
+               switches between the four phase-driven screens (Lobby, Champion Select, Match HUD,
+               Results) plus a fifth, toggle-driven Leaderboard screen
+
+Every *View class implements View + ModelListener. Every screen's functional React component
+(*Screen) is a thin render target: it reads state off the View's observed Model(s) and calls
+controller.operation(action, payload) in response to user input; it never computes a game outcome
+itself (SRS 2.1's client-is-a-display-and-input-device principle, enforced by convention throughout
+this codebase). LeaderboardController is the one exception to "every controller talks to the server
+over the socket" -- it is the client's only REST-based controller, calling the api's leaderboard
+endpoints directly over fetch().
+
+1.6 API-side package layout (packages/api/src)
+-------------------------------------------------------------------------
+  model/       PgPool, PlayerRepository, MatchRepository, LeaderboardEntry, LeaderboardRepository,
+               PendingMatchCorrelator
+  controller/  InternalMatchController, MatchHistoryController, LeaderboardController
+  view/        ErrorResponseView, MatchHistoryResponseView, LeaderboardResponseView
+  ApiMain.ts   wires everything and starts the Express process
+
+1.7 Persistence model (PostgreSQL, packages/api/schema.sql)
+-------------------------------------------------------------------------
+Three tables, matching SRS 3.4's logical database requirements exactly:
+
+  players             one row per unique username; created automatically (find-or-create) the first
+                       time a username is ever seen by the api, keyed by a server-generated canonical
+                       id -- distinct from the client's own transient, session-generated playerId
+                       (see Part 2.13).
+  matches             one row per match that reached Champion Selection completion; holds end reason,
+                       winning team (nullable, for a draw), duration, ended-at timestamp.
+  match_participants   one row per player per match; foreign keys to both matches and players; holds
+                       team, champion played, and result (WIN/LOSS/DRAW). This is the table both match
+                       history and the leaderboard are actually computed from (Part 2.14).
+
+A match that ends before both players finish Champion Selection (a selection timeout) is never
+persisted at all -- R7.2.
+
+1.8 Deployment structure
+-------------------------------------------------------------------------
+Each of server/api is built and run as an independent Docker container image (R-D4). docker-compose.yml
+brings up a persistent local stack (Postgres + api + server; the client runs separately via its own
+dev/build tooling, since its real operating environment is an evergreen browser, not a container).
+docker-compose.test.yml brings up a second, ephemeral (tmpfs-backed) Postgres instance on a distinct
+port, used only by the automated Jest integration tests and the Playwright end-to-end suite, so test
+runs never touch persistent local data. A GitHub Actions CI pipeline runs the full typecheck/Jest/
+Playwright suite on every change (R-D5).
+
+
+PART 2 -- ALGORITHMS CRITICAL TO SYSTEM BEHAVIOR
+=========================================================================
+
+2.1 Fixed-rate authoritative simulation tick (packages/server/src/model/TickLoop.ts)
+-------------------------------------------------------------------------
+One process-wide TickLoop drives every currently-registered MatchModel via a single setInterval at a
+fixed rate of 20 Hz (R-P1). Each firing:
+
+  deltaSeconds = 1 / tickRateHz          (a fixed nominal step, not a measured wall-clock delta --
+                                           Node's setInterval is not perfectly precise, and a fixed
+                                           simulation step is more deterministic and more testable than
+                                           trusting timer jitter)
+  for each registered match:
+      try:  match.tick(deltaSeconds)
+      catch: log the error, keep going
+
+The per-match try/catch is load-bearing: it guarantees one match's internal error cannot crash the
+loop or corrupt any other in-progress match (R5.4, 3.6.2 Robustness) -- a single misbehaving match is
+isolated to itself.
+
+2.2 Movement resolution (packages/server/src/model/ParticipantState.ts, method move())
+-------------------------------------------------------------------------
+A player's movement input for the current tick is buffered by MatchModel.submitMove() and applied
+exactly once per tick, inside MatchModel.tick():
+
+  1. Reject outright (no-op) if the participant is dead or currently crowd-controlled.
+  2. Normalize the raw (dx, dy) input to a unit vector server-side:
+         magnitude = hypot(dx, dy)
+         if magnitude == 0: no-op (no keys held, or opposite directions canceled client-side)
+         unit = (dx / magnitude, dy / magnitude)
+     Normalizing on the server, not trusting a client-sent unit vector, is what actually enforces
+     R4.1 -- an unnormalized diagonal input (e.g. {dx:-1,dy:-1}, magnitude sqrt(2)) would otherwise
+     move ~41% faster than a cardinal direction, and nothing would stop a modified client from sending
+     an arbitrarily large magnitude as a speed hack.
+  3. new position = current position + unit * champion.moveSpeed * deltaSeconds
+  4. Clamp both axes to [0, ARENA_WIDTH] x [0, ARENA_HEIGHT] (a player cannot walk off the arena).
+  5. Point-containment check against every ARENA_OBSTACLES rectangle (see 2.6.1's isWithinObstacle):
+     if the clamped destination would land inside any obstacle, the entire movement is rejected for
+     this tick and the participant stays exactly where they were -- not partially applied, not
+     redirected around the obstacle.
+
+2.3 Skillshot ability resolution (packages/server/src/model/MatchModel.ts, method submitAbility())
+-------------------------------------------------------------------------
+This is the single most involved algorithm in the system. Every ability except a self-targeted HEAL
+(see below) is an aimed "skillshot": the client sends an abilityId plus a targetPosition (the point in
+arena-space the player clicked), and the server resolves whether and how it lands using only that
+point's *direction* from the caster -- never the player's own reported distance, and never the
+targetPosition's magnitude directly.
+
+  Step 0 -- effect-type gate:
+    If the ability's effectType is HEAL and its range is exactly 0 (true only for Iron Skin in the
+    real roster), it is self-targeted and instant: validate cooldown/resource/incapacitation, apply
+    caster.applyHeal(magnitude), done. No aim needed. Every other ability -- including a HEAL ability
+    whose range is > 0 (Vital Siphon, range 100) -- falls through to the aimed path below.
+
+  Step 1 -- extract a unit aim direction from the click:
+        dx = targetPosition.x - caster.position.x
+        dy = targetPosition.y - caster.position.y
+        aimMagnitude = hypot(dx, dy)
+        if aimMagnitude == 0: no-op (aimed exactly at self, no direction to cast in)
+        (dirX, dirY) = (dx / aimMagnitude, dy / aimMagnitude)
+    The click's own distance from the caster is discarded immediately after this step for
+    DAMAGE/CROWD_CONTROL/ranged-HEAL -- only the direction survives past this point for those effect
+    types. (POSITIONING is the one exception -- see Step 3.)
+
+  Step 2 -- validate and consume cost:
+    caster.useAbility(ability, now) checks, in order: not incapacitated (dead or crowd-controlled) ->
+    cooldown elapsed -> sufficient resource. Any failure throws and the whole cast is silently
+    dropped, no cost consumed. If it succeeds, the ability's cooldown is set and its resource cost is
+    deducted immediately -- unconditionally, before it is known whether the cast will actually connect
+    with anything. A cast that goes on to miss (out of range, misaimed, blocked line of sight) still
+    consumed its cooldown and resource -- this is deliberate "whiffed cast" semantics matching R4.3,
+    not a bug.
+
+  Step 3 -- POSITIONING resolution (Bulwark Charge, Phase Step, Swift Reposition):
+        rawDestination = caster.position + (dirX, dirY) * ability.range
+        destination = rawDestination clamped to [0, ARENA_WIDTH] x [0, ARENA_HEIGHT]
+    Every POSITIONING ability always travels its *full listed range* in the aimed direction --
+    never merely to the clicked point, regardless of whether the click was closer or farther than
+    that range. The straight-line path from the caster's pre-cast position to the (already
+    wall-clamped) destination is then checked against every obstacle via the same segment-intersection
+    test used for line-of-sight (2.6.1) -- except for Phase Step specifically (ability.id ==
+    'phase-step'), which is exempt from this obstacle check, since it represents a teleport "through
+    the space between spaces" rather than a physical dash; it still respects the arena's outer wall
+    clamp above, since that represents a hard world boundary, not an "obstacle" in the collision sense.
+    If a non-Phase-Step positioning ability's path is blocked, the entire cast is rejected -- the
+    caster does not move at all (not partially), though cost was already consumed in Step 2.
+    Bulwark Charge additionally staggers the opponent (see 2.6.2) as a pure addition on top of this
+    same resolution, once the reposition itself has been decided.
+
+  Step 4 -- DAMAGE / CROWD_CONTROL / ranged-HEAL resolution, against the real opponent (never the
+  click point):
+    Four independent conditions, ALL of which must hold for the cast to connect:
+      a) Range:            distance(caster, opponent) <= ability.range
+      b) Forward-facing:   dot((opponentX-casterX, opponentY-casterY), (dirX,dirY)) >= 0
+                            -- the opponent must lie on the same side of the caster as the aim
+                            direction, not merely somewhere along the infinite line through it. Without
+                            this check, a click aimed directly away from the opponent could still
+                            register as a hit if the opponent happened to be exactly behind the caster
+                            along the same line -- a real correctness gap closed late in this project's
+                            development (11_cross_2).
+      c) Aim alignment:    perpendicularDistance(opponent, ray from caster in direction dir)
+                            <= hitRadius
+                            where perpendicularDistance = |ox*dirY - oy*dirX| for
+                            (ox,oy) = opponent.position - caster.position (the standard 2D
+                            point-to-line cross-product distance formula). hitRadius is a shared
+                            constant (SKILLSHOT_HIT_RADIUS, 40 arena units) for every ability except
+                            Shockwave Slam, which uses its own wider constant (2.6's special cases) --
+                            an area-effect ground slam is deliberately more forgiving to aim than a
+                            precision bolt.
+      d) Line of sight:    the straight segment from caster to opponent must not cross any
+                            ARENA_OBSTACLES rectangle (2.6.1).
+    If all four hold, the effect is applied by effectType:
+      DAMAGE:          opponent.applyDamage(magnitude)
+      CROWD_CONTROL:   opponent.applyCrowdControl(magnitude * 1000 [seconds -> ms], now)
+      HEAL (ranged, i.e. Vital Siphon only): BOTH opponent.applyDamage(magnitude) AND
+                       caster.applyHeal(magnitude) -- a real drain, not a plain heal; magnitude is
+                       shared between the two effects.
+    If any condition fails, nothing is applied -- a real miss, cost already consumed in Step 2.
+
+2.4 Health / resource / crowd-control primitives (packages/server/src/model/ParticipantState.ts)
+-------------------------------------------------------------------------
+  applyDamage(amount):    health = max(0, health - amount)
+  applyHeal(amount):      health = min(champion.maxHealth, health + amount)
+  applyCrowdControl(durationMs, now):
+                           crowdControlledUntil = max(crowdControlledUntil, now + durationMs)
+                           -- a newly-applied, shorter crowd-control window never shortens an existing
+                           longer one; the window only ever extends forward.
+  regenerateResource(deltaSeconds):
+                           resource = min(champion.maxResource,
+                                          resource + champion.resourceRegenRate * deltaSeconds)
+                           -- called for every participant, every tick, unconditionally (R4.4).
+  isIncapacitated(now):    !isAlive() || crowdControlledUntil > now
+                           -- the single gate checked before movement and before any ability use;
+                           checked first in useAbility()'s validation order (incapacitation, then
+                           cooldown, then resource) because it is the most fundamental block --
+                           a dead or crowd-controlled caster cannot act regardless of whether the
+                           ability itself would otherwise be ready.
+
+2.5 Per-ability unique mechanics (packages/server/src/model/MatchModel.ts, ability.id special cases)
+-------------------------------------------------------------------------
+Every ability resolves through the generic algorithm in 2.3/2.4 above based purely on its effectType,
+magnitude, and range -- with four narrow, deliberate exceptions, each gated by the literal ability.id
+string rather than a new field on the shared Ability class (each is a one-off need specific to that one
+ability's own flavor, not a general mechanic worth modeling for all ten):
+
+  shockwave-slam    uses SHOCKWAVE_SLAM_HIT_RADIUS (90 units) in place of the shared
+                     SKILLSHOT_HIT_RADIUS (40) at Step 4c above -- a wider aim-alignment tolerance,
+                     matching its own "arc-shaped shockwave" description (an area effect, not a
+                     precision point-and-click hit).
+  bulwark-charge    after a successful reposition (Step 3), computes the shortest distance from the
+                     opponent's current position to the charge's travel segment (caster's pre-cast
+                     position -> its final, wall-clamped destination) using the point-to-segment
+                     algorithm in 2.6.2. If that distance is within BULWARK_CHARGE_STAGGER_RADIUS
+                     (reuses the 40-unit SKILLSHOT_HIT_RADIUS), the opponent is staggered via
+                     applyCrowdControl(BULWARK_CHARGE_STAGGER_DURATION_MS [750ms], now) -- "a
+                     shoulder-first charge, shield raised" is more than a pure escape, unlike the
+                     other two POSITIONING abilities.
+  phase-step        exempt from the obstacle line-check in Step 3 -- a magical teleport "through the
+                     space between spaces," not a physical dash.
+  vital-siphon      the only ability whose HEAL effectType resolves through the aimed Step 4 path
+                     rather than the instant Step 0 path, because its range (100) is nonzero -- see
+                     Step 4's HEAL case above for the drain effect itself.
+
+2.6 Geometric primitives (packages/shared/src/domain/Arena.ts)
+-------------------------------------------------------------------------
+
+2.6.1 Segment-vs-axis-aligned-rectangle intersection (Liang-Barsky parametric clipping)
+  Used for: obstacle line-of-sight (Step 4d above), the POSITIONING obstacle-path check (Step 3).
+  A point-containment test alone (does either endpoint fall inside the rectangle) is not sufficient --
+  it misses a segment that clips only a corner, or one fully contained inside the rectangle at both
+  endpoints. The algorithm instead parametrizes the segment as
+      P(t) = (x1,y1) + t * (x2-x1, y2-y1),  t in [0, 1]
+  and narrows the interval of t for which P(t) lies inside the rectangle against each of the
+  rectangle's four bounding half-planes in turn (left, right, top, bottom edge), starting from
+  [t0, t1] = [0, 1]:
+      for each edge (p, q) of the four half-plane tests:
+          if p == 0:                      -- segment parallel to this edge
+              if q < 0: the segment is entirely outside this half-plane -> no intersection at all
+          else:
+              r = q / p
+              if p < 0: t1 = min(t1, r)    -- entering the half-plane
+              else:     t0 = max(t0, r)    -- (r < t0 short-circuits to no intersection)
+      intersects iff t0 <= t1 after all four edges are applied
+  A degenerate zero-length segment (both endpoints equal) is a well-defined edge case of the same
+  formula and reduces correctly to a point-containment test.
+
+2.6.2 Point-to-segment distance (clamped vector projection)
+  Used for: Bulwark Charge's opponent-stagger check (2.5).
+  Standard closest-point-on-a-segment formula: project the point onto the infinite line through the
+  segment, then clamp the projection parameter to [0, 1] so the "closest point" is never extrapolated
+  past either endpoint (i.e. the closest point to something beyond one end of the segment is that
+  segment's own endpoint, not a point further along the infinite line):
+      d = (x2-x1, y2-y1)
+      t = clamp( dot((px-x1, py-y1), d) / dot(d, d),  0,  1 )   [t = 0 if the segment has zero length]
+      closest = (x1,y1) + t * d
+      distance = |point - closest|
+
+2.7 Client-side render interpolation (packages/client/src/model/InterpolationBuffer.ts)
+-------------------------------------------------------------------------
+The server only broadcasts a new authoritative snapshot once per tick (every 50ms at 20Hz); rendering
+every champion's position as a discrete jump between snapshots would look stuttery. Each client keeps a
+small ring buffer (capacity 10, ~500ms of history) of the most recently received MatchStatePayload
+snapshots. To render a smooth position at the current wall-clock time `now`:
+  1. Anchor the *most recent* sample's timestamp at (now + 25ms) -- half a tick interval in the
+     future -- so that `now` almost always falls strictly between two bracketing samples rather than
+     landing exactly on or past the latest one (which would leave nothing to interpolate toward).
+     Every earlier sample is placed 50ms further back per tick, relative to that same anchor.
+  2. Scan the buffered samples for the tightest bracketing pair (prev, next) such that
+     time(prev) <= now <= time(next); default to the two most recent samples if no tighter bracket is
+     found.
+  3. Linearly interpolate: t = clamp((now - time(prev)) / (time(next) - time(prev)), 0, 1);
+     renderedPosition = prev.position + t * (next.position - prev.position).
+  Degenerate cases (zero or one buffered sample, a missing participant in one of the two samples, a
+  zero-length time span) each fall back to the best available real position rather than extrapolating.
+  This buffer is strictly a rendering aid: nothing it computes is ever written back into
+  ClientMatchModel or treated as authoritative -- the server-reported health, resource, and cooldown
+  values are always rendered exactly as received, never interpolated or smoothed.
+
+2.8 Matchmaking: FIFO pairing under a concurrency bound (packages/server/src/model/MatchmakingQueue.ts)
+-------------------------------------------------------------------------
+  join(player):  reject (AlreadyQueuedError) if this player is already queued OR already recorded as a
+                 participant in a currently-active match; otherwise append to the back of an ordered
+                 list and return the 1-based position.
+  cancel(playerId): remove that player's entry from the queue (NotQueuedError if absent).
+  tryPairNext(): if fewer than two entries are queued, or the number of currently-active matches has
+                 already reached maxConcurrentMatches (R-P3, default 50), return null (no pairing this
+                 attempt). Otherwise remove the two *longest-waiting* entries (the front of the list --
+                 true FIFO, not any kind of skill-based selection) and return them as a pair, having
+                 incremented the active-match count and marked both players as "in an active match".
+  releaseMatch(playerIds): called exactly once, when a match ends, to decrement the active-match count
+                 and clear both players' "in an active match" flag -- without this, capacity would
+                 never be freed and, separately, neither player could ever re-queue after their first
+                 match (R2.2's "already in an active match" guard would permanently apply to them).
+  MatchmakingController polls tryPairNext() and, on a successful pairing, is the one that actually
+  constructs the new MatchModel and registers it with TickLoop -- MatchmakingQueue itself never creates
+  a match, only decides who is paired.
+
+2.9 Disconnect / reconnect grace period (packages/server/src/model/MatchModel.ts + ParticipantState.ts)
+-------------------------------------------------------------------------
+A three-state model per participant, tracked via ParticipantState.connectionStatus and
+disconnectedAt:
+  CONNECTED (normal) -> DISCONNECTED (disconnectedAt = now, on socket disconnect) ->
+      either back to CONNECTED (disconnectedAt = null, on a matching match:reconnect within the
+      window) or the match ends as a forfeit.
+While DISCONNECTED, no further movement or ability input is accepted on that participant's behalf --
+their champion simply holds its last authoritative position; this is not a special code path, it falls
+naturally out of the fact that ConnectionHandler stops routing that socket's input once it is gone.
+Every tick, before combat logic runs, MatchModel checks each disconnected participant:
+      if (now - participant.disconnectedAt) >= DISCONNECT_GRACE_PERIOD_MS [30_000]:
+          end the match as a DISCONNECT_FORFEIT, crediting the opponent's team
+A reconnect within the window restores connectionStatus to CONNECTED and clears disconnectedAt, with
+no other state touched -- health, resource, cooldowns, and position are exactly what they were at the
+moment of disconnection, since nothing about the match's own simulation was paused or rolled back; only
+that one participant's own further input was withheld during the gap.
+
+2.10 Win-condition determination (packages/server/src/model/MatchModel.ts, checkWinConditions())
+-------------------------------------------------------------------------
+Checked once per tick, after movement/resource/combat effects for that tick have already been applied:
+  ELIMINATION:  if either participant's health has reached 0, the match ends immediately, crediting
+                the win to the *other* participant's team. Checked first/takes priority.
+  TIME_LIMIT:   else, if the match has been active for >= 5 minutes (MATCH_TIME_LIMIT_MS) since it
+                began, the match ends, crediting the win to whichever participant has strictly more
+                remaining health, or declaring a draw (winningTeam = null) if health is exactly equal.
+  (DISCONNECT_FORFEIT and SELECTION_TIMEOUT are decided at their own separate call sites -- 2.9 above
+  and Champion Select's own 30-second deadline check, respectively -- not inside this function.)
+Ending a match sets phase = ENDED, records endedAt/endReason/winningTeam, computes durationMs from the
+match's own startedAt, and fires a match:end broadcast to both clients -- the only place any of these
+four fields is ever set.
+
+2.11 Match-report correlation (packages/api/src/model/PendingMatchCorrelator.ts)
+-------------------------------------------------------------------------
+The game server reports a match's begin and end as two *separate*, asynchronous HTTP calls (2.3 above)
+-- begin arrives once both players finish Champion Select (carrying each player's chosen champion),
+end arrives once the match actually concludes, arbitrarily later. Persisting a match requires both
+halves together (one row in `matches`, two rows in `match_participants`). This class reconciles them
+via a small in-memory state machine keyed by matchId:
+  recordBegin(matchId, participants): if this matchId has already been fully completed (both halves
+      already correlated and handed off), ignored -- a retried begin report must not resurrect a
+      finished match. Otherwise, if a begin half is not already pending for this matchId, store it.
+  recordEnd(matchId, outcome): if already completed, ignored (a retried end report must not
+      double-persist). If a begin half is already pending for this matchId, remove the pending entry,
+      mark the matchId completed, and return the combined {participants, outcome} record for the
+      caller to actually persist. If no begin half has arrived yet, store the end half and return null
+      -- it will be picked up by a later recordBegin racing the other direction is not possible here
+      since begin always logically precedes end, but the implementation does not assume that ordering
+      is guaranteed to arrive at the api in the same order it happened server-side, and handles the
+      begin-after-end arrival order correctly by symmetry.
+  Both recordBegin and recordEnd are idempotent per matchId specifically so that an HTTP retry (network
+  hiccup, etc.) can never cause a match to be persisted twice or a completed correlation to be
+  reopened.
+
+2.12 Leaderboard and champion win-rate computation (packages/api/src/model/LeaderboardRepository.ts)
+-------------------------------------------------------------------------
+Both figures are derived fresh from persisted match_participants at query time -- never as a
+separately maintained running counter -- which is a correctness property (R8.1), not merely an
+implementation choice: it guarantees the number can never drift out of sync with the actual recorded
+match history.
+  Per-player leaderboard:
+      GROUP BY player, computing
+          wins   = COUNT(*) WHERE result = 'WIN'
+          losses = COUNT(*) WHERE result = 'LOSS'
+          draws  = COUNT(*) WHERE result = 'DRAW'
+          gamesPlayed = COUNT(*)
+          winRate = wins / gamesPlayed
+      HAVING gamesPlayed >= minGames  (R8.2, default 1 -- excludes a player who has never completed a
+                                        match from appearing at all)
+      ORDER BY winRate DESC, wins DESC   (ties in win rate broken by total wins, per R8.1)
+  Per-champion win rates (R8.3): the identical shape of query, grouped by championId across every
+  participant/match instead of by player, with no minimum-games floor.
+
+=========================================================================
+End of document.
