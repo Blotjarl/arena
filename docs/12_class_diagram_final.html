@@ -695,6 +695,7 @@
         +disconnect(playerId) void
         #endMatch(reason, winningTeam, now) void
         #findParticipant(playerId) ParticipantState
+        +getRehydrationInfo() object
         +notifyChanged(event) void
         #opponentOf(participant) ParticipantState
         +reconnect(playerId) void
@@ -832,6 +833,7 @@
     class MatchRegistryEntry {
         &lt;&lt;interface&gt;&gt;
         +MatchModel match
+        +[Player,Player] players
         +MatchBroadcastView view
     }
     class MatchReportingClient {
@@ -1104,11 +1106,15 @@
         -LobbyController controller
         -ClientIdentityModel model
         -object|null onUpdate
+        -ErrorPayload|null queueError
         -ClientQueueModel queueModel
-        +LobbyView(model, queueModel, controller)
+        -Pick~Socket,"on"~ socket
+        +LobbyView(model, queueModel, controller, socket)
+        -bindSocketEvents() void
         +bindUpdateCallback(callback) void
         +getController() LobbyController
         +getModel() ClientIdentityModel
+        +getQueueError() ErrorPayload|null
         +getQueueModel() ClientQueueModel
         +modelChanged(event) void
         +setController(controller) void
