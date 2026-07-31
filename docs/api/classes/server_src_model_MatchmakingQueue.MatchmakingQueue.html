@@ -15,14 +15,14 @@
 <div class="tsd-comment tsd-typography"><p>The FIFO pool of identified players waiting to be paired into a match (R2.1–R2.6). One process-wide
 instance, observed by <code>MatchmakingBroadcastView</code> via <code>AbstractModel</code>'s <code>ModelListener</code> mechanism.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="712">
+<section class="tsd-panel tsd-hierarchy" data-refl="713">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-signature-type">AbstractModel</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">MatchmakingQueue</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L15">server/src/model/MatchmakingQueue.ts:15</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L15">server/src/model/MatchmakingQueue.ts:15</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -68,7 +68,7 @@ instance, observed by <code>MatchmakingBroadcastView</code> via <code>AbstractMo
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MatchmakingQueue</a></h4><aside class="tsd-sources">
 <p>Overrides AbstractModel.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L21">server/src/model/MatchmakingQueue.ts:21</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L21">server/src/model/MatchmakingQueue.ts:21</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -76,26 +76,26 @@ instance, observed by <code>MatchmakingBroadcastView</code> via <code>AbstractMo
 <h3 class="tsd-anchor-link" id="activematchcount"><code class="tsd-tag">Private</code><span>active<wbr/>Match<wbr/>Count</span><a href="#activematchcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">activeMatchCount</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L17">server/src/model/MatchmakingQueue.ts:17</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L17">server/src/model/MatchmakingQueue.ts:17</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="activeparticipants"><code class="tsd-tag">Private</code><span>active<wbr/>Participants</span><a href="#activeparticipants" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">activeParticipants</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 <div class="tsd-comment tsd-typography"><p>Players currently paired into a live match (R2.2) — cleared per-player by releaseMatch() once that match ends.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L19">server/src/model/MatchmakingQueue.ts:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L19">server/src/model/MatchmakingQueue.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="entries"><code class="tsd-tag">Private</code><span>entries</span><a href="#entries" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">entries</span><span class="tsd-signature-symbol">:</span> <a href="server_src_model_QueueEntry.QueueEntry.html" class="tsd-signature-type tsd-kind-class">QueueEntry</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L16">server/src/model/MatchmakingQueue.ts:16</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L16">server/src/model/MatchmakingQueue.ts:16</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private">
 <h3 class="tsd-anchor-link" id="maxconcurrentmatches"><code class="tsd-tag">Private</code> <code class="tsd-tag">Readonly</code><span>max<wbr/>Concurrent<wbr/>Matches</span><a href="#maxconcurrentmatches" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">maxConcurrentMatches</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Upper bound on matches running concurrently (R-P3); pairing is withheld once reached.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L23">server/src/model/MatchmakingQueue.ts:23</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L23">server/src/model/MatchmakingQueue.ts:23</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -135,7 +135,7 @@ instance, observed by <code>MatchmakingBroadcastView</code> via <code>AbstractMo
 <h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if playerId is not currently queued (R2.3)</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L49">server/src/model/MatchmakingQueue.ts:49</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L49">server/src/model/MatchmakingQueue.ts:49</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="join"><span>join</span><a href="#join" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -157,7 +157,7 @@ instance, observed by <code>MatchmakingBroadcastView</code> via <code>AbstractMo
 <h4 class="tsd-anchor-link" id="throws-1">Throws<a href="#throws-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>if the player is already queued or already in an active match (R2.2)</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L34">server/src/model/MatchmakingQueue.ts:34</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L34">server/src/model/MatchmakingQueue.ts:34</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="notifychanged"><span>notify<wbr/>Changed</span><a href="#notifychanged" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -196,7 +196,7 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L92">server/src/model/MatchmakingQueue.ts:92</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L92">server/src/model/MatchmakingQueue.ts:92</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="removemodellistener"><span>remove<wbr/>Model<wbr/>Listener</span><a href="#removemodellistener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -222,7 +222,7 @@ so a listener that adds/removes another listener mid-notification can't corrupt 
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><p>the number of players currently waiting in the queue.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L81">server/src/model/MatchmakingQueue.ts:81</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L81">server/src/model/MatchmakingQueue.ts:81</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="trypairnext"><span>try<wbr/>Pair<wbr/>Next</span><a href="#trypairnext" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -241,7 +241,7 @@ job once the match is constructed, not this method's.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><a href="server_src_model_QueueEntry.QueueEntry.html" class="tsd-signature-type tsd-kind-class">QueueEntry</a><span class="tsd-signature-symbol">,</span> <a href="server_src_model_QueueEntry.QueueEntry.html" class="tsd-signature-type tsd-kind-class">QueueEntry</a><span class="tsd-signature-symbol">]</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><p>the two paired entries, removed from the queue, or null if no pairing is currently possible</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/model/MatchmakingQueue.ts#L70">server/src/model/MatchmakingQueue.ts:70</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/model/MatchmakingQueue.ts#L70">server/src/model/MatchmakingQueue.ts:70</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

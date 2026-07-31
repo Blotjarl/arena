@@ -16,10 +16,14 @@
 reconnecting player's brand-new <code>ConnectionHandler</code> (a fresh <a href="http://Socket.IO">Socket.IO</a> connection gets a fresh handler,
 see <code>ServerMain</code>) be rebound to the match it's already in, since <code>bindMatch()</code> otherwise only ever fires
 once, at original pairing time.</p>
+<p>CORRECTION (reload-reconnect fix): <code>players</code> is both original <code>Player</code> objects, in the same [A, B] order
+<code>MatchModel</code>'s own constructor uses to assign <code>Team.A</code>/<code>Team.B</code> — added so <code>ServerMain.rebindIfInMatch</code>
+can rebuild a <code>MatchFoundPayload</code> (team, opponent username) for a reconnecting client without adding a
+new public accessor to <code>MatchModel</code> just for this.</p>
 </div></section>
-<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">MatchRegistryEntry</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#match">match</a><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_model_MatchModel.MatchModel.html" class="tsd-signature-type tsd-kind-class">MatchModel</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#view">view</a><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_view_MatchBroadcastView.MatchBroadcastView.html" class="tsd-signature-type tsd-kind-class">MatchBroadcastView</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">MatchRegistryEntry</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#match">match</a><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_model_MatchModel.MatchModel.html" class="tsd-signature-type tsd-kind-class">MatchModel</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#players">players</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#view">view</a><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_view_MatchBroadcastView.MatchBroadcastView.html" class="tsd-signature-type tsd-kind-class">MatchBroadcastView</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L43">server/src/controller/MatchmakingController.ts:43</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L48">server/src/controller/MatchmakingController.ts:48</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -28,6 +32,7 @@ once, at original pairing time.</p>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#match" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>match</span></a>
+<a href="#players" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>players</span></a>
 <a href="#view" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>view</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -37,12 +42,17 @@ once, at original pairing time.</p>
 <h3 class="tsd-anchor-link" id="match"><span>match</span><a href="#match" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">match</span><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_model_MatchModel.MatchModel.html" class="tsd-signature-type tsd-kind-class">MatchModel</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L44">server/src/controller/MatchmakingController.ts:44</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L49">server/src/controller/MatchmakingController.ts:49</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="players"><span>players</span><a href="#players" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">players</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">Player</span><span class="tsd-signature-symbol">]</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L51">server/src/controller/MatchmakingController.ts:51</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="view"><span>view</span><a href="#view" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <a href="../classes/server_src_view_MatchBroadcastView.MatchBroadcastView.html" class="tsd-signature-type tsd-kind-class">MatchBroadcastView</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/88ec85dfd5fa70edf81040679631a98aba24c8bd/packages/server/src/controller/MatchmakingController.ts#L45">server/src/controller/MatchmakingController.ts:45</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/Blotjarl/arena/blob/740dd158ff830a12a2a69c1529a5db5bf7eab651/packages/server/src/controller/MatchmakingController.ts#L50">server/src/controller/MatchmakingController.ts:50</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -59,7 +69,7 @@ once, at original pairing time.</p>
 <h3>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#match"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>match</span></a><a href="#view"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>view</span></a></div></details></div></details></div>
+<div><a href="#match"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>match</span></a><a href="#players"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>players</span></a><a href="#view"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>view</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html">Arena — API Documentation</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
