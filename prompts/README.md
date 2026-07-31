@@ -328,3 +328,16 @@ generated from a written prompt, since this is a documentation/verification task
   against the real running system (same stack `e2e/match.spec.ts` already uses). Gated behind
   `CAPTURE_SCREENSHOTS=1` so it never runs as part of the regular CI regression suite; regenerate with
   `CAPTURE_SCREENSHOTS=1 npx playwright test e2e/capture-acceptance-screenshots.spec.ts`.
+
+`docs/ProjectProcess.txt`'s submission-archive list item 4: "Textual description of the structure of your
+system and implemented algorithms critical for the system's behavior." Plain text (`.txt`, not `.md`) per
+the submission's own literal wording.
+
+- **`docs/system-structure-and-algorithms.txt`** — Part 1 describes system structure (subsystems, the
+  shared MVC framework, client/server/API communication protocols, per-package layout, the persistence
+  model, and deployment); Part 2 describes the fourteen algorithms critical to system behavior (fixed-rate
+  tick loop, movement resolution, skillshot/positioning ability resolution, the two geometric primitives,
+  the four per-ability unique mechanics, cooldown/resource/crowd-control handling, client-side render
+  interpolation, FIFO matchmaking, disconnect/reconnect, win conditions, match-report correlation, and
+  leaderboard computation) — grounded in a fresh read of the real, current source rather than written from
+  memory.
