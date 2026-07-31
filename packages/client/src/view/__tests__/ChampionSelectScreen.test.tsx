@@ -82,7 +82,7 @@ describe('ChampionSelectScreen', () => {
     expect(screen.getByRole('button', { name: 'Select Vex' })).toHaveProperty('disabled', true);
   });
 
-  it('does not treat the opponent selecting as "my" selection', () => {
+  it('does not treat the opponent selecting as "my" selection, but does show that the opponent locked in (R3.3)', () => {
     const identity = new ClientIdentityModel();
     identity.identify('Raj');
     identity.playerId = 'p1';
@@ -94,6 +94,42 @@ describe('ChampionSelectScreen', () => {
 
     expect(screen.queryByText(/You selected/)).toBeNull();
     expect((screen.getByRole('button', { name: 'Select Vex' }) as HTMLButtonElement).disabled).toBe(false);
+    // CRITICAL CHECKPOINT (R3.3 gap, found by live testing): the opponent's lock-in must be visibly
+    // reflected without naming their champion (avoids a counter-pick advantage) or requiring any action.
+    // ("korr" still legitimately appears in the always-rendered roster list itself — checking the status
+    // line's own text doesn't name the champion is enough, not that the string never appears anywhere.)
+    expect(screen.getByText('Opponent has locked in a champion')).toBeTruthy();
+  });
+
+  it('CRITICAL CHECKPOINT: updates the opponent-locked-in indicator live (real notifyChanged pipeline), without Raj taking any action or refreshing', () => {
+    const identity = new ClientIdentityModel();
+    identity.identify('Raj');
+    identity.playerId = 'p1';
+    const match = new ClientMatchModel();
+    const view = new ChampionSelectView(identity, match, makeQueueWithRoster(), makeMockController());
+
+    render(<ChampionSelectScreen view={view} />);
+    expect(screen.queryByText('Opponent has locked in a champion')).toBeNull();
+
+    act(() => {
+      match.applyChampionSelected({ matchId: 'm1', playerId: 'p2', championId: 'korr', bothSelected: false });
+    });
+
+    expect(screen.getByText('Opponent has locked in a champion')).toBeTruthy();
+  });
+
+  it('suppresses "Opponent has locked in a champion" once both are ready, showing only "Both players ready"', () => {
+    const identity = new ClientIdentityModel();
+    identity.identify('Raj');
+    identity.playerId = 'p1';
+    const match = new ClientMatchModel();
+    match.applyChampionSelected({ matchId: 'm1', playerId: 'p2', championId: 'korr', bothSelected: true });
+    const view = new ChampionSelectView(identity, match, makeQueueWithRoster(), makeMockController());
+
+    render(<ChampionSelectScreen view={view} />);
+
+    expect(screen.getByText('Both players ready')).toBeTruthy();
+    expect(screen.queryByText('Opponent has locked in a champion')).toBeNull();
   });
 
   it('shows "Both players ready" once bothSelected is true', () => {

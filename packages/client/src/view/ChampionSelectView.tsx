@@ -161,6 +161,18 @@ export function ChampionSelectScreen(props: { view: ChampionSelectView }): JSX.E
       ? match.championSelection
       : null;
   const bothSelected = match.championSelection?.bothSelected ?? false;
+  // CORRECTION (R3.3 gap, found by live testing): the server already broadcasts champion:selected to both
+  // sockets (MatchBroadcastView.modelChanged), and ClientMatchModel.championSelection updates on both
+  // clients accordingly — but until now nothing here ever rendered the opponent's half of that broadcast,
+  // only "my own" selection (mySelection above) and a generic bothSelected summary with no signal at all
+  // while only one player has locked in. Deliberately does not name the champion (a competitive 1v1 reveal
+  // would let the still-deciding player counter-pick) — just that a lock-in happened, matching AT-10's own
+  // literal wording ("reflect that Alice has locked in a champion", not which one). Suppressed once
+  // bothSelected is already true, since "Both players ready" below already supersedes it.
+  const opponentSelection =
+    match.championSelection && match.championSelection.playerId !== identity.playerId
+      ? match.championSelection
+      : null;
 
   const maxRosterHealth = roster.reduce((max, c) => Math.max(max, c.maxHealth), 1);
 
@@ -175,6 +187,9 @@ export function ChampionSelectScreen(props: { view: ChampionSelectView }): JSX.E
           <p>Opponent: {opponentUsername}</p>
         </div>
         {mySelection && <p className="my-selection">You selected: {mySelection.championId}</p>}
+        {opponentSelection && !bothSelected && (
+          <p className="opponent-selection">Opponent has locked in a champion</p>
+        )}
         {bothSelected && <p className="both-ready">Both players ready</p>}
       </header>
       <ul aria-label="champion-roster" className="champion-roster">

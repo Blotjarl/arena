@@ -643,6 +643,17 @@ the actual render target the `View` class's `bindUpdateCallback` triggers, per S
 separate, exported components with no row of their own in this table; only the four `View` classes above
 are enumerated. `ClientMain.tsx`'s `wirePair` helper is also undocumented here.
 
+**Post-Step-13 correction (R3.3 gap, found by live testing) — `ChampionSelectScreen` gains an
+opponent-lock-in indicator**: `MatchBroadcastView` already broadcasts `champion:selected` to both sockets
+and `ClientMatchModel.championSelection` already updates on both clients — but until now the screen only
+ever rendered `mySelection` (filtered to this connection's own `playerId`) and a generic `bothSelected`
+summary with no name attached, so a player watching their opponent decide saw *nothing* change on screen
+until both had picked. A new `opponentSelection` (the same field, filtered to `playerId !== identity.
+playerId`) renders as "Opponent has locked in a champion" — deliberately not naming the champion (would
+let the still-deciding player counter-pick in a competitive 1v1), matching `docs/acceptance-test-cases.md`
+AT-10's own literal wording ("reflect that Alice has locked in a champion", not which one). Suppressed once
+`bothSelected` is already true, since "Both players ready" already supersedes it by then.
+
 **Step 11 correction (11_shared_4) — `MatchHUDView` gains a 5th, optional constructor param**:
 `MatchHUDView(identityModel, matchModel, controller, socket?)`. `socket` is the live Socket.IO client
 connection, listened to directly for `match:player_disconnected`/`match:player_reconnected` — per

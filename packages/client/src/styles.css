@@ -294,6 +294,11 @@ button {
   font-weight: 600;
 }
 
+.opponent-selection {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 .both-ready {
   color: var(--color-accent);
   font-weight: 700;
