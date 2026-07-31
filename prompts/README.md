@@ -310,3 +310,21 @@ not a formality, closed here.
 ## Later steps
 
 None remain — Steps 1-13 of `docs/ProjectProcess.txt` are all complete.
+
+## Submission materials (not a numbered process step)
+
+`docs/ProjectProcess.txt`'s own submission-archive list, item 1: "Description of execution of acceptance
+testcases illustrated with screenshots of all the windows and pop-up windows of the system along an
+acceptance testcase." No prompt file — traced directly from the real SRS (`docs/ArenaSRS.pdf`) rather than
+generated from a written prompt, since this is a documentation/verification task, not new system behavior.
+
+- **`docs/acceptance-test-cases.md`** — 29 manual acceptance test cases, traced to real SRS requirement IDs
+  (§3.2.1–3.2.8), each naming the actual current UI text/selectors rather than the SRS's illustrative
+  mockups.
+- **`docs/acceptance-test-execution.md`** — the execution record for one comprehensive case combining 16 of
+  the 29, illustrated with real screenshots of every client screen plus the system's one real transient
+  pop-up (the disconnect banner) and its one inline error alert.
+- **`e2e/capture-acceptance-screenshots.spec.ts`** — the Playwright script that produced those screenshots
+  against the real running system (same stack `e2e/match.spec.ts` already uses). Gated behind
+  `CAPTURE_SCREENSHOTS=1` so it never runs as part of the regular CI regression suite; regenerate with
+  `CAPTURE_SCREENSHOTS=1 npx playwright test e2e/capture-acceptance-screenshots.spec.ts`.
